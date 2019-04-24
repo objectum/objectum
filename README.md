@@ -1,2 +1,2 @@
 # objectum
-Javascript platform
+Javascript platform for NodeJS: PostgreSQL
