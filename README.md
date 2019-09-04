@@ -12,7 +12,16 @@ Objectum project example https://github.com/objectum/catalog
 ## Learn by Example project "Catalog"
 
 * [Platform initialization](#platform_init)  
-* [Project initialization](#project_init)  
+* [Project initialization (objectum-react)](#project_init)
+    * [Create react application](#create_react_application)
+    * [Add project configuration](#add_project_configuration)
+    * [Add project web-server](#add_project_web_server)
+    * [Add project proxy](#add_project_proxy)
+    * [Prepare tablespace folder](#prepare_tablespace_folder)
+    * [Create store](#create_store)
+    * [Import store structure](#import_store_structure)
+    * [Start project](#start_project)
+    * [Remove store](#remove_store)
 
 <a name="platform_init" />
 
@@ -22,7 +31,7 @@ Install platform:
 ```bash
 mkdir -p /opt/objectum/server
 cd /opt/objectum/server
-npm install objectum
+npm i objectum
 ```
 
 You must have installed [Redis](https://redis.io/), [PostgreSQL >= 9.x](https://www.postgresql.org/download/) (datestyle = dmy, iso)
@@ -72,15 +81,20 @@ node index.js
 
 ## Project initialization
 
-Create react application:
+<a name="create_react_application" />
+
+### Create react application
 ```bash
-mkdir -p /opt/objectum/projects/catalog/bin
-cd /opt/objectum/projects
-npx create-react-app catalog
-npm install fastify fastify-http-proxy objectum-client objectum-react react-dropzone react-modal react-router-dom
+mkdir -p /opt/objectum/projects/catalog
+cd /opt/objectum/projects/catalog
+npx create-react-app .
+npm i -S fastify fastify-http-proxy objectum-client objectum-react react-dropzone react-modal react-router-dom
 ```
 
-Add project configuration (postgres password: 12345):
+<a name="add_project_configuration" />
+
+### Add project configuration
+postgres password: 12345
 ```bash
 cat > /opt/objectum/projects/catalog/config.json
 {
@@ -105,6 +119,9 @@ cat > /opt/objectum/projects/catalog/config.json
 ```
 Admin password "admin" <= require ("crypto").createHash ("sha1").update ("admin").digest ("hex").toUpperCase ();
 
+<a name="add_project_web_server" />
+
+### Add project web-server
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/index.js
@@ -141,6 +158,9 @@ start ().catch (err => {
 });
 ```
 
+<a name="add_project_proxy" />
+
+### Add project proxy
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/src/setupProxy.js
@@ -156,12 +176,17 @@ module.exports = function (app) {
 };
 ```
 
-Prepare tablespace folder:
+<a name="prepare_tablespace_folder" />
+
+### Prepare tablespace folder
 ```bash
 mkdir /opt/objectum/projects/catalog/db
 chown postgres:postgres /opt/objectum/projects/catalog/db
 ```
 
+<a name="create_store" />
+
+### Create store:
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/bin/create.js
@@ -180,6 +205,9 @@ cd /opt/objectum/projects/catalog/bin
 node create.js
 ```
 
+<a name="import_store_structure" />
+
+### Import store structure
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/bin/import.js
@@ -198,16 +226,21 @@ cd /opt/objectum/projects/catalog/bin
 node import.js
 ```
 
-Start project:
+<a name="start_project" />
+
+### Start project
 ```bash
 cd /opt/objectum/projects/catalog
 node index.js
 ```
 
-Open URL: http://localhost:3000
+Open URL: http://localhost:3000  
 Login: admin  
 Password: admin  
 
+<a name="remove_store" />
+
+### Remove store
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/bin/remove.js
@@ -224,3 +257,4 @@ You can remove storage (drop tablespace, role, user from PostgreSQL):
 cd /opt/objectum/projects/catalog/bin
 node remove.js
 ```
+
