@@ -1,6 +1,3 @@
-"use strict"
+let Objectum = require ("./index").Objectum;
 
-let Objectum = require ("./server/objectum").Objectum;
-let config = require ("./config");
-
-module.exports = new Objectum (config);
+module.exports = new Objectum (require ("./config"));
