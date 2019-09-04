@@ -62,12 +62,16 @@ module.exports = {
 Add script:
 ```bash
 cat > /opt/objectum/server/index.js
+```
+```js
 require ("objectum").start (require ("./config"));
 ```
 
 Add script:
 ```bash
 cat > /opt/objectum/server/objectum.js
+```
+```js
 let Objectum = require ("objectum").Objectum;
 
 module.exports = new Objectum (require ("./config"));
@@ -99,6 +103,8 @@ npm i -S fastify fastify-http-proxy objectum-client objectum-react react-dropzon
 postgres password: 12345
 ```bash
 cat > /opt/objectum/projects/catalog/config.json
+```
+```json
 {
     "code": "catalog",
 	"rootDir": "/opt/objectum/projects/catalog",
@@ -127,6 +133,8 @@ Admin password "admin" <= require ("crypto").createHash ("sha1").update ("admin"
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/index.js
+```
+```js
 const fastify = require ("fastify") ();
 const proxy = require ("fastify-http-proxy");
 const config = require ("./config");
@@ -166,6 +174,8 @@ start ().catch (err => {
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/src/setupProxy.js
+```
+```js
 const proxy = require ("http-proxy-middleware");
 
 module.exports = function (app) {
@@ -192,6 +202,8 @@ chown postgres:postgres /opt/objectum/projects/catalog/db
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/bin/create.js
+```
+```js
 let $o = require ("/opt/objectum/server/objectum");
 
 $o.db.execute ({
@@ -213,6 +225,8 @@ node create.js
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/bin/import.js
+```
+```js
 let $o = require ("/opt/objectum/server/objectum");
 
 $o.db.execute ({
@@ -246,6 +260,8 @@ Password: admin
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/bin/remove.js
+```
+```js
 let $o = require ("/opt/objectum/server/objectum");
 
 $o.db.execute ({
