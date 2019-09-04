@@ -12,7 +12,7 @@ Objectum project example https://github.com/objectum/catalog
 ## Learn by Example project "Catalog"
 
 * [Platform initialization](#platform_init)  
-* [Project initialization (objectum-react)](#project_init)
+* [Project initialization](#project_init)
     * [Create react application](#create_react_application)
     * [Add project configuration](#add_project_configuration)
     * [Add project web-server](#add_project_web_server)
