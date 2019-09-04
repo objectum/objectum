@@ -11,15 +11,16 @@ Objectum project example https://github.com/objectum/catalog
  
 ## Learn by Example project "Catalog"
 
-* [Initialization](#init)  
+* [Platform initialization](#platform_init)  
+* [Project initialization](#project_init)  
 
-<a name="init" />
+<a name="platform_init" />
 
-## Initialization
+## Platform initialization
 
 Install platform:
 ```bash
-mkdir /opt/objectum/server
+mkdir -p /opt/objectum/server
 cd /opt/objectum/server
 npm install objectum
 ```
@@ -67,9 +68,11 @@ cd /opt/objectum/server
 node index.js
 ```
 
-Need to create project now.
+<a name="project_init" />
 
-Init project:
+## Project initialization
+
+Create react application:
 ```bash
 mkdir -p /opt/objectum/projects/catalog/bin
 cd /opt/objectum/projects
@@ -81,6 +84,7 @@ Add project configuration (postgres password: 12345):
 ```bash
 cat > /opt/objectum/projects/catalog/config.json
 {
+    "code": "catalog",
 	"rootDir": "/opt/objectum/projects/catalog",
 	"adminPassword": "D033E22AE348AEB5660FC2140AEC35850C4DA997",
 	"port": 3100,
@@ -114,8 +118,8 @@ fastify.addHook ("onError", async (req, res, error) => {
 
 fastify.register (proxy, {
 	upstream: `http://${config.objectum.host}:${config.objectum.port}`,
-	prefix: "/api/projects/catalog/",
-	rewritePrefix: "/projects/catalog/",
+	prefix: `/api/projects/${config.code}/`,
+	rewritePrefix: `/projects/${config.code}/`,
 	http2: false
 });
 
