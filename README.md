@@ -39,6 +39,8 @@ You must have installed [Redis](https://redis.io/), [PostgreSQL >= 9.x](https://
 Add platform configuration:
 ```bash
 cat > /opt/objectum/server/config.js
+```
+```js
 module.exports = {
 	"rootDir": "/opt/objectum/server",
 	"projectsDir": "/opt/objectum/projects",
