@@ -1,0 +1,11 @@
+/.idea
+/node_modules
+/npm-debug.log*
+/*.log
+/*.sh
+/*.old
+/store-test
+/test
+/webpack.config.js
+/config.js
+/index-8200.js

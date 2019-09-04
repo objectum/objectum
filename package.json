@@ -1,0 +1,39 @@
+{
+	"name": "objectum",
+	"version": "4.0.0",
+	"description": "Objectum - javascript app platform",
+	"main": "index.js",
+	"dependencies": {
+		"bunyan": "^1.5.1",
+		"fastify": "^2.1.0",
+		"formidable": "^1.2.1",
+		"lodash": "^4.17.11",
+		"objectum-extjs4-legacy": "^1.0.6",
+		"pg": "^4.4.3",
+		"redis": "^2.3.0",
+		"redis-promisify": "^0.1.1"
+	},
+	"devDependencies": {
+		"mocha": "^5.2.0",
+		"should": "^11.2.1"
+	},
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Dmitriy Samortsev <objectum.ru@gmail.com>",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/objectum/objectum.git"
+	},
+	"keywords": [
+		"objectum",
+		"orm",
+		"javascript",
+		"platform"
+	],
+	"bugs": {
+		"url": "https://github.com/objectum/objectum/issues"
+	},
+	"homepage": "https://github.com/objectum/objectum#readme"
+}
