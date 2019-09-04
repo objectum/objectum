@@ -258,3 +258,13 @@ cd /opt/objectum/projects/catalog/bin
 node remove.js
 ```
 
+## Author
+
+**Dmitriy Samortsev**
+
++ http://github.com/objectum
+
+
+## Copyright and license
+
+MIT
