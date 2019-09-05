@@ -107,7 +107,7 @@ cat > /opt/objectum/projects/catalog/config.json
 ```
 ```json
 {
-    "code": "catalog",
+	"code": "catalog",
 	"rootDir": "/opt/objectum/projects/catalog",
 	"adminPassword": "D033E22AE348AEB5660FC2140AEC35850C4DA997",
 	"port": 3100,
