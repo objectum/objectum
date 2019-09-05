@@ -20,8 +20,9 @@ Objectum project example https://github.com/objectum/catalog
     * [Prepare tablespace folder](#prepare_tablespace_folder)
     * [Create store](#create_store)
     * [Import store structure](#import_store_structure)
-    * [Start project](#start_project)
+    * [Start project (DevServer)](#start_project)
     * [Remove store](#remove_store)
+* [Development](#development)    
 
 <a name="platform_init" />
 
@@ -182,9 +183,9 @@ module.exports = function (app) {
     app.use (proxy ("/api",
         {target: "http://localhost:3100/"}
     ));
-	app.use (proxy ("/public",
-		{target: "http://localhost:3100/"}
-	));
+    app.use (proxy ("/public",
+        {target: "http://localhost:3100/"}
+    ));
 };
 ```
 
@@ -244,10 +245,11 @@ node import.js
 
 <a name="start_project" />
 
-### Start project
+### Start project (DevServer)
 ```bash
 cd /opt/objectum/projects/catalog
 node index.js
+npm start
 ```
 
 Open URL: http://localhost:3000  
@@ -275,6 +277,12 @@ You can remove storage (drop tablespace, role, user from PostgreSQL):
 cd /opt/objectum/projects/catalog/bin
 node remove.js
 ```
+
+<a name="platform_init" />
+
+## Development
+
+...
 
 ## Author
 
