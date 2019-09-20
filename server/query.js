@@ -294,7 +294,12 @@ class Query {
 					objectField = "tobject_attr.fid";
 				}
 			}
-			return "(select " + fields.join (",") + " from " + _tables.join (",") + where + ") " + alias;
+			let sql = "(select " + fields.join (",") + " from " + tables.join (",") + where + ") " + alias;
+			
+			if (tables.length == 1) {
+				sql = tables [0] + " " + alias;
+			}
+			return sql;
 		};
 		let r = "";
 

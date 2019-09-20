@@ -243,7 +243,7 @@ async function getContent ({viewId, row, rowCount, filter, order, total, dateAtt
 		getClasses (me.map ["class"][classCode].get ("id"));
 	}
 	let sqlLimit = sql + `\nlimit ${rowCount} offset ${row}\n`;
-	let rows = await me.query ({session, sql: sqlLimit});
+	//let rows = await me.query ({session, sql: sqlLimit});
 	let sqlCount = sql;
 	let s = "select\n\tcount (*) as rows_num";
 	
@@ -270,7 +270,12 @@ async function getContent ({viewId, row, rowCount, filter, order, total, dateAtt
 	s += `\nlimit ${config.query.maxCount || 1000} offset 0\n`;
 	s += ") v\n";
 	
-	let totalRow = (await me.query ({session, sql: s})) [0];
+	//let totalRow = (await me.query ({session, sql: s})) [0];
+	
+	let [rows, totalRow] = await Promise.all (me.query ({session, sql: sqlLimit}), await me.query ({session, sql: s}));
+	
+	totalRow = totalRow [0];
+	
 	let attrs = view.attrs, attrsNum = 0;
 	let orderAttrs = [];
 	

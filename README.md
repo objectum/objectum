@@ -272,7 +272,7 @@ $o.db.execute ({
 });
 ```
 
-You can remove storage (drop tablespace, role, user from PostgreSQL):
+You can remove store (drop tablespace, role, user from PostgreSQL):
 ```bash
 cd /opt/objectum/projects/catalog/bin
 node remove.js
