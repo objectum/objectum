@@ -23,10 +23,12 @@ Objectum project example https://github.com/objectum/catalog
     * [Start project (DevServer)](#start_project)
     * [Remove store](#remove_store)
 * [Development](#development)
-    * [Class "item"](#dev_class)
-    * Dictionary "d.item.type"
-    * Table part of item "t.item.comment"
-    * View "item"
+    * [Class "item"](#class_item)
+    * [Class attribute "name"](#class_attr_name)
+    * [Dictionary "d.item.type"](#class_item_type)
+    * [Tabular part of item "t.item.comment"](#class_comment)
+    * [View "item.list"](#view_list)
+    * [View "t.item.comment"](#view_comment)
     * Component "Items"
     * Component "Item"
         * Information
@@ -320,11 +322,63 @@ Open URL: http://localhost:3000
 Login: admin  
 Password: admin  
 
-<a name="dev_class" />
+<a name="class_item" />
 
-### Class "Item"
+### Class "item"
 Click "Classes" in menu. Click "Create". Edit and save.
 ![Class "Item"](https://github.com/objectum/catalog/blob/master/files/class-item.png) 
+
+<a name="class_attr_name" />
+
+### Class attribute "name"
+Create class attribute.
+![Class attribute "name"](https://github.com/objectum/catalog/blob/master/files/classAttr-name.png) 
+
+<a name="class_item_type" />
+
+### Dictionary "d.item.type"
+Create class "d.item" for grouping dictionaries of class "item". Create class "d.item.type" with attribute "name".
+![Dictionary "d.item.type"](https://github.com/objectum/catalog/blob/master/files/class-item-type.png) 
+
+Add attribute "type" to class "item".
+![Class attribute "type""](https://github.com/objectum/catalog/blob/master/files/classAttr-type.png)
+
+<a name="class_comment" />
+
+### Tabular part of item "t.item.comment"
+Create class "t.item" for grouping tabular parts of class "item". Create class "t.item.comment" with attribute "text".
+![t.item.comment](https://github.com/objectum/catalog/blob/master/files/class-comment.png) 
+
+<a name="view_list" />
+
+### View "item.list"
+Create view "item" for grouping views of class "item". Create view "item.list".
+View query:
+```sql
+{"data": "begin"}
+select
+	{"attr": "a.id", "as": "id"},
+	{"attr": "a.name", "as": "name"}
+{"data": "end"}
+
+{"count": "begin"}
+select
+	count (*) as num
+{"count": "end"}
+
+from
+	{"class": "item", "alias": "a"}
+limit {"param": "limit"}
+offset {"param": "offset"}
+```
+
+<a name="view_comment" />
+
+### View "t.item.comment"
+Create view "t.item" for grouping tabular part views of class "item". Create view "t.item.comment".
+View query:
+```sql
+```
 
 ## Author
 
