@@ -1,7 +1,7 @@
 Under construction.
 
 # Objectum
-Javascript platform for NodeJS: PostgreSQL 
+Javascript platform (NodeJS, PostgreSQL, Redis). 
 
 Objectum platform makes it easy to create realtime single page applications that run in both Node.js and browsers.
  
@@ -22,7 +22,22 @@ Objectum project example https://github.com/objectum/catalog
     * [Import store structure](#import_store_structure)
     * [Start project (DevServer)](#start_project)
     * [Remove store](#remove_store)
-* [Development](#development)    
+* [Development](#development)
+    * [Class "item"](#dev_class)
+    * Dictionary "d.item.type"
+    * Table part of item "t.item.comment"
+    * View "item"
+    * Component "Items"
+    * Component "Item"
+        * Information
+        * Comments
+    * Create role
+    * Create menu
+    * Create user    
+    * Deployment
+        * Export store
+        * Import store
+        * Cluster
 
 <a name="platform_init" />
 
@@ -178,13 +193,14 @@ cat > /opt/objectum/projects/catalog/src/setupProxy.js
 ```
 ```js
 const proxy = require ("http-proxy-middleware");
+const config = require ("./../config");
 
 module.exports = function (app) {
     app.use (proxy ("/api",
-        {target: "http://localhost:3100/"}
+        {target: `http://localhost:${config.port}/`}
     ));
     app.use (proxy ("/public",
-        {target: "http://localhost:3100/"}
+        {target: `http://localhost:${config.port}/`}
     ));
 };
 ```
@@ -200,6 +216,7 @@ chown postgres:postgres /opt/objectum/projects/catalog/db
 <a name="create_store" />
 
 ### Create store:
+"catalog" is developer store.
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/bin/create.js
@@ -223,6 +240,7 @@ node create.js
 <a name="import_store_structure" />
 
 ### Import store structure
+Import objectum classes and views.
 Add script:
 ```bash
 cat > /opt/objectum/projects/catalog/bin/import.js
@@ -278,11 +296,35 @@ cd /opt/objectum/projects/catalog/bin
 node remove.js
 ```
 
-<a name="platform_init" />
+<a name="development" />
 
 ## Development
+Start objectum platform:
+```bash
+cd /opt/objectum/server
+node index.js
 
-...
+```
+Start project server:
+```bash
+cd /opt/objectum/projects/catalog
+node index.js
+```
+Start project development server:
+```bash
+cd /opt/objectum/projects/catalog
+npm run start
+```
+
+Open URL: http://localhost:3000  
+Login: admin  
+Password: admin  
+
+<a name="dev_class" />
+
+### Class "Item"
+Click "Classes" in menu. Click "Create". Edit and save.
+![Class "Item"](https://github.com/objectum/catalog/files/class-item.png) 
 
 ## Author
 
