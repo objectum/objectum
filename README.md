@@ -324,7 +324,7 @@ Password: admin
 
 ### Class "Item"
 Click "Classes" in menu. Click "Create". Edit and save.
-![Class "Item"](https://github.com/objectum/catalog/files/class-item.png) 
+![Class "Item"](https://github.com/objectum/catalog/blob/master/files/class-item.png) 
 
 ## Author
 
