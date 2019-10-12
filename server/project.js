@@ -14,10 +14,11 @@ const legacy = require ("./legacy");
 const mimetypes = require ("./mimetypes");
 const data = require ("./data");
 
-require ("objectum-extjs4-legacy");
-
-config.wwwRoot = require ("path").dirname (require.resolve ("objectum-extjs4-legacy")) + "/www";
-
+if (config.legacy) {
+	require ("objectum-extjs4-legacy");
+	
+	config.wwwRoot = require ("path").dirname (require.resolve ("objectum-extjs4-legacy")) + "/www";
+}
 //const message = {};
 
 async function init () {
