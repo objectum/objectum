@@ -665,7 +665,8 @@ execute procedure trigger_%1$s_after_delete ();', tableName, classId);
 		end if;
 
         taiu := taiu || '
-		execute ''insert into tobject_attr (fobject_id, fclass_attr_id, ';
+        if (not (value = ''null'' and TG_OP = ''INSERT'')) then
+		    execute ''insert into tobject_attr (fobject_id, fclass_attr_id, ';
 
  		if (rec.ftype_id = 1 or rec.ftype_id = 5) then
  			taiu := taiu || 'fstring, ';
@@ -676,6 +677,7 @@ execute procedure trigger_%1$s_after_delete ();', tableName, classId);
  		end if;
 
  		taiu := taiu || format ('fstart_id, fend_id) values ('' || NEW.fobject_id || '', %s, '' || value || '', '' || revisionId || '', 0)'';
+ 		end if;
 	end if;', rec.fid);
 
     end loop;

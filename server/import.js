@@ -754,7 +754,7 @@ class Import {
 		log.info ({fn: "import.updateTriggers"});
 		
 		let me = this;
-		let rows = me.store.query ({session: me.session, sql: "select fid from _class"});
+		let rows = await me.store.query ({session: me.session, sql: "select fid from _class"});
 		
 		for (let i = 0; i < rows.length; i ++) {
 			await me.store.query ({session: me.session, sql: `select trigger_factory (${rows [i].fid})`});

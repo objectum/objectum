@@ -352,7 +352,7 @@ Create class "t.item" for grouping tabular parts of class "item". Create class "
 <a name="view_list" />
 
 ### View "item.list"
-Create view "item" for grouping views of class "item". Create view "item.list".
+Create view "item" for grouping views of class "item". Create view "item.list".  
 View query:
 ```sql
 {"data": "begin"}
@@ -378,6 +378,22 @@ offset {"param": "offset"}
 Create view "t.item" for grouping tabular part views of class "item". Create view "t.item.comment".
 View query:
 ```sql
+{"data": "begin"}
+select
+	{"attr": "a.id", "as": "id"},
+	{"attr": "a.item", "as": "item"},
+	{"attr": "a.text", "as": "text"}
+{"data": "end"}
+
+{"count": "begin"}
+select
+	count (*) as num
+{"count": "end"}
+
+from
+	{"class": "t.item.common", "alias": "a"}
+limit {"param": "limit"}
+offset {"param": "offset"}
 ```
 
 ## Author
