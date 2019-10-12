@@ -9,6 +9,7 @@ class Objectum {
 		global.config = config;
 		
 		_.defaults (config, {
+			stores: {},
 			auth: {multi: true},
 			backlog: 10000,
 			admin: {ip: ["127.0.0.1"]},
