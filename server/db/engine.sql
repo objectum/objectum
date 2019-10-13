@@ -628,7 +628,7 @@ execute procedure trigger_%1$s_after_delete ();', tableName, classId);
     loop
     	columnName := rec.fcode || '_' || rec.fid;
  		taiu := taiu || format ('
-    if ((TG_OP = ''INSERT'' and NEW.$s is not null) or
+    if ((TG_OP = ''INSERT'' and NEW.%s is not null) or
 	    (TG_OP = ''UPDATE'' and ((OLD.%1$s is null and NEW.%1$s is not null) or (OLD.%1$s is not null and NEW.%1$s is null) or (OLD.%1$s <> NEW.%1$s)))
 	) then
 	    if (TG_OP = ''UPDATE'') then
