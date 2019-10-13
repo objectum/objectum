@@ -628,8 +628,8 @@ execute procedure trigger_%1$s_after_delete ();', tableName, classId);
     loop
     	columnName := rec.fcode || '_' || rec.fid;
  		taiu := taiu || format ('
-    if (TG_OP = ''INSERT'' or
-	    (TG_OP = ''UPDATE'' and ((OLD.%s is null and NEW.%1$s is not null) or (OLD.%1$s is not null and NEW.%1$s is null) or (OLD.%1$s <> NEW.%1$s)))
+    if ((TG_OP = ''INSERT'' and NEW.$s is not null) or
+	    (TG_OP = ''UPDATE'' and ((OLD.%1$s is null and NEW.%1$s is not null) or (OLD.%1$s is not null and NEW.%1$s is null) or (OLD.%1$s <> NEW.%1$s)))
 	) then
 	    if (TG_OP = ''UPDATE'') then
 		    execute ''update tobject_attr set fend_id = '' || revisionId || '' where fend_id = 0 and fobject_id = '' || NEW.fobject_id || '' and fclass_attr_id = %s'';
@@ -665,8 +665,7 @@ execute procedure trigger_%1$s_after_delete ();', tableName, classId);
 		end if;
 
         taiu := taiu || '
-        if (not (value = ''null'' and TG_OP = ''INSERT'')) then
-		    execute ''insert into tobject_attr (fobject_id, fclass_attr_id, ';
+		execute ''insert into tobject_attr (fobject_id, fclass_attr_id, ';
 
  		if (rec.ftype_id = 1 or rec.ftype_id = 5) then
  			taiu := taiu || 'fstring, ';
@@ -677,7 +676,6 @@ execute procedure trigger_%1$s_after_delete ();', tableName, classId);
  		end if;
 
  		taiu := taiu || format ('fstart_id, fend_id) values ('' || NEW.fobject_id || '', %s, '' || value || '', '' || revisionId || '', 0)'';
- 		end if;
 	end if;', rec.fid);
 
     end loop;
