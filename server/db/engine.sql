@@ -430,9 +430,11 @@ begin
 	exception when others then
 	end;
 
-    insert into _object (fid, fclass_id, fstart_id) values (id, classId, startId);
-	insert into _log (fid, frsc_id, foper_id) values (id, 12, 1);
-    perform create_object_record (classId, id, classId);
+    if (NEW.fend_id = 0) then
+        insert into _object (fid, fclass_id, fstart_id) values (id, classId, startId);
+        insert into _log (fid, frsc_id, foper_id) values (id, 12, 1);
+        perform create_object_record (classId, id, classId);
+    end if;
 
 	return NEW;
 end; 
@@ -525,7 +527,9 @@ begin
 		end if;
 
 --		begin
+        if (classCode is not null) then
 			execute 'update ' || classCode || '_' || classId || ' set ' || caCode || '_' || NEW.fclass_attr_id || ' = ' || val || ' where fobject_id = ' || NEW.fobject_id;
+		end if;
 --		exception when others then
 --		end;
 --	end if;
@@ -596,32 +600,47 @@ begin
 	    insert into tobject (fid, fclass_id, fstart_id, fend_id) values (NEW.fobject_id, NEW.fclass_id, revisionId, 0);
     end if;', tableName, classId);
 
-	tad := format (
+    tad := format (
 'create or replace function trigger_%s_after_delete () returns trigger as
 $t1$
 declare
-	revisionId bigint;
+    revisionId bigint;
 begin
-	begin
-		select current_setting (''objectum.revision_id'') into revisionId;
-		if (revisionId = 0) then
-		    return OLD;
-		end if;
-	exception when others then
-		return OLD;
-	end;
-	if (OLD.fclass_id = %s) then
-		delete from _object where fid = OLD.fobject_id;
-    	insert into _log (fid, frsc_id, foper_id) values (OLD.fobject_id, 12, 3);
-	    execute ''update tobject set fend_id = '' || revisionId || '' where fend_id = 0 and fid = '' || OLD.fobject_id;
-	end if;
-	return OLD;
+    begin
+        select current_setting (''objectum.revision_id'') into revisionId;
+        if (revisionId = 0) then
+            return OLD;
+        end if;
+    exception when others then
+        return OLD;
+    end;
+    if (OLD.fclass_id = %s) then
+        delete from _object where fid = OLD.fobject_id;
+        insert into _log (fid, frsc_id, foper_id) values (OLD.fobject_id, 12, 3);
+        execute ''update tobject set fend_id = '' || revisionId || '' where fend_id = 0 and fid = '' || OLD.fobject_id;', tableName, classId);
+
+    parentId := classId;
+
+    loop
+        exit when parentId is null;
+
+        select fcode, fparent_id into classCode, parentId from _class where fid = parentId;
+
+        if (parentId is not null) then
+            tad := tad || format ('
+        execute ''delete from %s_%s where fobject_id = '' || OLD.fobject_id;', classCode, parentId);
+        end if;
+    end loop;
+
+    tad := tad || format ('
+    end if;
+    return OLD;
 end;
 $t1$ language plpgsql;
-drop trigger if exists %1$s_after_delete on %1$s;
+drop trigger if exists %s_after_delete on %1$s;
 create trigger %1$s_after_delete
 after delete on %1$s for each row
-execute procedure trigger_%1$s_after_delete ();', tableName, classId);
+execute procedure trigger_%1$s_after_delete ();', tableName);
 
 	-- class attributes
 	for rec in select fid, fcode, ftype_id from _class_attr where fclass_id = classId
@@ -834,6 +853,24 @@ begin
         end if;
 
         execute 'insert into ' || classCode || '_' || classId || ' (fobject_id, fclass_id) values (' || objectId || ',' || originalClassId || ')';
+    end if;
+end;
+$$ language plpgsql;
+
+create or replace function remove_object_record (classId bigint, objectId bigint) returns void as
+$$
+declare
+	classCode varchar (256);
+	parentId bigint;
+begin
+	select fcode, fparent_id into classCode, parentId from _class where fid = classId;
+
+    if (classCode is not null) then
+        if (parentId is not null) then
+            perform remove_object_record (parentId, objectId);
+        end if;
+
+        execute 'delete from ' || classCode || '_' || classId || ' where fobject_id = ' || objectId;
     end if;
 end;
 $$ language plpgsql;

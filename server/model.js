@@ -240,7 +240,9 @@ class Object extends Base {
 					where fobject_id = ${id}
 				`;
 			}
-			await me.store.query ({session, sql, params});
+			if (params.length) {
+				await me.store.query ({session, sql, params});
+			}
 		}
 		if (newObject) {
 			if (login || password) {
@@ -255,7 +257,7 @@ class Object extends Base {
 			}
 			if (me.store.auth.sroleClassId == classObj.get ("id")) {
 				me.store.revisions [revisionId]["auth"].created.push ({
-					userId: me.get ("subject"), role: me.get ("role")
+					userId: me.get ("subject") || me.get ("id"), role: me.get ("role")
 				});
 			}
 		} else {
@@ -273,7 +275,7 @@ class Object extends Base {
 			}
 			if (me.store.auth.sroleClassId == classObj.get ("id")) {
 				me.store.revisions [revisionId]["auth"].changed.push ({
-					userId: me.get ("subject"), role: me.get ("role")
+					userId: me.get ("subject") || me.get ("id"), role: me.get ("role")
 				});
 			}
 		}
@@ -296,7 +298,6 @@ class Meta extends Base {
 	}
 	
 	async sync ({session}) {
-		// todo: нельзя удалить класс (представление) с подчиненными узлами
 		let me = this;
 		let revisionId = me.store.revision [session.id];
 

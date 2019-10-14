@@ -499,92 +499,38 @@ class Store {
 		log.debug ({fn: "store.readAuthInfo"});
 		
 		let me = this;
-		let rows = await me.execute ({client: me.client, sql: {
-				asArray: true,
-				select: [
-					{"a": "id"}, "id",
-					{"a": "login"}, "login",
-					{"a": "password"}, "password",
-					{"a": "use"}, "use"
-				],
-				from: [
-					{"a":"system.admin.Authentication.LoginPassword"}
-				]
-			}});
-		let processedLoginPasswordPairs = {};
 		
-		for (let i = 0; i < rows.length; i ++) {
-			let row = rows [i];
-			
-			if (!row.use) {
-				continue;
-			}
-			let loginAttrId = row.login;
-			let passwordAttrId = row.password;
-			
-			if (!processedLoginPasswordPairs [loginAttrId] == passwordAttrId) {
-				continue;
-			}
-			processedLoginPasswordPairs [loginAttrId] = passwordAttrId;
-			me.auth.login [loginAttrId] = 1;
-			me.auth.password [passwordAttrId] = 1;
-			
-			let loginAttr = me.map ["classAttr"][loginAttrId];
-			let passwordAttr = me.map ["classAttr"][passwordAttrId];
-			let cls = me.map ["class"][loginAttr.get ("class")];
-			let sql = {
-				asArray: true,
-				select: [
-					{"a": "id"}, "id",
-					{"a": loginAttr.get ("code")}, "login",
-					{"a": passwordAttr.get ("code")}, "password"
-				],
-				from: [
-					{"a": cls.getPath ()}
-				],
-				where: [
-					{"a": loginAttr.get ("code")}, "is not null", "and",
-					{"a": passwordAttr.get ("code")}, "is not null"
-				]
-			};
-			let recs = await me.execute ({client: me.client, sql});
-			
-			_.each (recs, function (rec) {
-				let o = {
-					login: rec.login,
-					password: rec.password,
-					id: rec.id,
-					hasTryAttrs: cls.attrs.lastTry ? true : false
-				};
-				me.auth.user [rec.login] = o;
-				me.auth.user [rec.id] = o;
-			});
+		if (config.legacy) {
+			return await legacy.readAuthInfo.call (this);
 		}
-		let sroleRecs = await me.execute ({
-			client: me.client,
-			sql: {
-				asArray: true,
-				select: [
-					{"a": "subject"}, "subject",
-					{"a": "role"}, "role",
-					{"b": "menu"}, "menu"
-				],
-				from: [
-					{"a":"ose.srole"},
-					"left-join", {"b": "ose.role"}, "on", [{"a": "role"}, "=", {"b": "id"}]
-				]
-			}
+		let userCls = me.getClass ("objectum.user");
+		let roleCls = me.getClass ("objectum.role");
+		let recs = await me.query ({
+			client: me.client, sql: `
+				select
+					a.fobject_id as id,
+					a.${userCls.attrs ["login"].getField ()} as login,
+					a.${userCls.attrs ["password"].getField ()} as password,
+					a.${userCls.attrs ["role"].getField ()} as role,
+					b.${roleCls.attrs ["menu"].getField ()} as menu
+				from
+					${userCls.getTable ()} a
+					inner join ${roleCls.getTable ()} b on (a.${userCls.attrs ["role"].getField ()} = b.fobject_id)
+			`
 		});
-		_.each (sroleRecs, function (rec) {
-			let o = me.auth.user [rec.subject];
-			
-			if (o) {
-				o.role = rec.role;
-				o.menu = rec.menu;
-			}
+		_.each (recs, function (rec) {
+			let o = {
+				login: rec.login,
+				password: rec.password,
+				id: rec.id,
+				role: rec.role,
+				menu: rec.menu
+			};
+			me.auth.user [rec.login] = o;
+			me.auth.user [rec.id] = o;
 		});
-		me.auth.roleClassId = me.getClass ("ose.role").get ("id");
-		me.auth.sroleClassId = me.getClass ("ose.srole").get ("id");
+		me.auth.roleClassId = me.getClass ("objectum.role").get ("id");
+		me.auth.sroleClassId = me.getClass ("objectum.user").get ("id");
 	}
 	
 	end () {

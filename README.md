@@ -26,15 +26,15 @@ Objectum project example https://github.com/objectum/catalog
     * [Class "item"](#class_item)
     * [Class attribute "name"](#class_attr_name)
     * [Dictionary "d.item.type"](#class_item_type)
-    * [Tabular part of item "t.item.comment"](#class_comment)
+    * [Tabular part "t.item.comment" of "item"](#class_comment)
     * [View "item.list"](#view_list)
     * [View "t.item.comment"](#view_comment)
     * Component "Items"
     * Component "Item"
         * Information
         * Comments
-    * Create role
     * Create menu
+    * Create role
     * Create user    
     * Deployment
         * Export store
@@ -345,7 +345,7 @@ Add attribute "type" to class "item".
 
 <a name="class_comment" />
 
-### Tabular part of item "t.item.comment"
+### Tabular part "t.item.comment" of "item"
 Create class "t.item" for grouping tabular parts of class "item". Create class "t.item.comment" with attribute "text".
 ![t.item.comment](https://github.com/objectum/catalog/blob/master/files/class-comment.png) 
 
