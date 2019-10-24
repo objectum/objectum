@@ -633,6 +633,27 @@
 				null,
 				null,
 				1008,
+				1039,
+				2,
+				1017
+			]
+		},
+		{
+			"values": [
+				1017,
+				1007,
+				"Path",
+				"path",
+				null,
+				null,
+				1,
+				0,
+				null,
+				null,
+				null,
+				null,
+				null,
+				1039,
 				0,
 				2,
 				1017
@@ -770,6 +791,16 @@
 				0,
 				2,
 				1015
+			]
+		},
+		{
+			"values": [
+				1016,
+				1007,
+				1040,
+				0,
+				2,
+				1016
 			]
 		}
 	],
@@ -1217,7 +1248,7 @@
 				null,
 				null,
 				1029,
-				0,
+				1041,
 				2,
 				1031
 			]
@@ -1273,7 +1304,7 @@
 				null,
 				null,
 				1029,
-				0,
+				1041,
 				2,
 				1035
 			]
@@ -1301,7 +1332,7 @@
 				null,
 				null,
 				1030,
-				0,
+				1042,
 				2,
 				1037
 			]
@@ -1357,7 +1388,7 @@
 				null,
 				null,
 				1030,
-				0,
+				1042,
 				2,
 				1041
 			]
@@ -1385,7 +1416,7 @@
 				null,
 				null,
 				1031,
-				0,
+				1043,
 				2,
 				1043
 			]
@@ -1441,7 +1472,7 @@
 				null,
 				null,
 				1031,
-				0,
+				1043,
 				2,
 				1047
 			]
@@ -1469,7 +1500,7 @@
 				null,
 				null,
 				1032,
-				0,
+				1044,
 				2,
 				1049
 			]
@@ -1525,7 +1556,7 @@
 				null,
 				null,
 				1032,
-				0,
+				1044,
 				2,
 				1053
 			]
@@ -1553,7 +1584,7 @@
 				null,
 				null,
 				1033,
-				0,
+				1045,
 				2,
 				1055
 			]
@@ -1609,7 +1640,7 @@
 				null,
 				null,
 				1033,
-				0,
+				1045,
 				2,
 				1059
 			]
@@ -1640,6 +1671,230 @@
 				0,
 				2,
 				1061
+			]
+		},
+		{
+			"values": [
+				1062,
+				1016,
+				1015,
+				"fas fa-cog",
+				null,
+				null,
+				1040,
+				0,
+				2,
+				1062
+			]
+		},
+		{
+			"values": [
+				1063,
+				1016,
+				1012,
+				null,
+				1005,
+				null,
+				1040,
+				0,
+				2,
+				1063
+			]
+		},
+		{
+			"values": [
+				1064,
+				1016,
+				1014,
+				"Objectum",
+				null,
+				null,
+				1040,
+				0,
+				2,
+				1064
+			]
+		},
+		{
+			"values": [
+				1065,
+				1016,
+				1016,
+				null,
+				1,
+				null,
+				1040,
+				0,
+				2,
+				1065
+			]
+		},
+		{
+			"values": [
+				1066,
+				1016,
+				1013,
+				null,
+				null,
+				null,
+				1040,
+				0,
+				2,
+				1066
+			]
+		},
+		{
+			"values": [
+				1067,
+				1016,
+				1017,
+				null,
+				null,
+				null,
+				1040,
+				0,
+				2,
+				1067
+			]
+		},
+		{
+			"values": [
+				1068,
+				1011,
+				1015,
+				"fas fa-cubes",
+				null,
+				null,
+				1041,
+				0,
+				2,
+				1068
+			]
+		},
+		{
+			"values": [
+				1069,
+				1011,
+				1013,
+				null,
+				1016,
+				null,
+				1041,
+				0,
+				2,
+				1069
+			]
+		},
+		{
+			"values": [
+				1070,
+				1012,
+				1015,
+				"fas fa-eye",
+				null,
+				null,
+				1042,
+				0,
+				2,
+				1070
+			]
+		},
+		{
+			"values": [
+				1071,
+				1012,
+				1013,
+				null,
+				1016,
+				null,
+				1042,
+				0,
+				2,
+				1071
+			]
+		},
+		{
+			"values": [
+				1072,
+				1013,
+				1015,
+				"fas fa-elementor",
+				null,
+				null,
+				1043,
+				0,
+				2,
+				1072
+			]
+		},
+		{
+			"values": [
+				1073,
+				1013,
+				1013,
+				null,
+				1016,
+				null,
+				1043,
+				0,
+				2,
+				1073
+			]
+		},
+		{
+			"values": [
+				1074,
+				1014,
+				1015,
+				"fas fa-users",
+				null,
+				null,
+				1044,
+				0,
+				2,
+				1074
+			]
+		},
+		{
+			"values": [
+				1075,
+				1014,
+				1013,
+				null,
+				1016,
+				null,
+				1044,
+				0,
+				2,
+				1075
+			]
+		},
+		{
+			"values": [
+				1076,
+				1015,
+				1015,
+				"fas fa-user",
+				null,
+				null,
+				1045,
+				0,
+				2,
+				1076
+			]
+		},
+		{
+			"values": [
+				1077,
+				1015,
+				1013,
+				null,
+				1016,
+				null,
+				1045,
+				0,
+				2,
+				1077
 			]
 		}
 	],
@@ -1962,6 +2217,46 @@
 				0,
 				2,
 				1009
+			]
+		},
+		{
+			"values": [
+				1010,
+				1000,
+				"All menu items",
+				"allMenuItems",
+				null,
+				null,
+				"select\n    {\"attr\": \"a.id\", \"as\": \"id\"},\n    {\"attr\": \"a.name\", \"as\": \"name\"},\n    {\"attr\": \"a.order\", \"as\": \"order\"},\n    {\"attr\": \"a.menu\", \"as\": \"menu\"},\n    {\"attr\": \"a.parent\", \"as\": \"parent\"},\n    {\"attr\": \"a.path\", \"as\": \"path\"},\n    {\"attr\": \"a.icon\", \"as\": \"icon\"}\nfrom\n    {\"class\": \"objectum.menuItem\", \"alias\": \"a\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1046,
+				1047,
+				2,
+				1010
+			]
+		},
+		{
+			"values": [
+				1010,
+				1000,
+				"User menu items",
+				"userMenuItems",
+				null,
+				null,
+				"select\n    {\"attr\": \"a.id\", \"as\": \"id\"},\n    {\"attr\": \"a.name\", \"as\": \"name\"},\n    {\"attr\": \"a.order\", \"as\": \"order\"},\n    {\"attr\": \"a.menu\", \"as\": \"menu\"},\n    {\"attr\": \"a.parent\", \"as\": \"parent\"},\n    {\"attr\": \"a.path\", \"as\": \"path\"},\n    {\"attr\": \"a.icon\", \"as\": \"icon\"}\nfrom\n    {\"class\": \"objectum.menuItem\", \"alias\": \"a\"}\nwhere\n\t{\"attr\": \"a.menu\"} = {\"param\": \"menu\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1047,
+				0,
+				2,
+				1010
 			]
 		}
 	],
@@ -3016,6 +3311,114 @@
 				"Removing class attr: 1008",
 				2,
 				1038
+			]
+		},
+		{
+			"values": [
+				1039,
+				{
+					"type": "datetime",
+					"value": "2019-10-15T05:48:16.603Z"
+				},
+				"Saving rsc: classAttr, rid: 1017",
+				2,
+				1039
+			]
+		},
+		{
+			"values": [
+				1040,
+				{
+					"type": "datetime",
+					"value": "2019-10-15T05:48:39.509Z"
+				},
+				"Creating rsc: object, cid: objectum.menuItem",
+				2,
+				1040
+			]
+		},
+		{
+			"values": [
+				1041,
+				{
+					"type": "datetime",
+					"value": "2019-10-15T05:55:51.661Z"
+				},
+				"Saving rsc: object, rid: 1011",
+				2,
+				1041
+			]
+		},
+		{
+			"values": [
+				1042,
+				{
+					"type": "datetime",
+					"value": "2019-10-15T05:56:17.390Z"
+				},
+				"Saving rsc: object, rid: 1012",
+				2,
+				1042
+			]
+		},
+		{
+			"values": [
+				1043,
+				{
+					"type": "datetime",
+					"value": "2019-10-15T05:56:56.668Z"
+				},
+				"Saving rsc: object, rid: 1013",
+				2,
+				1043
+			]
+		},
+		{
+			"values": [
+				1044,
+				{
+					"type": "datetime",
+					"value": "2019-10-15T05:58:17.904Z"
+				},
+				"Saving rsc: object, rid: 1014",
+				2,
+				1044
+			]
+		},
+		{
+			"values": [
+				1045,
+				{
+					"type": "datetime",
+					"value": "2019-10-15T05:58:28.939Z"
+				},
+				"Saving rsc: object, rid: 1015",
+				2,
+				1045
+			]
+		},
+		{
+			"values": [
+				1046,
+				{
+					"type": "datetime",
+					"value": "2019-10-15T06:10:45.693Z"
+				},
+				"Creating rsc: view",
+				2,
+				1046
+			]
+		},
+		{
+			"values": [
+				1047,
+				{
+					"type": "datetime",
+					"value": "2019-10-15T06:12:29.668Z"
+				},
+				"Saving rsc: view, rid: 1010",
+				2,
+				1047
 			]
 		}
 	]
