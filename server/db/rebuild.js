@@ -68,8 +68,12 @@ async function rebuild ({store}) {
 	
 	let engineTables = {
 		"_class": {
-			logTable: "tclass",
-			fields: ["fid", "fparent_id", "fname", "fcode", "fdescription", "fformat", "fview_id", "fstart_id"]
+			sql: `
+				insert into _class (fid, fparent_id, fname, fcode, fdescription, fformat,  fview_id, fstart_id)
+				select fid, fparent_id, fname, fcode, fdescription, fformat,  fview_id, fstart_id
+				from tclass
+				where fend_id = 0 and fid >= 1000
+			`
 		},
 		"_class_attr": {
 			sql: `
