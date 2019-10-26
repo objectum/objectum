@@ -550,6 +550,7 @@ declare
 	columnName varchar (256);
 	classCode varchar (256);
 	parentId bigint;
+	prevClassId bigint;
 	revisionId bigint;
 	taiu text;
 	tad text;
@@ -619,17 +620,14 @@ begin
         insert into _log (fid, frsc_id, foper_id) values (OLD.fobject_id, 12, 3);
         execute ''update tobject set fend_id = '' || revisionId || '' where fend_id = 0 and fid = '' || OLD.fobject_id;', tableName, classId);
 
-    parentId := classId;
-
     loop
         exit when parentId is null;
 
+        prevClassId := parentId;
         select fcode, fparent_id into classCode, parentId from _class where fid = parentId;
 
-        if (parentId is not null) then
-            tad := tad || format ('
-        execute ''delete from %s_%s where fobject_id = '' || OLD.fobject_id;', classCode, parentId);
-        end if;
+        tad := tad || format ('
+        execute ''delete from %s_%s where fobject_id = '' || OLD.fobject_id;', classCode, prevClassId);
     end loop;
 
     tad := tad || format ('
