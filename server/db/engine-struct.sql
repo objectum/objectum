@@ -1,0 +1,69 @@
+create table _class (
+	fid bigserial not null,
+	fparent_id bigint,
+	fname varchar (256),
+	fcode varchar (256) not null,
+	fdescription text,
+	fformat text,
+	fview_id bigint,
+	funlogged bigint,
+	fstart_id bigint
+);
+
+create table _class_attr (
+	fid bigserial not null,
+	fclass_id bigint not null,
+	fclass_code varchar (256) not null,
+	fname varchar (256),
+	fcode varchar (256) not null,
+	fdescription text,
+	ftype_id bigint not null,
+	fnot_null bigint,
+	fsecure bigint,
+	funique bigint,
+	fremove_rule varchar (256),
+	funlogged bigint,
+	fstart_id bigint
+);
+
+create table _view (
+	fid bigserial not null,
+	fparent_id bigint,
+	fname varchar (256),
+	fcode varchar (256) not null,
+	fdescription text,
+	flayout text,
+	fquery text,
+	fstart_id bigint
+);
+
+create table _object (
+	fid bigserial not null,
+	fclass_id bigint,
+	fstart_id bigint
+);
+
+create table _opts (
+	fid bigserial,
+	fcode varchar (256) not null,
+	fvalue text
+);
+
+create unlogged table _log (
+	fid bigint,
+	frsc_id bigint,
+	foper_id bigint
+);
+
+alter table _class add primary key (fid);
+alter table _class_attr add primary key (fid);
+alter table _view add primary key (fid);
+alter table _object add primary key (fid);
+alter table _opts add primary key (fid);
+
+create unique index _class_fcode on _class (fparent_id, fcode);
+create unique index _class_fcode_null on _class (fcode)  where fparent_id is null;
+create unique index _class_attr_fcode on _class_attr (fclass_id, fcode);
+create unique index _view_fcode on _view (fparent_id, fcode);
+create unique index _view_fcode_null on _view (fcode) where fparent_id is null;
+create unique index _opts_fcode on _opts (fcode);

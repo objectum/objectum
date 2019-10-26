@@ -231,7 +231,7 @@ class Postgres {
 		await this.connect ();
 		await this.query ({sql: `create schema ${connection.dbUser} authorization ${connection.dbUser}`});
 		
-		let files = ["tables", "indexes", "data", "engine"];
+		let files = ["tables", "indexes", "data", "engine-struct", "engine-fn"];
 		
 		for (let i = 0; i < files.length; i ++) {
 			let filename = files [i];

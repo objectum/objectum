@@ -58,7 +58,11 @@ async function rebuild ({store}) {
 	await store.query ({client: store.client, sql: "commit"});
 	
 	// engine
-	let sql = await fs_readFile (`${__dirname}/engine.sql`, "utf8");
+	let sql = await fs_readFile (`${__dirname}/engine-struct.sql`, "utf8");
+	
+	await store.query ({client: store.client, sql});
+
+	sql = await fs_readFile (`${__dirname}/engine-fn.sql`, "utf8");
 	
 	await store.query ({client: store.client, sql});
 	
