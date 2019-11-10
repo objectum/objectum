@@ -417,6 +417,9 @@ async function rollbackTransaction (req) {
 };
 
 async function classFn (req) {
+	req.args ["view"] = req.args ["query"];
+	delete req.args ["query"];
+	
 	log.debug ({fn: "project.classFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
@@ -425,13 +428,6 @@ async function classFn (req) {
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "create") {
-		delete req.args.id;
-		o = new Class ({store, rec: req.args});
-		await o.sync ({session: req.session});
-		
-		return o.data;
-	}
 	if (req.args.fn == "remove") {
 		o = store.getClass (req.args.id || req.args.code);
 		o.remove ();
@@ -439,11 +435,14 @@ async function classFn (req) {
 		
 		return {id: o.get ("id")};
 	}
+	if (req.args.fn == "create") {
+		delete req.args.id;
+		o = new Class ({store, rec: req.args});
+		await o.sync ({session: req.session});
+	} else
 	if (req.args.fn == "get") {
 		o = store.getClass (req.args.id || req.args.code);
-		
-		return o.data;
-	}
+	} else
 	if (req.args.fn == "set") {
 		o = store.getClass (req.args.id || req.args.code);
 		delete req.args.id;
@@ -452,9 +451,13 @@ async function classFn (req) {
 			o.set (a, v);
 		});
 		await o.sync ({session: req.session});
-		
-		return o.data;
+	} else {
+		throw new Error ("project.classFn: unknown fn: " + req.args.fn);
 	}
+	o.data ["query"] = o.data ["view"];
+	delete o.data ["view"];
+
+	return o.data;
 };
 
 async function classAttrFn (req) {
@@ -469,13 +472,6 @@ async function classAttrFn (req) {
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "create") {
-		delete req.args.id;
-		o = new ClassAttr ({store, rec: req.args});
-		await o.sync ({session: req.session});
-		
-		return o.data;
-	}
 	if (req.args.fn == "remove") {
 		o = store.getClassAttr (req.args.id || req.args.code);
 		o.remove ();
@@ -483,11 +479,14 @@ async function classAttrFn (req) {
 		
 		return {id: o.get ("id")};
 	}
+	if (req.args.fn == "create") {
+		delete req.args.id;
+		o = new ClassAttr ({store, rec: req.args});
+		await o.sync ({session: req.session});
+	} else
 	if (req.args.fn == "get") {
 		o = store.getClassAttr (req.args.id || req.args.code);
-		
-		return o.data;
-	}
+	} else
 	if (req.args.fn == "set") {
 		o = store.getClassAttr (req.args.id || req.args.code);
 		delete req.args.id;
@@ -496,12 +495,19 @@ async function classAttrFn (req) {
 			o.set (a, v);
 		});
 		await o.sync ({session: req.session});
-		
-		return o.data;
+	} else {
+		throw new Error ("project.classAttrFn: unknown fn: " + req.args.fn);
 	}
+	o.data ["model"] = o.data ["class"];
+	delete o.data ["class"];
+	
+	return o.data;
 };
 
 async function viewFn (req) {
+	req.args ["class"] = req.args ["model"];
+	delete req.args ["model"];
+	
 	log.debug ({fn: "project.viewFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
@@ -510,13 +516,6 @@ async function viewFn (req) {
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "create") {
-		delete req.args.id;
-		o = new View ({store, rec: req.args});
-		await o.sync ({session: req.session});
-		
-		return o.data;
-	}
 	if (req.args.fn == "remove") {
 		o = store.getView (req.args.id || req.args.code);
 		o.remove ();
@@ -524,11 +523,14 @@ async function viewFn (req) {
 		
 		return {id: o.get ("id")};
 	}
+	if (req.args.fn == "create") {
+		delete req.args.id;
+		o = new View ({store, rec: req.args});
+		await o.sync ({session: req.session});
+	} else
 	if (req.args.fn == "get") {
 		o = store.getView (req.args.id || req.args.code);
-		
-		return o.data;
-	}
+	} else
 	if (req.args.fn == "set") {
 		o = store.getView (req.args.id || req.args.code);
 		delete req.args.id;
@@ -537,9 +539,13 @@ async function viewFn (req) {
 			o.set (a, v);
 		});
 		await o.sync ({session: req.session});
-		
-		return o.data;
+	} else {
+		throw new Error ("project.viewFn: unknown fn: " + req.args.fn);
 	}
+	o.data ["model"] = o.data ["class"];
+	delete o.data ["class"];
+	
+	return o.data;
 };
 
 async function viewAttrFn (req) {
@@ -554,13 +560,6 @@ async function viewAttrFn (req) {
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "create") {
-		delete req.args.id;
-		o = new ViewAttr ({store, rec: req.args});
-		await o.sync ({session: req.session});
-		
-		return o.data;
-	}
 	if (req.args.fn == "remove") {
 		o = store.getViewAttr (req.args.id || req.args.code);
 		o.remove ();
@@ -568,11 +567,14 @@ async function viewAttrFn (req) {
 		
 		return {id: o.get ("id")};
 	}
+	if (req.args.fn == "create") {
+		delete req.args.id;
+		o = new ViewAttr ({store, rec: req.args});
+		await o.sync ({session: req.session});
+	} else
 	if (req.args.fn == "get") {
 		o = store.getViewAttr (req.args.id || req.args.code);
-		
-		return o.data;
-	}
+	} else
 	if (req.args.fn == "set") {
 		o = store.getViewAttr (req.args.id || req.args.code);
 		delete req.args.id;
@@ -581,9 +583,13 @@ async function viewAttrFn (req) {
 			o.set (a, v);
 		});
 		await o.sync ({session: req.session});
-		
-		return o.data;
+	} else {
+		throw new Error ("project.viewAttrFn: unknown fn: " + req.args.fn);
 	}
+	o.data ["query"] = o.data ["view"];
+	delete o.data ["view"];
+	
+	return o.data;
 };
 
 async function actionFn (req) {
@@ -595,13 +601,6 @@ async function actionFn (req) {
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "create") {
-		delete req.args.id;
-		o = new Action ({store, rec: req.args});
-		await o.sync ({session: req.session});
-		
-		return o.data;
-	}
 	if (req.args.fn == "remove") {
 		o = await store.getAction ({session: req.session, id: req.args.id || req.args.code});
 		o.remove ();
@@ -609,11 +608,14 @@ async function actionFn (req) {
 		
 		return {id: o.get ("id")};
 	}
+	if (req.args.fn == "create") {
+		delete req.args.id;
+		o = new Action ({store, rec: req.args});
+		await o.sync ({session: req.session});
+	} else
 	if (req.args.fn == "get") {
 		o = await store.getAction ({session: req.session, id: req.args.id || req.args.code});
-		
-		return o.data;
-	}
+	} else
 	if (req.args.fn == "set") {
 		o = await store.getAction ({session: req.session, id: req.args.id || req.args.code});
 		delete req.args.id;
@@ -622,9 +624,10 @@ async function actionFn (req) {
 			o.set (a, v);
 		});
 		await o.sync ({session: req.session});
-		
-		return o.data;
+	} else {
+		throw new Error ("project.actionFn: unknown fn: " + req.args.fn);
 	}
+	return o.data;
 };
 
 async function objectFn (req) {
@@ -636,13 +639,6 @@ async function objectFn (req) {
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "create") {
-		delete req.args.id;
-		o = new Object ({store, rec: req.args});
-		await o.sync ({session: req.session});
-		
-		return o.data;
-	}
 	if (req.args.fn == "remove") {
 		o = await store.getObject ({session: req.session, id: req.args.id});
 		o.remove ();
@@ -650,11 +646,14 @@ async function objectFn (req) {
 		
 		return {id: o.get ("id")};
 	}
+	if (req.args.fn == "create") {
+		delete req.args.id;
+		o = new Object ({store, rec: req.args});
+		await o.sync ({session: req.session});
+	} else
 	if (req.args.fn == "get") {
 		o = await store.getObject ({session: req.session, id: req.args.id});
-		
-		return o.data;
-	}
+	} else
 	if (req.args.fn == "set") {
 		o = await store.getObject ({session: req.session, id: req.args.id});
 		delete req.args.id;
@@ -663,9 +662,13 @@ async function objectFn (req) {
 			o.set (a, v);
 		});
 		await o.sync ({session: req.session});
-		
-		return o.data;
+	} else {
+		throw new Error ("project.objectFn: unknown fn: " + req.args.fn);
 	}
+	o.data ["model"] = o.data ["class"];
+	delete o.data ["class"];
+	
+	return o.data;
 };
 
 async function getNews (req) {
@@ -825,6 +828,10 @@ async function getAll (req) {
 			"column": await getTableRecords ({session, store, table: "tview_attr", fields: getFields ("viewAttr")}),
 			"visualObjectum": store.visualObjectum
 		};
+		_.each (result ["model"], rec => {
+			rec ["query"] = rec ["view"];
+			delete rec ["view"];
+		});
 		_.each (result ["property"], rec => {
 			rec ["model"] = rec ["class"];
 			delete rec ["class"];
