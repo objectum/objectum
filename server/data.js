@@ -5,7 +5,7 @@ const { isMetaTable } = require ("./map");
 
 async function getDict (req, store) {
 	let session = req.session;
-	let cls = store.getClass (req.args ["class"]);
+	let cls = store.getClass (req.args ["model"]);
 	let ca = cls.attrs ["name"];
 	
 	if (!ca) {
@@ -402,7 +402,7 @@ async function getViewAttrs (recs, view, caMap, store, fields) {
 
 async function getData (req, store) {
 	let session = req.session;
-	let view = store.getView (req.args.view);
+	let view = store.getView (req.args.query);
 	let query = view.get ("query");
 	let tokens = [], json = "", str = "", classMap = {}, caMap = {};
 	let hasSelectCount = false, hasTree = false;

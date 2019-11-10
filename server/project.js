@@ -458,6 +458,9 @@ async function classFn (req) {
 };
 
 async function classAttrFn (req) {
+	req.args ["class"] = req.args ["model"];
+	delete req.args ["model"];
+	
 	log.debug ({fn: "project.classAttrFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
@@ -540,6 +543,9 @@ async function viewFn (req) {
 };
 
 async function viewAttrFn (req) {
+	req.args ["view"] = req.args ["query"];
+	delete req.args ["query"];
+	
 	log.debug ({fn: "project.viewAttrFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
@@ -622,6 +628,9 @@ async function actionFn (req) {
 };
 
 async function objectFn (req) {
+	req.args ["class"] = req.args ["model"];
+	delete req.args ["model"];
+	
 	log.debug ({fn: "project.objectFn", session: req.session.id, args: req.args});
 	
 	let store = await getStore ({code: req.code});
@@ -671,7 +680,7 @@ async function getNews (req) {
 
 	if (clientRevision == 0 || clientRevision == store.lastRevision) {
 		// first call
-		data = {revision: store.lastRevision, objects: []/*, message*/};
+		data = {revision: store.lastRevision, records: []/*, message*/};
 	} else {
 		// send changed objects id from revision to lastRevision
 		let r = [];
@@ -681,7 +690,7 @@ async function getNews (req) {
 				r = r.concat (store.revisions [revision].object.changed);
 			}
 		}
-		data = {revision: store.lastRevision, objects: r/*, message*/};
+		data = {revision: store.lastRevision, records: r/*, message*/};
 	}
 	sessions [req.session.id].news.revision = store.lastRevision;
 	
@@ -810,12 +819,26 @@ async function getAll (req) {
 		const {getFields} = require ("./map");
 	 
 		result = {
-			"class": await getTableRecords ({session, store, table: "tclass", fields: getFields ("class")}),
-			"classAttr": await getTableRecords ({session, store, table: "tclass_attr", fields: getFields ("classAttr")}),
-			"view": await getTableRecords ({session, store, table: "tview", fields: getFields ("view")}),
-			"viewAttr": await getTableRecords ({session, store, table: "tview_attr", fields: getFields ("viewAttr")}),
+			"model": await getTableRecords ({session, store, table: "tclass", fields: getFields ("class")}),
+			"property": await getTableRecords ({session, store, table: "tclass_attr", fields: getFields ("classAttr")}),
+			"query": await getTableRecords ({session, store, table: "tview", fields: getFields ("view")}),
+			"column": await getTableRecords ({session, store, table: "tview_attr", fields: getFields ("viewAttr")}),
 			"visualObjectum": store.visualObjectum
 		};
+		_.each (result ["property"], rec => {
+			rec ["model"] = rec ["class"];
+			delete rec ["class"];
+		});
+		_.each (result ["query"], rec => {
+			rec ["model"] = rec ["class"];
+			delete rec ["class"];
+		});
+		_.each (result ["column"], rec => {
+			rec ["query"] = rec ["view"];
+			delete rec ["view"];
+			rec ["property"] = rec ["classAttr"];
+			delete rec ["classAttr"];
+		});
 		redisClient.hset (`${req.code}-requests`, "all", JSON.stringify (result));
 	}
 	return result;

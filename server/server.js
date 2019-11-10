@@ -139,10 +139,15 @@ async function init () {
 	};
 	let rscMap = {
 		"object": project.objectFn,
+		"record": project.objectFn,
 		"class": project.classFn,
+		"model": project.classFn,
 		"classAttr": project.classAttrFn,
+		"property": project.classAttrFn,
 		"view": project.viewFn,
+		"query": project.viewFn,
 		"viewAttr": project.viewAttrFn,
+		"column": project.viewAttrFn,
 		"action": project.actionFn
 	};
 	fastify.post ("/projects/:code/", async (req, res) => {
