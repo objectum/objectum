@@ -1278,7 +1278,7 @@
 				null,
 				null,
 				1029,
-				0,
+				1050,
 				2,
 				1033
 			]
@@ -1320,7 +1320,7 @@
 				null,
 				null,
 				1029,
-				0,
+				1050,
 				2,
 				1036
 			]
@@ -1362,7 +1362,7 @@
 				null,
 				null,
 				1030,
-				0,
+				1051,
 				2,
 				1039
 			]
@@ -1404,7 +1404,7 @@
 				null,
 				null,
 				1030,
-				0,
+				1051,
 				2,
 				1042
 			]
@@ -1898,6 +1898,62 @@
 				2,
 				1077
 			]
+		},
+		{
+			"values": [
+				1078,
+				1011,
+				1014,
+				"Models",
+				null,
+				null,
+				1050,
+				0,
+				2,
+				1078
+			]
+		},
+		{
+			"values": [
+				1079,
+				1011,
+				1017,
+				"/models",
+				null,
+				null,
+				1050,
+				0,
+				2,
+				1079
+			]
+		},
+		{
+			"values": [
+				1080,
+				1012,
+				1014,
+				"Queries",
+				null,
+				null,
+				1051,
+				0,
+				2,
+				1080
+			]
+		},
+		{
+			"values": [
+				1081,
+				1012,
+				1017,
+				"/queries",
+				null,
+				null,
+				1051,
+				0,
+				2,
+				1081
+			]
 		}
 	],
 	"tview": [
@@ -1936,6 +1992,66 @@
 				null,
 				null,
 				1001,
+				1052,
+				2,
+				1001
+			]
+		},
+		{
+			"values": [
+				1001,
+				1000,
+				"Models",
+				"model",
+				null,
+				null,
+				"\n{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n\tfparent_id as parent\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n\tfparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n\t_class\nwhere\n\tfparent_id {\"tree\": \"filter\"}\n\n{\"tree\": \"begin\"}\ngroup by\n\tfparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\t\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1052,
+				1062,
+				2,
+				1001
+			]
+		},
+		{
+			"values": [
+				1001,
+				1000,
+				"Models",
+				"model",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n\tfparent_id as parent\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n\tfparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n\t_class\n\n{\"where\": \"begin\"}\n\tfparent_id {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"tree\": \"begin\"}\ngroup by\n\tfparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\t\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1062,
+				1071,
+				2,
+				1001
+			]
+		},
+		{
+			"values": [
+				1001,
+				1000,
+				"Models",
+				"model",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n\tfparent_id as parent\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n\tfparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n\t_class\n\n{\"where\": \"begin\"}\n\tfparent_id {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"order\": \"begin\"}\n    fcode, fid\n{\"order\": \"end\"}\n\n{\"tree\": \"begin\"}\ngroup by\n\tfparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\t\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1071,
 				0,
 				2,
 				1001
@@ -1956,6 +2072,66 @@
 				null,
 				null,
 				1001,
+				1054,
+				2,
+				1002
+			]
+		},
+		{
+			"values": [
+				1002,
+				1000,
+				"Queries",
+				"query",
+				null,
+				null,
+				"\n{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n\tfparent_id as parent\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n\tfparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n\t_view\nwhere\n\tfparent_id {\"tree\": \"filter\"}\n\n{\"tree\": \"begin\"}\ngroup by\n\tfparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1054,
+				1064,
+				2,
+				1002
+			]
+		},
+		{
+			"values": [
+				1002,
+				1000,
+				"Queries",
+				"query",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n\tfparent_id as parent\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n\tfparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n\t_view\n    \n{\"where\": \"begin\"}\n\tfparent_id {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"tree\": \"begin\"}\ngroup by\n\tfparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1064,
+				1073,
+				2,
+				1002
+			]
+		},
+		{
+			"values": [
+				1002,
+				1000,
+				"Queries",
+				"query",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n\tfparent_id as parent\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n\tfparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n\t_view\n    \n{\"where\": \"begin\"}\n\tfparent_id {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"order\": \"begin\"}\n    fcode, fid\n{\"order\": \"end\"}\n\n{\"tree\": \"begin\"}\ngroup by\n\tfparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1073,
 				0,
 				2,
 				1002
@@ -1976,6 +2152,26 @@
 				null,
 				null,
 				1001,
+				1066,
+				2,
+				1003
+			]
+		},
+		{
+			"values": [
+				1003,
+				1000,
+				"Types",
+				"type",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n\tfparent_id as parent\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n\tfparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n\ttclass\n    \n{\"where\": \"begin\"}\n\tfend_id = 0 and (fid < 6 or fid >= 1000) and fparent_id {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"order\": \"begin\"}\n\tfid\n{\"order\": \"end\"}\n\n{\"tree\": \"begin\"}\ngroup by\n\tfparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1066,
 				0,
 				2,
 				1003
@@ -1996,6 +2192,86 @@
 				null,
 				null,
 				1001,
+				1053,
+				2,
+				1004
+			]
+		},
+		{
+			"values": [
+				1004,
+				1000,
+				"Properties",
+				"property",
+				null,
+				null,
+				"\n{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n    ftype_id as type,\n    fnot_null as not_null,\n    fsecure as secure,\n    funique as unique,\n    fremove_rule as remove_rule\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\nfrom\n\t_class_attr\nwhere\n\tfclass_id = {\"param\": \"classId\"}\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1053,
+				1057,
+				2,
+				1004
+			]
+		},
+		{
+			"values": [
+				1004,
+				1000,
+				"Properties",
+				"property",
+				null,
+				null,
+				"\n{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n    ftype_id as type,\n    fnot_null as not_null,\n    fsecure as secure,\n    funique as unique,\n    fremove_rule as remove_rule\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\nfrom\n\t_class_attr\nwhere\n\tfclass_id = {\"param\": \"modelId\"}\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1057,
+				1063,
+				2,
+				1004
+			]
+		},
+		{
+			"values": [
+				1004,
+				1000,
+				"Properties",
+				"property",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n    ftype_id as type,\n    fnot_null as not_null,\n    fsecure as secure,\n    funique as unique,\n    fremove_rule as remove_rule\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\nfrom\n\t_class_attr\n    \n{\"where\": \"begin\"}\n\tfclass_id = {\"param\": \"modelId\"}\n{\"where\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1063,
+				1072,
+				2,
+				1004
+			]
+		},
+		{
+			"values": [
+				1004,
+				1000,
+				"Properties",
+				"property",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n    ftype_id as type,\n    fnot_null as not_null,\n    fsecure as secure,\n    funique as unique,\n    fremove_rule as remove_rule\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\nfrom\n\t_class_attr\n    \n{\"where\": \"begin\"}\n\tfclass_id = {\"param\": \"modelId\"}\n{\"where\": \"end\"}\n\n{\"order\": \"begin\"}\n    fcode, fid\n{\"order\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1072,
 				0,
 				2,
 				1004
@@ -2016,6 +2292,86 @@
 				null,
 				null,
 				1001,
+				1055,
+				2,
+				1005
+			]
+		},
+		{
+			"values": [
+				1005,
+				1000,
+				"Columns",
+				"column",
+				null,
+				null,
+				"\n{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n    forder as order,\n    farea as area,\n    fcolumn_width as column_width\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\nfrom\n\ttview_attr\nwhere\n\tfend_id = 0 and fview_id = {\"param\": \"viewId\"}\n\n{\"data\": \"begin\"}\norder by\n\tforder\n{\"data\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1055,
+				1056,
+				2,
+				1005
+			]
+		},
+		{
+			"values": [
+				1005,
+				1000,
+				"Columns",
+				"column",
+				null,
+				null,
+				"\n{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n    forder as order,\n    farea as area,\n    fcolumn_width as column_width\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\nfrom\n\ttview_attr\nwhere\n\tfend_id = 0 and fview_id = {\"param\": \"queryId\"}\n\n{\"data\": \"begin\"}\norder by\n\tforder\n{\"data\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1056,
+				1060,
+				2,
+				1005
+			]
+		},
+		{
+			"values": [
+				1005,
+				1000,
+				"Columns",
+				"column",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n    forder as order,\n    farea as area,\n    fcolumn_width as column_width\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\nfrom\n\ttview_attr\nwhere\n\tfend_id = 0 and fview_id = {\"param\": \"queryId\"}\n\n{\"order\": \"begin\"}\n\tforder\n{\"order\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1060,
+				1077,
+				2,
+				1005
+			]
+		},
+		{
+			"values": [
+				1005,
+				1000,
+				"Columns",
+				"column",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n    forder as order,\n    farea as area,\n    fcolumn_width as column_width\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\nfrom\n\ttview_attr\n\n{\"where\": \"begin\"}\n\tfend_id = 0 and fview_id = {\"param\": \"queryId\"}\n{\"where\": \"end\"}    \n\n{\"order\": \"begin\"}\n\tforder\n{\"order\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1077,
 				0,
 				2,
 				1005
@@ -2036,6 +2392,46 @@
 				null,
 				null,
 				1001,
+				1065,
+				2,
+				1006
+			]
+		},
+		{
+			"values": [
+				1006,
+				1000,
+				"Roles",
+				"role",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    {\"prop\": \"a.id\", \"as\": \"id\"},\n    {\"prop\": \"a.name\", \"as\": \"name\"},\n    {\"prop\": \"a.code\", \"as\": \"code\"}\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\nfrom\n    {\"model\": \"objectum.role\", \"alias\": \"a\"}\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1065,
+				1074,
+				2,
+				1006
+			]
+		},
+		{
+			"values": [
+				1006,
+				1000,
+				"Roles",
+				"role",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    {\"prop\": \"a.id\", \"as\": \"id\"},\n    {\"prop\": \"a.name\", \"as\": \"name\"},\n    {\"prop\": \"a.code\", \"as\": \"code\"}\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\nfrom\n    {\"model\": \"objectum.role\", \"alias\": \"a\"}\n\n{\"order\": \"begin\"}\n    {\"prop\": \"a.code\"}, {\"prop\": \"a.id\"}\n{\"order\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1074,
 				0,
 				2,
 				1006
@@ -2096,6 +2492,46 @@
 				null,
 				null,
 				1017,
+				1058,
+				2,
+				1007
+			]
+		},
+		{
+			"values": [
+				1007,
+				1000,
+				"Menus",
+				"menu",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\t{\"attr\": \"a.id\", \"as\": \"id\"},\n\t{\"attr\": \"a.name\", \"as\": \"name\"},\n\t{\"attr\": \"a.code\", \"as\": \"code\"},\n\t{\"attr\": \"a.order\", \"as\": \"order\"}\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\nfrom\n\t{\"class\": \"objectum.menu\", \"alias\": \"a\"}\n\n{\"order\": \"begin\"}\n\t{\"attr\": \"a.order\"}\n{\"order\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1058,
+				1059,
+				2,
+				1007
+			]
+		},
+		{
+			"values": [
+				1007,
+				1000,
+				"Menus",
+				"menu",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    {\"prop\": \"a.id\", \"as\": \"id\"},\n    {\"prop\": \"a.name\", \"as\": \"name\"},\n    {\"prop\": \"a.code\", \"as\": \"code\"},\n    {\"prop\": \"a.order\", \"as\": \"order\"}\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\nfrom\n    {\"model\": \"objectum.menu\", \"alias\": \"a\"}\n\n{\"order\": \"begin\"}\n    {\"prop\": \"a.order\"}\n{\"order\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1059,
 				0,
 				2,
 				1007
@@ -2116,6 +2552,46 @@
 				null,
 				null,
 				1001,
+				1067,
+				2,
+				1008
+			]
+		},
+		{
+			"values": [
+				1008,
+				1000,
+				"Users",
+				"user",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    {\"prop\": \"a.id\", \"as\": \"id\"},\n    {\"prop\": \"a.name\", \"as\": \"name\"},\n    {\"prop\": \"a.login\", \"as\": \"login\"}\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\nfrom\n    {\"model\": \"objectum.user\", \"alias\": \"a\"}\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1067,
+				1075,
+				2,
+				1008
+			]
+		},
+		{
+			"values": [
+				1008,
+				1000,
+				"Users",
+				"user",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    {\"prop\": \"a.id\", \"as\": \"id\"},\n    {\"prop\": \"a.name\", \"as\": \"name\"},\n    {\"prop\": \"a.login\", \"as\": \"login\"}\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\nfrom\n    {\"model\": \"objectum.user\", \"alias\": \"a\"}\n    \n{\"order\": \"begin\"}\n    {\"prop\": \"a.login\"}, {\"prop\": \"a.id\"}\n{\"order\": \"end\"}\n    \nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1075,
 				0,
 				2,
 				1008
@@ -2216,6 +2692,66 @@
 				null,
 				null,
 				1023,
+				1061,
+				2,
+				1009
+			]
+		},
+		{
+			"values": [
+				1009,
+				1000,
+				"Menu items",
+				"menuItem",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    {\"prop\": \"a.id\", \"as\": \"id\"},\n    {\"prop\": \"a.name\", \"as\": \"name\"},\n    {\"prop\": \"a.order\", \"as\": \"order\"},\n    {\"prop\": \"a.menu\", \"as\": \"menu\"},\n    {\"prop\": \"a.parent\", \"as\": \"parent\"},\n    {\"prop\": \"a.path\", \"as\": \"path\"},\n    {\"prop\": \"a.icon\", \"as\": \"icon\"}\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n    {\"prop\": \"a.parent\", \"as\": \"parent\"}, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n    {\"model\": \"objectum.menuItem\", \"alias\": \"a\"}\nwhere\n    {\"prop\": \"a.menu\"} = {\"param\": \"menu\"} and\n    {\"prop\": \"a.parent\"} {\"tree\": \"filter\"}\n\n{\"tree\": \"begin\"}\ngroup by\n    {\"prop\": \"a.parent\"}\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}  \n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1061,
+				1069,
+				2,
+				1009
+			]
+		},
+		{
+			"values": [
+				1009,
+				1000,
+				"Menu items",
+				"menuItem",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    {\"prop\": \"a.id\", \"as\": \"id\"},\n    {\"prop\": \"a.name\", \"as\": \"name\"},\n    {\"prop\": \"a.order\", \"as\": \"order\"},\n    {\"prop\": \"a.menu\", \"as\": \"menu\"},\n    {\"prop\": \"a.parent\", \"as\": \"parent\"},\n    {\"prop\": \"a.path\", \"as\": \"path\"},\n    {\"prop\": \"a.icon\", \"as\": \"icon\"}\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n    {\"prop\": \"a.parent\", \"as\": \"parent\"}, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n    {\"model\": \"objectum.menuItem\", \"alias\": \"a\"}\nwhere\n    {\"prop\": \"a.menu\"} = {\"param\": \"menu\"} and\n    {\"prop\": \"a.parent\"} {\"tree\": \"filter\"}\n\n{\"order\": \"begin\"}\n    {\"prop\": \"a.order\"}\n{\"order\": \"end\"}\n\n{\"tree\": \"begin\"}\ngroup by\n    {\"prop\": \"a.parent\"}\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}  \n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1069,
+				1076,
+				2,
+				1009
+			]
+		},
+		{
+			"values": [
+				1009,
+				1000,
+				"Menu items",
+				"menuItem",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    {\"prop\": \"a.id\", \"as\": \"id\"},\n    {\"prop\": \"a.name\", \"as\": \"name\"},\n    {\"prop\": \"a.order\", \"as\": \"order\"},\n    {\"prop\": \"a.menu\", \"as\": \"menu\"},\n    {\"prop\": \"a.parent\", \"as\": \"parent\"},\n    {\"prop\": \"a.path\", \"as\": \"path\"},\n    {\"prop\": \"a.icon\", \"as\": \"icon\"}\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n    {\"prop\": \"a.parent\", \"as\": \"parent\"}, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n    {\"model\": \"objectum.menuItem\", \"alias\": \"a\"}\n\n{\"where\": \"begin\"}\n    {\"prop\": \"a.menu\"} = {\"param\": \"menu\"} and\n    {\"prop\": \"a.parent\"} {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"order\": \"begin\"}\n    {\"prop\": \"a.order\"}\n{\"order\": \"end\"}\n\n{\"tree\": \"begin\"}\ngroup by\n    {\"prop\": \"a.parent\"}\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}  \n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1076,
 				0,
 				2,
 				1009
@@ -2256,6 +2792,46 @@
 				null,
 				null,
 				1047,
+				1068,
+				2,
+				1010
+			]
+		},
+		{
+			"values": [
+				1010,
+				1000,
+				"User menu items",
+				"userMenuItems",
+				null,
+				null,
+				"select\n    {\"prop\": \"a.id\", \"as\": \"id\"},\n    {\"prop\": \"a.name\", \"as\": \"name\"},\n    {\"prop\": \"a.order\", \"as\": \"order\"},\n    {\"prop\": \"a.menu\", \"as\": \"menu\"},\n    {\"prop\": \"a.parent\", \"as\": \"parent\"},\n    {\"prop\": \"a.path\", \"as\": \"path\"},\n    {\"prop\": \"a.icon\", \"as\": \"icon\"}\nfrom\n    {\"model\": \"objectum.menuItem\", \"alias\": \"a\"}\nwhere\n    {\"prop\": \"a.menu\"} = {\"param\": \"menu\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1068,
+				1070,
+				2,
+				1010
+			]
+		},
+		{
+			"values": [
+				1010,
+				1000,
+				"User menu items",
+				"userMenuItems",
+				null,
+				null,
+				"select\n    {\"prop\": \"a.id\", \"as\": \"id\"},\n    {\"prop\": \"a.name\", \"as\": \"name\"},\n    {\"prop\": \"a.order\", \"as\": \"order\"},\n    {\"prop\": \"a.menu\", \"as\": \"menu\"},\n    {\"prop\": \"a.parent\", \"as\": \"parent\"},\n    {\"prop\": \"a.path\", \"as\": \"path\"},\n    {\"prop\": \"a.icon\", \"as\": \"icon\"}\nfrom\n    {\"model\": \"objectum.menuItem\", \"alias\": \"a\"}\nwhere\n    {\"prop\": \"a.menu\"} = {\"param\": \"menu\"}\norder by\n    {\"prop\": \"a.order\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1070,
 				0,
 				2,
 				1010
@@ -2976,7 +3552,7 @@
 				1000,
 				{
 					"type": "datetime",
-					"value": "2019-05-25T02:23:00.612Z"
+					"value": "2019-05-25T08:23:00.612Z"
 				},
 				"objectum",
 				2,
@@ -3000,7 +3576,7 @@
 				1002,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:23:07.344Z"
+					"value": "2019-10-14T11:23:07.344Z"
 				},
 				"Creating rsc: class",
 				2,
@@ -3012,7 +3588,7 @@
 				1003,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:24:17.497Z"
+					"value": "2019-10-14T11:24:17.497Z"
 				},
 				"Creating rsc: classAttr",
 				2,
@@ -3024,7 +3600,7 @@
 				1004,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:24:40.018Z"
+					"value": "2019-10-14T11:24:40.018Z"
 				},
 				"Creating rsc: classAttr",
 				2,
@@ -3036,7 +3612,7 @@
 				1005,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:25:31.227Z"
+					"value": "2019-10-14T11:25:31.227Z"
 				},
 				"Creating rsc: classAttr",
 				2,
@@ -3048,7 +3624,7 @@
 				1006,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:25:52.071Z"
+					"value": "2019-10-14T11:25:52.071Z"
 				},
 				"Creating rsc: classAttr",
 				2,
@@ -3060,7 +3636,7 @@
 				1007,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:26:12.217Z"
+					"value": "2019-10-14T11:26:12.217Z"
 				},
 				"Creating rsc: classAttr",
 				2,
@@ -3072,7 +3648,7 @@
 				1008,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:26:54.970Z"
+					"value": "2019-10-14T11:26:54.970Z"
 				},
 				"Creating rsc: classAttr",
 				2,
@@ -3084,7 +3660,7 @@
 				1010,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:28:01.943Z"
+					"value": "2019-10-14T11:28:01.943Z"
 				},
 				"Creating rsc: classAttr",
 				2,
@@ -3096,7 +3672,7 @@
 				1011,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:30:28.028Z"
+					"value": "2019-10-14T11:30:28.028Z"
 				},
 				"Removing menu: 1001",
 				2,
@@ -3108,7 +3684,7 @@
 				1012,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:30:30.533Z"
+					"value": "2019-10-14T11:30:30.533Z"
 				},
 				"Removing menu: 1002",
 				2,
@@ -3120,7 +3696,7 @@
 				1013,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:30:33.364Z"
+					"value": "2019-10-14T11:30:33.364Z"
 				},
 				"Removing menu: 1003",
 				2,
@@ -3132,7 +3708,7 @@
 				1014,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:30:35.323Z"
+					"value": "2019-10-14T11:30:35.323Z"
 				},
 				"Removing menu: 1004",
 				2,
@@ -3144,7 +3720,7 @@
 				1015,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:32:13.315Z"
+					"value": "2019-10-14T11:32:13.315Z"
 				},
 				"Saving rsc: view, rid: 1007",
 				2,
@@ -3156,7 +3732,7 @@
 				1016,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:32:24.351Z"
+					"value": "2019-10-14T11:32:24.351Z"
 				},
 				"Removing view attr: 1032",
 				2,
@@ -3168,7 +3744,7 @@
 				1017,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:33:18.484Z"
+					"value": "2019-10-14T11:33:18.484Z"
 				},
 				"Saving rsc: view, rid: 1007",
 				2,
@@ -3180,7 +3756,7 @@
 				1018,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:36:35.169Z"
+					"value": "2019-10-14T11:36:35.169Z"
 				},
 				"Creating rsc: object, cid: objectum.menu",
 				2,
@@ -3192,7 +3768,7 @@
 				1019,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:38:42.700Z"
+					"value": "2019-10-14T11:38:42.700Z"
 				},
 				"Creating rsc: view",
 				2,
@@ -3204,7 +3780,7 @@
 				1020,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:41:45.187Z"
+					"value": "2019-10-14T11:41:45.187Z"
 				},
 				"Saving rsc: view, rid: 1009",
 				2,
@@ -3216,7 +3792,7 @@
 				1021,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:55:30.887Z"
+					"value": "2019-10-14T11:55:30.887Z"
 				},
 				"Saving rsc: view, rid: 1009",
 				2,
@@ -3228,7 +3804,7 @@
 				1022,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T05:57:56.866Z"
+					"value": "2019-10-14T11:57:56.866Z"
 				},
 				"Saving rsc: view, rid: 1009",
 				2,
@@ -3240,7 +3816,7 @@
 				1023,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T06:02:50.430Z"
+					"value": "2019-10-14T12:02:50.430Z"
 				},
 				"Saving rsc: view, rid: 1009",
 				2,
@@ -3252,7 +3828,7 @@
 				1029,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T06:22:18.145Z"
+					"value": "2019-10-14T12:22:18.145Z"
 				},
 				"Creating rsc: object, cid: objectum.menuItem",
 				2,
@@ -3264,7 +3840,7 @@
 				1030,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T06:23:08.276Z"
+					"value": "2019-10-14T12:23:08.276Z"
 				},
 				"Creating rsc: object, cid: objectum.menuItem",
 				2,
@@ -3276,7 +3852,7 @@
 				1031,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T06:23:18.871Z"
+					"value": "2019-10-14T12:23:18.871Z"
 				},
 				"Creating rsc: object, cid: objectum.menuItem",
 				2,
@@ -3288,7 +3864,7 @@
 				1032,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T06:23:29.488Z"
+					"value": "2019-10-14T12:23:29.488Z"
 				},
 				"Creating rsc: object, cid: objectum.menuItem",
 				2,
@@ -3300,7 +3876,7 @@
 				1033,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T06:23:40.491Z"
+					"value": "2019-10-14T12:23:40.491Z"
 				},
 				"Creating rsc: object, cid: objectum.menuItem",
 				2,
@@ -3312,7 +3888,7 @@
 				1034,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T06:34:25.618Z"
+					"value": "2019-10-14T12:34:25.618Z"
 				},
 				"Saving rsc: object, rid: 1000",
 				2,
@@ -3324,7 +3900,7 @@
 				1035,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T06:34:57.478Z"
+					"value": "2019-10-14T12:34:57.478Z"
 				},
 				"Removing class attr: 1007",
 				2,
@@ -3336,7 +3912,7 @@
 				1037,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T06:50:26.566Z"
+					"value": "2019-10-14T12:50:26.566Z"
 				},
 				"Removing class attr: 1010",
 				2,
@@ -3348,7 +3924,7 @@
 				1038,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T06:50:33.588Z"
+					"value": "2019-10-14T12:50:33.588Z"
 				},
 				"Removing class attr: 1008",
 				2,
@@ -3360,7 +3936,7 @@
 				1039,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T23:48:16.603Z"
+					"value": "2019-10-15T05:48:16.603Z"
 				},
 				"Saving rsc: classAttr, rid: 1017",
 				2,
@@ -3372,7 +3948,7 @@
 				1040,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T23:48:39.509Z"
+					"value": "2019-10-15T05:48:39.509Z"
 				},
 				"Creating rsc: object, cid: objectum.menuItem",
 				2,
@@ -3384,7 +3960,7 @@
 				1041,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T23:55:51.661Z"
+					"value": "2019-10-15T05:55:51.661Z"
 				},
 				"Saving rsc: object, rid: 1011",
 				2,
@@ -3396,7 +3972,7 @@
 				1042,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T23:56:17.390Z"
+					"value": "2019-10-15T05:56:17.390Z"
 				},
 				"Saving rsc: object, rid: 1012",
 				2,
@@ -3408,7 +3984,7 @@
 				1043,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T23:56:56.668Z"
+					"value": "2019-10-15T05:56:56.668Z"
 				},
 				"Saving rsc: object, rid: 1013",
 				2,
@@ -3420,7 +3996,7 @@
 				1044,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T23:58:17.904Z"
+					"value": "2019-10-15T05:58:17.904Z"
 				},
 				"Saving rsc: object, rid: 1014",
 				2,
@@ -3432,7 +4008,7 @@
 				1045,
 				{
 					"type": "datetime",
-					"value": "2019-10-14T23:58:28.939Z"
+					"value": "2019-10-15T05:58:28.939Z"
 				},
 				"Saving rsc: object, rid: 1015",
 				2,
@@ -3444,7 +4020,7 @@
 				1046,
 				{
 					"type": "datetime",
-					"value": "2019-10-15T00:10:45.693Z"
+					"value": "2019-10-15T06:10:45.693Z"
 				},
 				"Creating rsc: view",
 				2,
@@ -3456,7 +4032,7 @@
 				1047,
 				{
 					"type": "datetime",
-					"value": "2019-10-15T00:12:29.668Z"
+					"value": "2019-10-15T06:12:29.668Z"
 				},
 				"Saving rsc: view, rid: 1010",
 				2,
@@ -3468,7 +4044,7 @@
 				1048,
 				{
 					"type": "datetime",
-					"value": "2019-10-24T22:17:44.249Z"
+					"value": "2019-10-25T04:17:44.249Z"
 				},
 				"Creating rsc: view",
 				2,
@@ -3480,11 +4056,347 @@
 				1049,
 				{
 					"type": "datetime",
-					"value": "2019-10-24T22:18:08.944Z"
+					"value": "2019-10-25T04:18:08.944Z"
 				},
 				"Creating rsc: view",
 				2,
 				1049
+			]
+		},
+		{
+			"values": [
+				1050,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T03:40:59.479Z"
+				},
+				"Saving rsc: object, rid: 1011",
+				2,
+				1050
+			]
+		},
+		{
+			"values": [
+				1051,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T03:41:43.439Z"
+				},
+				"Saving rsc: object, rid: 1012",
+				2,
+				1051
+			]
+		},
+		{
+			"values": [
+				1052,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T04:05:20.093Z"
+				},
+				"Saving rsc: view, rid: 1001",
+				2,
+				1052
+			]
+		},
+		{
+			"values": [
+				1053,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T04:06:08.028Z"
+				},
+				"Saving rsc: view, rid: 1004",
+				2,
+				1053
+			]
+		},
+		{
+			"values": [
+				1054,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T04:06:30.546Z"
+				},
+				"Saving rsc: view, rid: 1002",
+				2,
+				1054
+			]
+		},
+		{
+			"values": [
+				1055,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T04:06:43.193Z"
+				},
+				"Saving rsc: view, rid: 1005",
+				2,
+				1055
+			]
+		},
+		{
+			"values": [
+				1056,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T04:09:54.649Z"
+				},
+				"Saving rsc: view, rid: 1005",
+				2,
+				1056
+			]
+		},
+		{
+			"values": [
+				1057,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T04:13:20.450Z"
+				},
+				"Saving rsc: view, rid: 1004",
+				2,
+				1057
+			]
+		},
+		{
+			"values": [
+				1058,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T13:28:04.585Z"
+				},
+				"Saving rsc: query, rid: 1007",
+				2,
+				1058
+			]
+		},
+		{
+			"values": [
+				1059,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T13:34:10.663Z"
+				},
+				"Saving rsc: query, rid: 1007",
+				2,
+				1059
+			]
+		},
+		{
+			"values": [
+				1060,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T13:36:22.357Z"
+				},
+				"Saving rsc: query, rid: 1005",
+				2,
+				1060
+			]
+		},
+		{
+			"values": [
+				1061,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T13:38:26.826Z"
+				},
+				"Saving rsc: query, rid: 1009",
+				2,
+				1061
+			]
+		},
+		{
+			"values": [
+				1062,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T13:39:44.854Z"
+				},
+				"Saving rsc: query, rid: 1001",
+				2,
+				1062
+			]
+		},
+		{
+			"values": [
+				1063,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T13:41:02.700Z"
+				},
+				"Saving rsc: query, rid: 1004",
+				2,
+				1063
+			]
+		},
+		{
+			"values": [
+				1064,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T13:41:52.826Z"
+				},
+				"Saving rsc: query, rid: 1002",
+				2,
+				1064
+			]
+		},
+		{
+			"values": [
+				1065,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T13:42:27.495Z"
+				},
+				"Saving rsc: query, rid: 1006",
+				2,
+				1065
+			]
+		},
+		{
+			"values": [
+				1066,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T13:43:21.617Z"
+				},
+				"Saving rsc: query, rid: 1003",
+				2,
+				1066
+			]
+		},
+		{
+			"values": [
+				1067,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T13:43:48.581Z"
+				},
+				"Saving rsc: query, rid: 1008",
+				2,
+				1067
+			]
+		},
+		{
+			"values": [
+				1068,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T13:44:23.362Z"
+				},
+				"Saving rsc: query, rid: 1010",
+				2,
+				1068
+			]
+		},
+		{
+			"values": [
+				1069,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T14:17:01.917Z"
+				},
+				"Saving rsc: query, rid: 1009",
+				2,
+				1069
+			]
+		},
+		{
+			"values": [
+				1070,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T14:17:41.471Z"
+				},
+				"Saving rsc: query, rid: 1010",
+				2,
+				1070
+			]
+		},
+		{
+			"values": [
+				1071,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T14:19:56.996Z"
+				},
+				"Saving rsc: query, rid: 1001",
+				2,
+				1071
+			]
+		},
+		{
+			"values": [
+				1072,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T14:20:18.242Z"
+				},
+				"Saving rsc: query, rid: 1004",
+				2,
+				1072
+			]
+		},
+		{
+			"values": [
+				1073,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T14:20:44.114Z"
+				},
+				"Saving rsc: query, rid: 1002",
+				2,
+				1073
+			]
+		},
+		{
+			"values": [
+				1074,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T14:21:32.681Z"
+				},
+				"Saving rsc: query, rid: 1006",
+				2,
+				1074
+			]
+		},
+		{
+			"values": [
+				1075,
+				{
+					"type": "datetime",
+					"value": "2019-11-10T14:22:13.114Z"
+				},
+				"Saving rsc: query, rid: 1008",
+				2,
+				1075
+			]
+		},
+		{
+			"values": [
+				1076,
+				{
+					"type": "datetime",
+					"value": "2019-11-11T04:41:09.618Z"
+				},
+				"Saving rsc: query, rid: 1009",
+				2,
+				1076
+			]
+		},
+		{
+			"values": [
+				1077,
+				{
+					"type": "datetime",
+					"value": "2019-11-11T04:42:35.524Z"
+				},
+				"Saving rsc: query, rid: 1005",
+				2,
+				1077
 			]
 		}
 	]

@@ -25,285 +25,81 @@ async function getDict (req, store) {
 	return await store.query ({session, sql});
 };
 
-function selectQueryOld  (req, tokens) {
+function getQuery (code, tokens, args, parents) {
 	let sql = "", skip = false;
 	
 	for (let i = 0; i < tokens.length; i ++) {
 		let o = tokens [i];
 		
 		if (o && typeof (o) == "object") {
-			if (o ["select"] == "countBegin" || o ["select"] == "treeBegin" || o ["groupBy"] == "treeBegin") {
-				skip = true;
-				continue;
-			}
-			if (o ["select"] == "countEnd" || o ["select"] == "treeEnd" || o ["groupBy"] == "treeEnd") {
-				skip = false;
-				continue;
-			}
-			if (skip) {
-				continue;
-			}
-			if (o ["select"] == "dataBegin") {
-				o = "select";
+			if (o ["where"] == "begin") {
+				o = "where";
 			} else
-			if (o ["select"] == "dataEnd") {
+			if (o ["where"] == "end") {
 				o = "";
 			} else
-			if (o ["param"]) {
-				o = req.args [o.param];
-			} else
-			if (o ["tree"] == "filter") {
-				if (req.args ["parent"]) {
-					o = " = " + req.args ["parent"];
+			if (o ["order"] == "begin") {
+				if (code == "data") {
+					o = "order by";
 				} else {
-					o = " is null";
+					skip = true;
+					continue;
+				}
+			} else
+			if (o ["order"] == "end") {
+				if (code == "data") {
+					o = "";
+				} else {
+					skip = false;
+					continue;
+				}
+			} else
+			if (o [code] == "begin") {
+				o = "";
+			} else
+			if (o [code] == "end") {
+				o = "";
+			} else {
+				let section = o ["data"] || o ["count"] || o ["tree"];
+				
+				if (section == "begin") {
+					skip = true;
+					continue;
+				}
+				if (section == "end") {
+					skip = false;
+					continue;
+				}
+				if (skip) {
+					continue;
 				}
 			}
-			sql += o;
-		} else {
-			if (!skip) {
-				sql += o;
-			}
-		}
-	}
-	return sql;
-};
-
-function selectQuery (req, tokens) {
-	let sql = "", skip = false;
-	
-	for (let i = 0; i < tokens.length; i ++) {
-		let o = tokens [i];
-		
-		if (o && typeof (o) == "object") {
-			if (o ["count"] == "begin" || o ["tree"] == "begin") {
-				skip = true;
-				continue;
-			}
-			if (o ["count"] == "end" || o ["tree"] == "end") {
-				skip = false;
-				continue;
-			}
-			if (skip) {
-				continue;
-			}
-			if (o ["data"] == "begin") {
-				o = "";
-			} else
-			if (o ["data"] == "end") {
-				o = "";
-			} else
-			if (o ["param"]) {
-				o = req.args [o.param];
-			} else
-			if (o ["tree"] == "filter") {
-				if (req.args ["parent"]) {
-					o = " = " + req.args ["parent"];
-				} else {
-					o = " is null";
-				}
-			}
-			sql += o;
-		} else {
-			if (!skip) {
-				sql += o;
-			}
-		}
-	}
-	return sql;
-};
-
-function countQueryOld (req, tokens) {
-	let sql = "", skip = false;
-	
-	for (let i = 0; i < tokens.length; i ++) {
-		let o = tokens [i];
-		
-		if (o && typeof (o) == "object") {
-			if (o ["select"] == "dataBegin" || o ["select"] == "treeBegin" || o ["groupBy"] == "treeBegin") {
-				skip = true;
-				continue;
-			}
-			if (o ["select"] == "dataEnd" || o ["select"] == "treeEnd" || o ["groupBy"] == "treeEnd") {
-				skip = false;
-				continue;
-			}
-			if (skip) {
-				continue;
-			}
-			if (o ["select"] == "countBegin") {
-				o = "select";
-			}
-			if (o ["select"] == "countEnd") {
-				o = "";
-			}
-			if (o ["param"]) {
-				if (o ["param"] == "offset") {
-					o = 0;
+			if (o) {
+				if (o ["param"]) {
+					if (code == "count" || code == "tree") {
+						if (o ["param"] == "offset") {
+							o = 0;
+						} else
+						if (o ["param"] == "limit") {
+							o = config.query.maxCount;
+						} else {
+							o = args [o.param];
+						}
+					} else {
+						o = args [o.param];
+					}
 				} else
-				if (o ["param"] == "limit") {
-					o = config.query.maxCount;
-				} else {
-					o = req.args [o.param];
+				if (o ["tree"] == "filter") {
+					if (code == "tree") {
+						o = " in (" + parents.join (",") + ")";
+					} else {
+						if (args ["parent"]) {
+							o = " = " + args ["parent"];
+						} else {
+							o = " is null";
+						}
+					}
 				}
-			}
-			if (o ["tree"] == "filter") {
-				if (req.args ["parent"]) {
-					o = " = " + req.args ["parent"];
-				} else {
-					o = " is null";
-				}
-			}
-			sql += o;
-		} else {
-			if (!skip) {
-				sql += o;
-			}
-		}
-	}
-	return sql;
-};
-
-function countQuery (req, tokens) {
-	let sql = "", skip = false;
-	
-	for (let i = 0; i < tokens.length; i ++) {
-		let o = tokens [i];
-		
-		if (o && typeof (o) == "object") {
-			if (o ["data"] == "begin" || o ["tree"] == "begin") {
-				skip = true;
-				continue;
-			}
-			if (o ["data"] == "end" || o ["tree"] == "end") {
-				skip = false;
-				continue;
-			}
-			if (skip) {
-				continue;
-			}
-			if (o ["count"] == "begin") {
-				o = "";
-			}
-			if (o ["count"] == "end") {
-				o = "";
-			}
-			if (o ["param"]) {
-				if (o ["param"] == "offset") {
-					o = 0;
-				} else
-				if (o ["param"] == "limit") {
-					o = config.query.maxCount;
-				} else {
-					o = req.args [o.param];
-				}
-			}
-			if (o ["tree"] == "filter") {
-				if (req.args ["parent"]) {
-					o = " = " + req.args ["parent"];
-				} else {
-					o = " is null";
-				}
-			}
-			sql += o;
-		} else {
-			if (!skip) {
-				sql += o;
-			}
-		}
-	}
-	return sql;
-};
-
-function treeQueryOld (req, tokens, parents) {
-	let sql = "", skip = false;
-	
-	for (let i = 0; i < tokens.length; i ++) {
-		let o = tokens [i];
-		
-		if (o && typeof (o) == "object") {
-			if (o ["select"] == "dataBegin" || o ["select"] == "countBegin") {
-				skip = true;
-				continue;
-			}
-			if (o ["select"] == "dataEnd" || o ["select"] == "countEnd") {
-				skip = false;
-				continue;
-			}
-			if (skip) {
-				continue;
-			}
-			if (o ["select"] == "treeBegin") {
-				o = "select";
-			}
-			if (o ["select"] == "treeEnd") {
-				o = "";
-			}
-			if (o ["groupBy"] == "treeBegin") {
-				o = "group by";
-			}
-			if (o ["groupBy"] == "treeEnd") {
-				o = "";
-			}
-			if (o ["param"]) {
-				if (o ["param"] == "offset") {
-					o = 0;
-				} else
-				if (o ["param"] == "limit") {
-					o = config.query.maxCount;
-				} else {
-					o = req.args [o.param];
-				}
-			}
-			if (o ["tree"] == "filter") {
-				o = " in (" + parents.join (",") + ")";
-			}
-			sql += o;
-		} else {
-			if (!skip) {
-				sql += o;
-			}
-		}
-	}
-	return sql;
-};
-
-function treeQuery (req, tokens, parents) {
-	let sql = "", skip = false;
-	
-	for (let i = 0; i < tokens.length; i ++) {
-		let o = tokens [i];
-		
-		if (o && typeof (o) == "object") {
-			if (o ["data"] == "begin" || o ["count"] == "begin") {
-				skip = true;
-				continue;
-			}
-			if (o ["data"] == "end" || o ["count"] == "end") {
-				skip = false;
-				continue;
-			}
-			if (skip) {
-				continue;
-			}
-			if (o ["tree"] == "begin") {
-				o = "";
-			}
-			if (o ["tree"] == "end") {
-				o = "";
-			}
-			if (o ["param"]) {
-				if (o ["param"] == "offset") {
-					o = 0;
-				} else
-				if (o ["param"] == "limit") {
-					o = config.query.maxCount;
-				} else {
-					o = req.args [o.param];
-				}
-			}
-			if (o ["tree"] == "filter") {
-				o = " in (" + parents.join (",") + ")";
 			}
 			sql += o;
 		} else {
@@ -351,53 +147,14 @@ async function getViewAttrs (recs, view, caMap, store, fields) {
 			name,
 			code: a,
 			order,
-			"class": classId,
-			classAttr: classAttrId,
+			model: classId,
+			property: classAttrId,
 			type: typeId
 		};
 	});
 	cols = _.sortBy (cols, ["order", "name"]);
 	
 	return cols;
-/*
-	let cols = _.map (_.keys (recs [0]), (a) => {
-		let va = view.attrs [a];
-		let ca = caMap [a];
-		let name = a;
-		let order = 0;
-		let classId = null, classAttrId = null, typeId = 1;
-		
-		if (va) {
-			name = va.get ("name");
-			order = va.get ("order");
-		} else
-		if (ca) {
-			if (ca.get) {
-				name = ca.get ("name");
-				order = ca.get ("order");
-				classId = store.getClass (ca.get ("class")).getPath ();
-				classAttrId = ca.get ("id");
-				typeId = ca.get ("type");
-			} else {
-				name = ca.name;
-				classId = ca.classId;
-				classAttrId = ca.classAttrId;
-				typeId = ca.type;
-			}
-		}
-		return {
-			name,
-			code: a,
-			order,
-			"class": classId,
-			classAttr: classAttrId,
-			type: typeId
-		};
-	});
-	cols = _.sortBy (cols, ["order", "name"]);
-	
-	return cols;
-*/
 };
 
 async function getData (req, store) {
@@ -421,10 +178,9 @@ async function getData (req, store) {
 			
 			if (json ["param"]) {
 				tokens.push (json);
-				//tokens.push (req.args [json.param]);
 			} else
-			if (json ["class"]) {
-				let cls = store.getClass (json ["class"]);
+			if (json ["class"] || json ["model"]) {
+				let cls = store.getClass (json ["class"] || json ["model"]);
 				
 				tokens.push (cls.getTable () + " " + json ["alias"]);
 				classMap [json ["alias"]] = cls
@@ -452,8 +208,8 @@ async function getData (req, store) {
 		let o = tokens [i];
 		
 		if (o && typeof (o) == "object") {
-			if (o ["attr"]) {
-				let t = o ["attr"].split (".");
+			if (o ["attr"] || o ["prop"]) {
+				let t = (o ["attr"] || o ["prop"]).split (".");
 				let f, ca;
 				
 				if (t [1] == "id") {
@@ -483,19 +239,19 @@ async function getData (req, store) {
 	}
 	let fields = {};
 	let data = {
-		recs: await store.query ({session, sql: selectQuery (req, tokens), fields})
+		recs: await store.query ({session, sql: getQuery ("data", tokens, req.args), fields})
 	};
 	data.cols = await getViewAttrs (data.recs, view, caMap, store, fields);
 	
 	if (_.has (req.args, "offset") && _.has (req.args, "limit")) {
 		if (hasSelectCount) {
-			let recs = await store.query ({session, sql: countQuery (req, tokens)});
+			let recs = await store.query ({session, sql: getQuery ("count", tokens, req.args)});
 			
 			data.length = recs [0].num;
 		}
 		if (hasTree) {
 			if (data.recs.length) {
-				data.childs = await store.query ({session, sql: treeQuery (req, tokens, _.map (data.recs, "id"))});
+				data.childs = await store.query ({session, sql: getQuery ("tree", tokens, req.args, _.map (data.recs, "id"))});
 			} else {
 				data.childs = [];
 			}

@@ -1,10 +1,10 @@
 Under construction.
 
 # Objectum
-Javascript platform (NodeJS, PostgreSQL, Redis). 
-
 Objectum platform makes it easy to create realtime single page applications that run in both Node.js and browsers.
  
+Requirements: [Redis](https://redis.io/), [PostgreSQL >= 9.x](https://www.postgresql.org/download/) (datestyle = dmy, iso)
+
 Isomorhic javascript client https://github.com/objectum/objectum-client  
 React components https://github.com/objectum/objectum-react  
 Objectum project example https://github.com/objectum/catalog 
@@ -23,12 +23,12 @@ Objectum project example https://github.com/objectum/catalog
     * [Start project (DevServer)](#start_project)
     * [Remove store](#remove_store)
 * [Development](#development)
-    * [Class "item"](#class_item)
-    * [Class attribute "name"](#class_attr_name)
-    * [Dictionary "d.item.type"](#class_item_type)
-    * [Tabular part "t.item.comment" of "item"](#class_comment)
-    * [View "item.list"](#view_list)
-    * [View "t.item.comment"](#view_comment)
+    * [Model "item"](#model_item)
+    * [Property "name"](#property_name)
+    * [Dictionary "d.item.type"](#model_item_type)
+    * [Tabular part "t.item.comment" of "item"](#model_comment)
+    * [Query "item.list"](#query_list)
+    * [Query "t.item.comment"](#query_comment)
     * Component "Items"
     * Component "Item"
         * Information
@@ -51,8 +51,6 @@ mkdir -p /opt/objectum/server
 cd /opt/objectum/server
 npm i objectum
 ```
-
-You must have installed [Redis](https://redis.io/), [PostgreSQL >= 9.x](https://www.postgresql.org/download/) (datestyle = dmy, iso)
 
 Add platform configuration:
 ```bash
@@ -322,43 +320,43 @@ Open URL: http://localhost:3000
 Login: admin  
 Password: admin  
 
-<a name="class_item" />
+<a name="model_item" />
 
-### Class "item"
-Click "Classes" in menu. Click "Create". Edit and save.
-![Class "Item"](https://github.com/objectum/catalog/blob/master/files/class-item.png) 
+### Model "item"
+Click "Models" in menu. Click "Create". Edit and save.
+![Model "Item"](https://github.com/objectum/catalog/blob/master/files/class-item.png) 
 
-<a name="class_attr_name" />
+<a name="property_name" />
 
-### Class attribute "name"
-Create class attribute.
-![Class attribute "name"](https://github.com/objectum/catalog/blob/master/files/classAttr-name.png) 
+### Property "name"
+Create property.
+![Property "name"](https://github.com/objectum/catalog/blob/master/files/classAttr-name.png) 
 
-<a name="class_item_type" />
+<a name="model_item_type" />
 
 ### Dictionary "d.item.type"
-Create class "d.item" for grouping dictionaries of class "item". Create class "d.item.type" with attribute "name".
+Create model "d.item" for grouping dictionaries of model "item". Create model "d.item.type" with property "name".
 ![Dictionary "d.item.type"](https://github.com/objectum/catalog/blob/master/files/class-item-type.png) 
 
-Add attribute "type" to class "item".
-![Class attribute "type""](https://github.com/objectum/catalog/blob/master/files/classAttr-type.png)
+Add property "type" to model "item".
+![Property "type""](https://github.com/objectum/catalog/blob/master/files/classAttr-type.png)
 
-<a name="class_comment" />
+<a name="model_comment" />
 
 ### Tabular part "t.item.comment" of "item"
-Create class "t.item" for grouping tabular parts of class "item". Create class "t.item.comment" with attribute "text".
+Create model "t.item" for grouping tabular parts of model "item". Create model "t.item.comment" with property "text".
 ![t.item.comment](https://github.com/objectum/catalog/blob/master/files/class-comment.png) 
 
-<a name="view_list" />
+<a name="query_list" />
 
-### View "item.list"
-Create view "item" for grouping views of class "item". Create view "item.list".  
-View query:
+### Query "item.list"
+Create query "item" for grouping queries of model "item". Create query "item.list".  
+Query:
 ```sql
 {"data": "begin"}
 select
-	{"attr": "a.id", "as": "id"},
-	{"attr": "a.name", "as": "name"}
+	{"prop": "a.id", "as": "id"},
+	{"prop": "a.name", "as": "name"}
 {"data": "end"}
 
 {"count": "begin"}
@@ -367,22 +365,22 @@ select
 {"count": "end"}
 
 from
-	{"class": "item", "alias": "a"}
+	{"model": "item", "alias": "a"}
 limit {"param": "limit"}
 offset {"param": "offset"}
 ```
 
-<a name="view_comment" />
+<a name="query_comment" />
 
-### View "t.item.comment"
-Create view "t.item" for grouping tabular part views of class "item". Create view "t.item.comment".
-View query:
+### Query "t.item.comment"
+Create query "t.item" for grouping tabular part queries of model "item". Create query "t.item.comment".
+Query:
 ```sql
 {"data": "begin"}
 select
-	{"attr": "a.id", "as": "id"},
-	{"attr": "a.item", "as": "item"},
-	{"attr": "a.text", "as": "text"}
+	{"prop": "a.id", "as": "id"},
+	{"prop": "a.item", "as": "item"},
+	{"prop": "a.text", "as": "text"}
 {"data": "end"}
 
 {"count": "begin"}
@@ -391,7 +389,7 @@ select
 {"count": "end"}
 
 from
-	{"class": "t.item.common", "alias": "a"}
+	{"model": "t.item.common", "alias": "a"}
 limit {"param": "limit"}
 offset {"param": "offset"}
 ```
