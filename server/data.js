@@ -25,6 +25,49 @@ async function getDict (req, store) {
 	return await store.query ({session, sql});
 };
 
+function addFilters (tokens, filters, caMap, aliasPrefix) {
+	if (!filters || !filters.length) {
+		return tokens;
+	}
+	let f = "\n" + _.map (filters, f => {
+		let s = `${aliasPrefix [f [0]]}.${caMap [f [0]].isId ? "fobject_id" : caMap [f [0]].getField ()} ${f [1]}`;
+		
+		if (f [2] !== "") {
+			s += ` '${f [2]}'`;
+		}
+		return s;
+	}).join (" and ") + "\n";
+	let r = [], whereBeginWas = false, where = [];
+	
+	for (let i = 0; i < tokens.length; i ++) {
+		let o = tokens [i];
+		
+		if (o && typeof (o) == "object" && o ["where"]) {
+			if (o ["where"] == "begin") {
+				r.push (o);
+				whereBeginWas = true;
+			}
+			if (o ["where"] == "end") {
+				if (where.length) {
+					r = [...r, "(", ...where, ") and (", ...f, ")", o];
+				} else {
+					r = [...r, ...f, o];
+				}
+			}
+			if (o ["where"] == "empty") {
+				r = [...r, {"where": "begin"}, ...f, {"where": "end"}];
+			}
+		} else {
+			if (whereBeginWas) {
+				where.push (o);
+			} else {
+				r.push (o);
+			}
+		}
+	}
+	return r;
+};
+
 function getQuery (code, tokens, args, parents) {
 	let sql = "", skip = false;
 	
@@ -36,6 +79,9 @@ function getQuery (code, tokens, args, parents) {
 				o = "where";
 			} else
 			if (o ["where"] == "end") {
+				o = "";
+			} else
+			if (o ["where"] == "empty") {
 				o = "";
 			} else
 			if (o ["order"] == "begin") {
@@ -53,6 +99,9 @@ function getQuery (code, tokens, args, parents) {
 					skip = false;
 					continue;
 				}
+			} else
+			if (o ["order"] == "empty") {
+				o = "";
 			} else
 			if (o [code] == "begin") {
 				o = "";
@@ -111,7 +160,7 @@ function getQuery (code, tokens, args, parents) {
 	return sql;
 };
 
-async function getViewAttrs (recs, view, caMap, store, fields) {
+async function getViewAttrsOld (recs, view, caMap, store, fields) {
 	let cols = _.map (_.keys (recs [0]), (a) => {
 		let va = view.attrs [a];
 		let name = a;
@@ -157,11 +206,61 @@ async function getViewAttrs (recs, view, caMap, store, fields) {
 	return cols;
 };
 
+async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
+	let cols = _.map (fields, (field, i) => {
+		let name = field.alias;
+		let va = view.attrs [name];
+		let order = 0;
+		let classId = null, classAttrId = null, typeId = 1;
+		
+		if (isMetaTable (field.table)) {
+			if (["funlogged", "fnot_null", "fsecure", "funique", "fsystem"].indexOf (field.column) > -1) {
+				typeId = 4;
+			} else
+			if (field.column == "ftype_id") {
+				typeId = 6;
+			}
+		} else {
+			classId = Number (field.table.split ("_")[1]);
+			classId = store.getClass (classId).getPath ();
+			
+			if (field.column == "fobject_id") {
+				classAttrId = null;
+				typeId = 2;
+			} else {
+				classAttrId = Number (field.column.split ("_")[1]);
+			}
+			if (classAttrId) {
+				let ca = store.getClassAttr (classAttrId);
+				
+				name = ca.get ("name");
+				order = ca.get ("order");
+				typeId = ca.get ("type");
+			}
+		}
+		if (va) {
+			name = va.get ("name");
+			order = va.get ("order");
+		}
+		return {
+			name,
+			code: selectAliases [i],
+			order,
+			model: classId,
+			property: classAttrId,
+			type: typeId
+		};
+	});
+	//cols = _.sortBy (cols, ["order", "name"]);
+	
+	return cols;
+};
+
 async function getData (req, store) {
 	let session = req.session;
 	let view = store.getView (req.args.query);
 	let query = view.get ("query");
-	let tokens = [], json = "", str = "", classMap = {}, caMap = {};
+	let tokens = [], json = "", str = "", classMap = {}, caMap = {}, selectAliases = [], aliasPrefix = {};
 	let hasSelectCount = false, hasTree = false;
 	
 	for (let i = 0; i < query.length; i ++) {
@@ -219,7 +318,8 @@ async function getData (req, store) {
 						code: "id",
 						classId: classMap [t [0] || ""].get ("id"),
 						classAttrId: null,
-						type: 2
+						type: 2,
+						isId: true
 					};
 				} else {
 					ca = classMap [t [0] || ""].attrs [t [1]];
@@ -232,20 +332,25 @@ async function getData (req, store) {
 				if (o ["alias"] || o ["as"]) {
 					f += " as " + (o ["alias"] || o ["as"]);
 					caMap [o ["alias"] || o ["as"]] = ca;
+					selectAliases.push (o ["alias"] || o ["as"]);
+					aliasPrefix [o ["alias"] || o ["as"]] = t [0];
 				}
 				tokens [i] = f;
 			}
 		}
 	}
-	let fields = {};
+	tokens = addFilters (tokens, req.args.filters, caMap, aliasPrefix);
+	
+//	let fields = {};
+	let fields = [];
 	let data = {
-		recs: await store.query ({session, sql: getQuery ("data", tokens, req.args), fields})
+		recs: await store.query ({session, sql: getQuery ("data", tokens, req.args), fields, rowMode: "array"})
 	};
-	data.cols = await getViewAttrs (data.recs, view, caMap, store, fields);
+	data.cols = await getViewAttrs (data.recs, view, caMap, store, fields, selectAliases);
 	
 	if (_.has (req.args, "offset") && _.has (req.args, "limit")) {
 		if (hasSelectCount) {
-			let recs = await store.query ({session, sql: getQuery ("count", tokens, req.args)});
+			let recs = await store.query ({session, sql: getQuery ("count", tokens, req.args), rowMode: "array"});
 			
 			data.length = recs [0].num;
 		}

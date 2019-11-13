@@ -58,7 +58,7 @@ class Store {
 		return me.clientPool [session.id] || createClient (me);
 	}
 	
-	async query ({session, client, sql, params, fields}) {
+	async query ({session, client, sql, params, fields, rowMode}) {
 		let me = this;
 		
 		if (!client && !session) {
@@ -115,9 +115,10 @@ class Store {
 		}
 */
 		let fArray = fields ? [] : undefined;
-		let rows = await client.query ({sql, params, fields: fArray});
+		let rows = await client.query ({sql, params, rowMode, fields: fArray});
 		
 		if (fields) {
+/*
 			for (let i = 0; i < fArray.length; i ++) {
 				let f = fArray [i];
 				let pgo = me.pgObject [f.tableID];
@@ -130,6 +131,21 @@ class Store {
 					table: pgo.table,
 					column: pgo.columns [f.columnID] ? pgo.columns [f.columnID].column : null
 				};
+			}
+*/
+			for (let i = 0; i < fArray.length; i ++) {
+				let f = fArray [i];
+				let pgo = me.pgObject [f.tableID];
+				
+				if (!pgo) {
+					await me.loadPgObjects ({});
+					pgo = me.pgObject [f.tableID];
+				}
+				fields.push ({
+					alias: f.name,
+					table: pgo.table,
+					column: pgo.columns [f.columnID] ? pgo.columns [f.columnID].column : null
+				});
 			}
 		}
 		if ((!session || !this.clientPool [session.id]) && !client.inStore) {

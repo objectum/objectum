@@ -417,9 +417,10 @@ async function rollbackTransaction (req) {
 };
 
 async function classFn (req) {
-	req.args ["view"] = req.args ["query"];
-	delete req.args ["query"];
-	
+	if (_.has (req.args, "query")) {
+		req.args ["view"] = req.args ["query"];
+		delete req.args ["query"];
+	}
 	log.debug ({fn: "project.classFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
@@ -461,9 +462,10 @@ async function classFn (req) {
 };
 
 async function classAttrFn (req) {
-	req.args ["class"] = req.args ["model"];
-	delete req.args ["model"];
-	
+	if (_.has (req.args, "model")) {
+		req.args ["class"] = req.args ["model"];
+		delete req.args ["model"];
+	}
 	log.debug ({fn: "project.classAttrFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
@@ -505,9 +507,10 @@ async function classAttrFn (req) {
 };
 
 async function viewFn (req) {
-	req.args ["class"] = req.args ["model"];
-	delete req.args ["model"];
-	
+	if (_.has (req.args, "model")) {
+		req.args ["class"] = req.args ["model"];
+		delete req.args ["model"];
+	}
 	log.debug ({fn: "project.viewFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
@@ -549,9 +552,10 @@ async function viewFn (req) {
 };
 
 async function viewAttrFn (req) {
-	req.args ["view"] = req.args ["query"];
-	delete req.args ["query"];
-	
+	if (_.has (req.args, "query")) {
+		req.args ["view"] = req.args ["query"];
+		delete req.args ["query"];
+	}
 	log.debug ({fn: "project.viewAttrFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
@@ -593,6 +597,10 @@ async function viewAttrFn (req) {
 };
 
 async function actionFn (req) {
+	if (_.has (req.args, "model")) {
+		req.args ["class"] = req.args ["model"];
+		delete req.args ["model"];
+	}
 	log.debug ({fn: "project.actionFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
@@ -627,13 +635,17 @@ async function actionFn (req) {
 	} else {
 		throw new Error ("project.actionFn: unknown fn: " + req.args.fn);
 	}
+	o.data ["model"] = o.data ["class"];
+	delete o.data ["class"];
+	
 	return o.data;
 };
 
 async function objectFn (req) {
-	req.args ["class"] = req.args ["model"];
-	delete req.args ["model"];
-	
+	if (_.has (req.args, "model")) {
+		req.args ["class"] = req.args ["model"];
+		delete req.args ["model"];
+	}
 	log.debug ({fn: "project.objectFn", session: req.session.id, args: req.args});
 	
 	let store = await getStore ({code: req.code});

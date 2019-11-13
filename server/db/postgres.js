@@ -116,7 +116,7 @@ class Postgres {
 		}
 	}
 	
-	async query ({sql, params, fields}) {
+	async query ({sql, params, fields, rowMode}) {
 		log.debug ({fn: "postgres.query", sql, params});
 		
 		let me = this;
@@ -125,7 +125,8 @@ class Postgres {
 			if (!me.connected) {
 				await me.connect ();
 			}
-			let res = await me.client.queryAsync (sql, params);
+//			let res = await me.client.queryAsync (sql, params);
+			let res = await me.client.queryAsync ({text: sql, values: params, rowMode});
 			
 			if (fields) {
 				_.each (res.fields, f => {
