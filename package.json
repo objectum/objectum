@@ -1,6 +1,6 @@
 {
 	"name": "objectum",
-	"version": "4.1.4",
+	"version": "4.1.5",
 	"description": "Objectum - javascript app platform",
 	"main": "index.js",
 	"dependencies": {

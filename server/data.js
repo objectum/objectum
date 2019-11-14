@@ -26,12 +26,12 @@ async function getDict (req, store) {
 };
 
 function addFilters (tokens, filters, caMap, aliasPrefix) {
-	if (!filters || !filters.length) {
-		return tokens;
-	}
 	let f = "\n" + _.map (filters, f => {
 		let s = `${aliasPrefix [f [0]]}.${caMap [f [0]].isId ? "fobject_id" : caMap [f [0]].getField ()} ${f [1]}`;
 		
+		if (f [1] == "like" || f [1] == "not like") {
+			f [2] += "%";
+		}
 		if (f [2] !== "") {
 			s += ` '${f [2]}'`;
 		}
@@ -61,6 +61,33 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 			if (whereBeginWas) {
 				where.push (o);
 			} else {
+				r.push (o);
+			}
+		}
+	}
+	return r;
+};
+
+function addOrder (tokens, order, caMap, aliasPrefix) {
+	let orderStr = `\n${aliasPrefix [order [0]]}.${caMap [order [0]].isId ? "fobject_id" : caMap [order [0]].getField ()} ${order [1]}\n`;
+	let r = [], beginWas = false;
+	
+	for (let i = 0; i < tokens.length; i ++) {
+		let o = tokens [i];
+		
+		if (o && typeof (o) == "object" && o ["order"]) {
+			if (o ["order"] == "begin") {
+				r.push (o);
+				beginWas = true;
+			}
+			if (o ["order"] == "end") {
+				r = [...r, orderStr];
+			}
+			if (o ["order"] == "empty") {
+				r = [...r, {"order": "begin"}, orderStr, {"order": "end"}];
+			}
+		} else {
+			if (!beginWas) {
 				r.push (o);
 			}
 		}
@@ -244,7 +271,7 @@ async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 		}
 		return {
 			name,
-			code: selectAliases [i],
+			code: selectAliases [i] || field.alias,
 			order,
 			model: classId,
 			property: classAttrId,
@@ -339,8 +366,12 @@ async function getData (req, store) {
 			}
 		}
 	}
-	tokens = addFilters (tokens, req.args.filters, caMap, aliasPrefix);
-	
+	if (req.args.filters && req.args.filters.length) {
+		tokens = addFilters (tokens, req.args.filters, caMap, aliasPrefix);
+	}
+	if (req.args.order) {
+		tokens = addOrder (tokens, req.args.order, caMap, aliasPrefix);
+	}
 //	let fields = {};
 	let fields = [];
 	let data = {
@@ -350,13 +381,23 @@ async function getData (req, store) {
 	
 	if (_.has (req.args, "offset") && _.has (req.args, "limit")) {
 		if (hasSelectCount) {
-			let recs = await store.query ({session, sql: getQuery ("count", tokens, req.args), rowMode: "array"});
+			let recs = await store.query ({session, sql: getQuery ("count", tokens, req.args)});
 			
 			data.length = recs [0].num;
 		}
 		if (hasTree) {
 			if (data.recs.length) {
-				data.childs = await store.query ({session, sql: getQuery ("tree", tokens, req.args, _.map (data.recs, "id"))});
+				let parents = [];
+				
+				for (let i = 0; i < fields.length; i ++) {
+					if (fields [i].alias == "id") {
+						parents = _.map (data.recs, (rec) => {
+							return rec [i];
+						});
+						break;
+					}
+				}
+				data.childs = await store.query ({session, sql: getQuery ("tree", tokens, req.args, parents)});
 			} else {
 				data.childs = [];
 			}

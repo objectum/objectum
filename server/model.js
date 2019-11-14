@@ -135,9 +135,13 @@ class Object extends Base {
 			throw new Error (`unknown class: ${me.get ("class")}`);
 		}
 		if (me.removed) {
-			// todo: auth.removed
 			await me.store.query ({session, sql: `delete from ${classObj.getTable ()} where fobject_id = ${me.get ("id")}`});
 			await me.store.redisClient.hdelAsync (`${me.store.code}-objects`, me.get ("id"));
+			
+			if (!config.legacy && me.store.getClass ("objectum.user").get ("id") == me.get ("class")) {
+				delete me.store.auth.user [me.get ("login")];
+				delete me.store.auth.user [me.get ("id")];
+			}
 			return;
 //			return await me.store.query ({session, sql: `update tobject set fend_id = ${revisionId} where fid = ${me.get ("id")} and fend_id = 0`});
 		}
@@ -278,6 +282,24 @@ class Object extends Base {
 					userId: me.get ("subject") || me.get ("id"), role: me.get ("role")
 				});
 			}
+		}
+		if (!config.legacy && me.store.getClass ("objectum.user").get ("id") == me.get ("class")) {
+			let menuId = null;
+			
+			if (me.get ("role")) {
+				let o = await me.store.getObject ({session, id: me.get ("role")});
+				
+				menuId = o.get ("menu");
+			}
+			let o = {
+				login: me.get ("login"),
+				password: me.get ("password"),
+				id: me.get ("id"),
+				role: me.get ("role"),
+				menu: menuId
+			};
+			me.store.auth.user [me.get ("login")] = o;
+			me.store.auth.user [me.get ("id")] = o;
 		}
 	}
 	
