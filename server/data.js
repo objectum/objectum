@@ -285,7 +285,40 @@ async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 
 async function getData (req, store) {
 	let session = req.session;
-	let view = store.getView (req.args.query);
+	let view;
+	
+	if (req.args.query) {
+		view = store.getView (req.args.query);
+	} else
+	if (req.args.model) {
+		view = store.getView ("internal-dictionary");
+		view.set ("query", `
+			{"data": "begin"}
+			select
+				{"prop": "a.id", "as": "id"},
+				{"prop": "a.name", "as": "name"}
+			{"data": "end"}
+			
+			{"count": "begin"}
+			select
+				count (*) as num
+			{"count": "end"}
+			
+			from
+				{"model": "${req.args.model}", "alias": "a"}
+			
+			{"where": "empty"}
+			
+			{"order": "begin"}
+				{"prop": "a.name"}
+			{"order": "end"}
+			
+			limit {"param": "limit"}
+			offset {"param": "offset"}
+		`);
+	} else {
+		throw new Error ("query or model not exist");
+	}
 	let query = view.get ("query");
 	let tokens = [], json = "", str = "", classMap = {}, caMap = {}, selectAliases = [], aliasPrefix = {};
 	let hasSelectCount = false, hasTree = false;
@@ -406,7 +439,11 @@ async function getData (req, store) {
 	return data;
 };
 
+async function getRecords (req, store) {
+};
+
 module.exports = {
 	getDict,
-	getData
+	getData,
+	getRecords
 };

@@ -135,7 +135,8 @@ async function init () {
 		"getAll": project.getAll,
 		"logout": project.logout,
 		"getData": project.getData,
-		"getDict": project.getDict
+		"getDict": project.getDict,
+		"getRecords": project.getRecords
 	};
 	let rscMap = {
 		"object": project.objectFn,

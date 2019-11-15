@@ -929,6 +929,14 @@ async function getData (req) {
 	return await data.getData (req, store);
 };
 
+async function getRecords (req) {
+	log.debug ({fn: "project.getRecords"});
+	
+	let store = await getStore ({code: req.code});
+	
+	return await data.getRecords (req, store);
+};
+
 module.exports = {
 	init,
 	loadConfig,
@@ -955,5 +963,6 @@ module.exports = {
 	actionFn,
 	objectFn,
 	getData,
-	getDict
+	getDict,
+	getRecords
 };

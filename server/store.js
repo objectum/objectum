@@ -2,7 +2,7 @@
 
 const _ = require ("lodash");
 const { createClient } = require ("./db/client").db;
-const { Base, Object, Action, factory } = require ("./model");
+const { Base, Object, Action, View, ViewAttr, factory } = require ("./model");
 const { Query } = require ("./query");
 const { native, getMetaTable } = require ("./map");
 const legacy = require ("./legacy");
@@ -662,6 +662,43 @@ class Store {
 		});
 	}
 	
+	addInternals () {
+		let me = this;
+		let o = new View ({
+			store: me,
+			rec: {
+				"id": -1,
+				"parent": null,
+				"name": "Internal dictionary",
+				"code": "internal-dictionary",
+				"query": ""
+			}
+		});
+		o.attrs = {
+			"id": new ViewAttr ({
+				store: me,
+				rec: {
+					"id": -1,
+					"name": "id",
+					"code": "id",
+					"order": 1,
+					"area": 1,
+				}
+			}),
+			"name": new ViewAttr ({
+				store: me,
+				rec: {
+					"id": -1,
+					"name": "Name",
+					"code": "name",
+					"order": 2,
+					"area": 1,
+				}
+			})
+		};
+		me.map ["view"]["internal-dictionary"] = o;
+	}
+	
 	async init () {
 		log.debug ({fn: "store.init"});
 		
@@ -708,6 +745,8 @@ class Store {
 					me.initRsc ({rsc, action: "create", o});
 				});
 			}
+			me.addInternals ();
+			
 			try {
 				await me.readAuthInfo ();
 			} catch (err) {
