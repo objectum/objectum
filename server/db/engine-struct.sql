@@ -4,6 +4,7 @@ create table _class (
 	fname varchar (256),
 	fcode varchar (256) not null,
 	fdescription text,
+	forder numeric,
 	fformat text,
 	fview_id bigint,
 	funlogged bigint,
@@ -17,6 +18,7 @@ create table _class_attr (
 	fname varchar (256),
 	fcode varchar (256) not null,
 	fdescription text,
+	forder numeric,
 	ftype_id bigint not null,
 	fnot_null bigint,
 	fsecure bigint,
@@ -32,6 +34,7 @@ create table _view (
 	fname varchar (256),
 	fcode varchar (256) not null,
 	fdescription text,
+	forder numeric,
 	flayout text,
 	fquery text,
 	fstart_id bigint

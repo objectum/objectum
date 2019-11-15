@@ -2272,6 +2272,46 @@
 				null,
 				null,
 				1072,
+				1078,
+				2,
+				1004
+			]
+		},
+		{
+			"values": [
+				1004,
+				1000,
+				"Properties",
+				"property",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n    ftype_id as type,\n    fnot_null as not_null,\n    fsecure as secure,\n    funique as unique,\n    fremove_rule as remove_rule,\n    forder as order\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\nfrom\n\t_class_attr\n    \n{\"where\": \"begin\"}\n\tfclass_id = {\"param\": \"modelId\"}\n{\"where\": \"end\"}\n\n{\"order\": \"begin\"}\n    fcode, fid\n{\"order\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1078,
+				1080,
+				2,
+				1004
+			]
+		},
+		{
+			"values": [
+				1004,
+				1000,
+				"Properties",
+				"property",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n\tfid as id,\n\tfname as name,\n\tfcode as code,\n    ftype_id as type,\n    fnot_null as not_null,\n    fsecure as secure,\n    funique as unique,\n    fremove_rule as remove_rule,\n    forder as order\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n\tcount (*) as num\n{\"count\": \"end\"}\n\nfrom\n\t_class_attr\n    \n{\"where\": \"begin\"}\n\tfclass_id = {\"param\": \"modelId\"}\n{\"where\": \"end\"}\n\n{\"order\": \"begin\"}\n    forder, fcode, fid\n{\"order\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1080,
 				0,
 				2,
 				1004
@@ -3526,6 +3566,24 @@
 				2,
 				1035
 			]
+		},
+		{
+			"values": [
+				1036,
+				1004,
+				"Order",
+				"order",
+				null,
+				9,
+				null,
+				1,
+				null,
+				null,
+				1079,
+				0,
+				2,
+				1036
+			]
 		}
 	],
 	"tschema": [
@@ -4397,6 +4455,42 @@
 				"Saving rsc: query, rid: 1005",
 				2,
 				1077
+			]
+		},
+		{
+			"values": [
+				1078,
+				{
+					"type": "datetime",
+					"value": "2019-11-15T12:53:04.904Z"
+				},
+				"Saving rsc: query, rid: 1004",
+				2,
+				1078
+			]
+		},
+		{
+			"values": [
+				1079,
+				{
+					"type": "datetime",
+					"value": "2019-11-15T12:53:20.915Z"
+				},
+				"Creating rsc: column",
+				2,
+				1079
+			]
+		},
+		{
+			"values": [
+				1080,
+				{
+					"type": "datetime",
+					"value": "2019-11-15T12:53:35.007Z"
+				},
+				"Saving rsc: query, rid: 1004",
+				2,
+				1080
 			]
 		}
 	]

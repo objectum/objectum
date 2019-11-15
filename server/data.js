@@ -2,6 +2,7 @@
 
 const _ = require ("lodash");
 const { isMetaTable } = require ("./map");
+const { View, ViewAttr } = require ("./model");
 
 async function getDict (req, store) {
 	let session = req.session;
@@ -187,52 +188,6 @@ function getQuery (code, tokens, args, parents) {
 	return sql;
 };
 
-async function getViewAttrsOld (recs, view, caMap, store, fields) {
-	let cols = _.map (_.keys (recs [0]), (a) => {
-		let va = view.attrs [a];
-		let name = a;
-		let order = 0;
-		let classId = null, classAttrId = null, typeId = 1;
-		let field = fields [a];
-		
-		if (isMetaTable (field.table)) {
-			if (["funlogged", "fnot_null", "fsecure", "funique", "fsystem"].indexOf (field.column) > -1) {
-				typeId = 4;
-			} else
-			if (field.column == "ftype_id") {
-				typeId = 6;
-			}
-		} else {
-			classId = Number (field.table.split ("_")[1]);
-			classId = store.getClass (classId).getPath ();
-			classAttrId = field.column == "fobject_id" ? null : Number (field.column.split ("_")[1]);
-			
-			if (classAttrId) {
-				let ca = store.getClassAttr (classAttrId);
-				
-				name = ca.get ("name");
-				order = ca.get ("order");
-				typeId = ca.get ("type");
-			}
-		}
-		if (va) {
-			name = va.get ("name");
-			order = va.get ("order");
-		}
-		return {
-			name,
-			code: a,
-			order,
-			model: classId,
-			property: classAttrId,
-			type: typeId
-		};
-	});
-	cols = _.sortBy (cols, ["order", "name"]);
-	
-	return cols;
-};
-
 async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 	let cols = _.map (fields, (field, i) => {
 		let name = field.alias;
@@ -278,9 +233,82 @@ async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 			type: typeId
 		};
 	});
-	//cols = _.sortBy (cols, ["order", "name"]);
-	
 	return cols;
+};
+
+function getModelView (model, store) {
+	let m = store.getClass (model);
+	let attrs = _.sortBy (_.values (m.attrs), ["order", "name"]);
+	
+	if (!attrs.length) {
+		throw new Error ("model has no properties");
+	}
+	let order = [];
+	
+	if (attrs ["order"]) {
+		order.push (`{"prop": "a.order"}`);
+	}
+	if (attrs ["name"]) {
+		order.push (`{"prop": "a.name"}`);
+	}
+	order.push (`{"prop": "a.id"}`);
+	
+	let query = `
+		{"data": "begin"}
+		select
+			{"prop": "a.id", "as": "id"},
+			${_.map (attrs, a => {
+				return `{"prop": "a.${a.get ("code")}", "as": "${a.get ("code")}"}`;
+			}).join ("\n,")}
+		{"data": "end"}
+		
+		{"count": "begin"}
+		select
+			count (*) as num
+		{"count": "end"}
+		
+		from
+			{"model": "${model}", "alias": "a"}
+		
+		{"where": "empty"}
+		
+		{"order": "begin"}
+			${order.join (", ")}
+		{"order": "end"}
+		
+		limit {"param": "limit"}
+		offset {"param": "offset"}
+	`;
+	let o = new View ({
+		rec: {
+			code: "model-view",
+			query
+		}
+	});
+	o.attrs = {
+		"id": new ViewAttr ({
+			rec: {
+				"name": "id",
+				"code": "id",
+				"order": 0
+			}
+		})
+	};
+	let i = 1;
+	
+	_.each (attrs, a => {
+		if (a.get ("order")) {
+			i = a.get ("order");
+		}
+		o.attrs [a.get ("code")] = new ViewAttr ({
+			rec: {
+				"name": a.get ("name"),
+				"code": a.get ("code"),
+				"order": i ++
+			}
+		})
+	});
+	return o;
 };
 
 async function getData (req, store) {
@@ -291,31 +319,7 @@ async function getData (req, store) {
 		view = store.getView (req.args.query);
 	} else
 	if (req.args.model) {
-		view = store.getView ("internal-dictionary");
-		view.set ("query", `
-			{"data": "begin"}
-			select
-				{"prop": "a.id", "as": "id"},
-				{"prop": "a.name", "as": "name"}
-			{"data": "end"}
-			
-			{"count": "begin"}
-			select
-				count (*) as num
-			{"count": "end"}
-			
-			from
-				{"model": "${req.args.model}", "alias": "a"}
-			
-			{"where": "empty"}
-			
-			{"order": "begin"}
-				{"prop": "a.name"}
-			{"order": "end"}
-			
-			limit {"param": "limit"}
-			offset {"param": "offset"}
-		`);
+		view = getModelView (req.args.model, store);
 	} else {
 		throw new Error ("query or model not exist");
 	}
@@ -405,7 +409,6 @@ async function getData (req, store) {
 	if (req.args.order) {
 		tokens = addOrder (tokens, req.args.order, caMap, aliasPrefix);
 	}
-//	let fields = {};
 	let fields = [];
 	let data = {
 		recs: await store.query ({session, sql: getQuery ("data", tokens, req.args), fields, rowMode: "array"})
