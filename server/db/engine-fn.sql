@@ -62,9 +62,9 @@ begin
 
 		if (classCode is null) then
 			insert into _class (
-				fid, fparent_id, fname, fcode, fdescription, forder, fformat, fview_id, funlogged, fstart_id
+				fid, fparent_id, fname, fcode, fdescription, forder, fformat, fview_id, funlogged, fopts, fstart_id
 			) values (
-				NEW.fid, NEW.fparent_id, NEW.fname, NEW.fcode, NEW.fdescription, NEW.forder, NEW.fformat, NEW.fview_id, NEW.funlogged, NEW.fstart_id
+				NEW.fid, NEW.fparent_id, NEW.fname, NEW.fcode, NEW.fdescription, NEW.forder, NEW.fformat, NEW.fview_id, NEW.funlogged, NEW.fopts, NEW.fstart_id
 			);
 
 			if (NEW.fid >= 1000) then
@@ -91,6 +91,7 @@ begin
 				forder = NEW.forder,
 				fformat = NEW.fformat,
 				fview_id = NEW.fview_id,
+				fopts = NEW.fopts,
 				fstart_id = NEW.fstart_id
 			where
 				fid = NEW.fid;
@@ -163,9 +164,9 @@ begin
 
 		if (caCode is null) then
 			insert into _class_attr (
-				fid, fclass_id, fclass_code, fname, fcode, fdescription, forder, ftype_id, fnot_null, fsecure, funique, fremove_rule, funlogged, fstart_id
+				fid, fclass_id, fclass_code, fname, fcode, fdescription, forder, ftype_id, fnot_null, fsecure, funique, fremove_rule, funlogged, fopts, fstart_id
 			) values (
-				NEW.fid, NEW.fclass_id, classCode, NEW.fname, NEW.fcode, NEW.fdescription, NEW.forder, NEW.ftype_id, NEW.fnot_null, NEW.fsecure, NEW.funique, NEW.fremove_rule, NEW.funlogged, NEW.fstart_id
+				NEW.fid, NEW.fclass_id, classCode, NEW.fname, NEW.fcode, NEW.fdescription, NEW.forder, NEW.ftype_id, NEW.fnot_null, NEW.fsecure, NEW.funique, NEW.fremove_rule, NEW.funlogged, NEW.fopts, NEW.fstart_id
 			);
 
 			perform column_util (NEW.fid, 'createColumn,createTable,setNotNull,createIndex,createForeignKey');
@@ -208,6 +209,7 @@ begin
 				fnot_null = NEW.fnot_null,
 				fsecure = NEW.fsecure,
 				fremove_rule = NEW.fremove_rule,
+				fopts = NEW.fopts,
 				fstart_id = NEW.fstart_id
 			where
 				fid = NEW.fid;
@@ -290,9 +292,9 @@ begin
 	if (NEW.fsystem is null and NEW.fend_id = 0) then
 		if (viewCode is null) then
 			insert into _view (
-				fid, fparent_id, fname, fcode, fdescription, forder, flayout, fquery, fstart_id
+				fid, fparent_id, fname, fcode, fdescription, forder, flayout, fquery, fopts, fstart_id
 			) values (
-				NEW.fid, NEW.fparent_id, NEW.fname, NEW.fcode, NEW.fdescription, NEW.forder, NEW.flayout, NEW.fquery, NEW.fstart_id
+				NEW.fid, NEW.fparent_id, NEW.fname, NEW.fcode, NEW.fdescription, NEW.forder, NEW.flayout, NEW.fquery, NEW.fopts, NEW.fstart_id
 			);
 		else
 			update _view set
@@ -303,6 +305,7 @@ begin
 				forder = NEW.forder,
 				flayout = NEW.flayout,
 				fquery = NEW.fquery,
+				fopts = NEW.fopts,
 				fstart_id = NEW.fstart_id
 			where
 				fid = NEW.fid;

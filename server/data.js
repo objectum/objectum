@@ -193,7 +193,7 @@ async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 		let name = field.alias;
 		let va = view.attrs [name];
 		let order = 0;
-		let classId = null, classAttrId = null, typeId = 1;
+		let classId = null, classAttrId = null, typeId = 1, area = 1;
 		
 		if (isMetaTable (field.table)) {
 			if (["funlogged", "fnot_null", "fsecure", "funique", "fsystem"].indexOf (field.column) > -1) {
@@ -223,11 +223,13 @@ async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 		if (va) {
 			name = va.get ("name");
 			order = va.get ("order");
+			area = va.get ("area");
 		}
 		return {
 			name,
 			code: selectAliases [i] || field.alias,
 			order,
+			area,
 			model: classId,
 			property: classAttrId,
 			type: typeId
@@ -236,7 +238,7 @@ async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 	return cols;
 };
 
-function getModelView (model, store) {
+function getModelView (model, store, args) {
 	let m = store.getClass (model);
 	let attrs = _.sortBy (_.values (m.attrs), ["order", "name"]);
 	
@@ -253,6 +255,20 @@ function getModelView (model, store) {
 	}
 	order.push (`{"prop": "a.id"}`);
 	
+	let where = `{"where": "empty"}`;
+	
+	if (m.getPath ().substr (0, 2) == "t.") {
+		let tokens = m.getPath ().split (".");
+		let parentCode = tokens [tokens.length - 2];
+		
+		if (args [parentCode]) {
+			where = `
+		{"where": "begin"}
+			{"prop": "a.${parentCode}"} = ${args [parentCode]}
+		{"where": "end"}
+			`;
+		}
+	}
 	let query = `
 		{"data": "begin"}
 		select
@@ -270,7 +286,7 @@ function getModelView (model, store) {
 		from
 			{"model": "${model}", "alias": "a"}
 		
-		{"where": "empty"}
+		${where}
 		
 		{"order": "begin"}
 			${order.join (", ")}
@@ -300,11 +316,18 @@ function getModelView (model, store) {
 		if (a.get ("order")) {
 			i = a.get ("order");
 		}
+		let area = 1;
+		let opts = a.getOpts ();
+		
+		if (opts.column && opts.column.hasOwnProperty ("area")) {
+			area = opts.column.area;
+		}
 		o.attrs [a.get ("code")] = new ViewAttr ({
 			rec: {
 				"name": a.get ("name"),
 				"code": a.get ("code"),
-				"order": i ++
+				"order": i ++,
+				"area": area
 			}
 		})
 	});
@@ -319,7 +342,7 @@ async function getData (req, store) {
 		view = store.getView (req.args.query);
 	} else
 	if (req.args.model) {
-		view = getModelView (req.args.model, store);
+		view = getModelView (req.args.model, store, req.args);
 	} else {
 		throw new Error ("query or model not exist");
 	}

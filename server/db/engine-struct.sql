@@ -8,6 +8,7 @@ create table _class (
 	fformat text,
 	fview_id bigint,
 	funlogged bigint,
+	fopts text,
 	fstart_id bigint
 );
 
@@ -25,6 +26,7 @@ create table _class_attr (
 	funique bigint,
 	fremove_rule varchar (256),
 	funlogged bigint,
+	fopts text,
 	fstart_id bigint
 );
 
@@ -37,6 +39,7 @@ create table _view (
 	forder numeric,
 	flayout text,
 	fquery text,
+	fopts text,
 	fstart_id bigint
 );
 

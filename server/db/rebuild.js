@@ -69,16 +69,16 @@ async function rebuild ({store}) {
 	let engineTables = {
 		"_class": {
 			sql: `
-				insert into _class (fid, fparent_id, fname, fcode, fdescription, fformat,  fview_id, fstart_id)
-				select fid, fparent_id, fname, fcode, fdescription, fformat,  fview_id, fstart_id
+				insert into _class (fid, fparent_id, fname, fcode, fdescription, forder, fformat,  fview_id, fopts, fstart_id)
+				select fid, fparent_id, fname, fcode, fdescription, forder, fformat,  fview_id, fopts, fstart_id
 				from tclass
 				where fend_id = 0 and fid >= 1000
 			`
 		},
 		"_class_attr": {
 			sql: `
-				insert into _class_attr (fid, fclass_id, fclass_code, fname, fcode, fdescription, ftype_id, fnot_null, fsecure, funique, fremove_rule, fstart_id)
-				select a.fid, a.fclass_id, b.fcode, a.fname, a.fcode, a.fdescription, a.ftype_id, a.fnot_null, a.fsecure, a.funique, a.fremove_rule, a.fstart_id
+				insert into _class_attr (fid, fclass_id, fclass_code, fname, fcode, fdescription, forder, ftype_id, fnot_null, fsecure, funique, fremove_rule, fopts, fstart_id)
+				select a.fid, a.fclass_id, b.fcode, a.fname, a.fcode, a.fdescription, a.forder, a.ftype_id, a.fnot_null, a.fsecure, a.funique, a.fremove_rule, a.fopts, a.fstart_id
 				from tclass_attr a
 				inner join tclass b on (b.fid = a.fclass_id and b.fend_id = 0)
 				where a.fend_id = 0
@@ -86,7 +86,7 @@ async function rebuild ({store}) {
 		},
 		"_view": {
 			logTable: "tview",
-			fields: ["fid", "fparent_id", "fname", "fcode", "fdescription", "flayout", "fquery", "fstart_id"]
+			fields: ["fid", "fparent_id", "fname", "fcode", "fdescription", "forder", "flayout", "fquery", "fopts", "fstart_id"]
 		},
 		"_object": {
 			logTable: "tobject",

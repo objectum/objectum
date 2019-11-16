@@ -407,6 +407,10 @@ class Meta extends Base {
 	commit () {
 		this.sync.call (this, arguments);
 	}
+	
+	getOpts () {
+		return JSON.parse (this.get ("opts") || "{}");
+	}
 }
 
 class Class extends Meta {
