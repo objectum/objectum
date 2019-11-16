@@ -114,7 +114,7 @@ const map = {
 	},
 	"object": {
 		"fid": "id",
-		"fclass_id": "class",
+		"fclass_id": "_class",
 		"fstart_id": "start",
 		"fend_id": "end",
 		"fschema_id": "schema",

@@ -436,7 +436,7 @@ class Store {
 			}
 			object = new Object ({store: me});
 			object.data.id = id;
-			object.data.fclass_id = object.data.classId = object.data ["class"] = rows [0].fclass_id;
+			object.data.fclass_id = object.data.classId = object.data ["_class"] = rows [0].fclass_id;
 			
 			_.each (rows, function (row) {
 				let classAttr = me.map ["classAttr"][row.fclass_attr_id];
@@ -619,7 +619,7 @@ class Store {
 			_.remove (me.recs [rsc], rec => {
 				return rec.get ("id") == o.get ("id");
 			});
-			if (o.get ("class")) {
+			if (rsc != "object" && o.get ("class")) {
 				me.removeAttr (me.map ["class"], me.map ["class"][o.get ("class")], o);
 			}
 			if (o.get ("view")) {

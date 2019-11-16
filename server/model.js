@@ -43,21 +43,27 @@ class Base {
 		}
 		// todo: reserved words for objectAttr code
 		if (v && typeof (v) == "string") {
-			if (a == "class") {
-				v = me.store.getClass (v).get ("id");
-			}
-			if (a == "view") {
-				v = me.store.getView (v).get ("id");
-			}
-			if (a == "type") {
-				v = me.store.getTypeId (v);
-			}
-			if (a == "parent") {
-				if (me.rsc == "class") {
+			if (me.rsc == "object") {
+				if (a == "_class") {
 					v = me.store.getClass (v).get ("id");
 				}
-				if (me.rsc == "view") {
+			} else {
+				if (a == "class") {
+					v = me.store.getClass (v).get ("id");
+				}
+				if (a == "view") {
 					v = me.store.getView (v).get ("id");
+				}
+				if (a == "type") {
+					v = me.store.getTypeId (v);
+				}
+				if (a == "parent") {
+					if (me.rsc == "class") {
+						v = me.store.getClass (v).get ("id");
+					}
+					if (me.rsc == "view") {
+						v = me.store.getView (v).get ("id");
+					}
 				}
 			}
 		}
@@ -106,8 +112,8 @@ class Object extends Base {
 		
 		let me = this;
 		
-		if (me.get ("class")) {
-			let attrs = me.store.getClass (me.get ("class")).attrs;
+		if (me.get ("_class")) {
+			let attrs = me.store.getClass (me.get ("_class")).attrs;
 			
 			_.each (opts.rec, function (v, a) {
 				if (attrs [a]) {
@@ -129,16 +135,16 @@ class Object extends Base {
 			throw new Error (`no transaction, session ${session.id}`);
 		}
 		let client = me.store.getClient ({session});
-		let classObj = me.store.map ["class"][me.get ("class")];
+		let classObj = me.store.map ["class"][me.get ("_class")];
 		
 		if (!classObj) {
-			throw new Error (`unknown class: ${me.get ("class")}`);
+			throw new Error (`unknown model: ${me.get ("_class")}`);
 		}
 		if (me.removed) {
 			await me.store.query ({session, sql: `delete from ${classObj.getTable ()} where fobject_id = ${me.get ("id")}`});
 			await me.store.redisClient.hdelAsync (`${me.store.code}-objects`, me.get ("id"));
 			
-			if (!config.legacy && me.store.getClass ("objectum.user").get ("id") == me.get ("class")) {
+			if (!config.legacy && me.store.getClass ("objectum.user").get ("id") == me.get ("_class")) {
 				delete me.store.auth.user [me.get ("login")];
 				delete me.store.auth.user [me.get ("id")];
 			}
@@ -220,7 +226,7 @@ class Object extends Base {
 				let fields = ["fobject_id", "fclass_id"], values = [`$${n ++}`, `$${n ++}`];
 				
 				params.push (id);
-				params.push (me.get ("class"));
+				params.push (me.get ("_class"));
 				
 				_.each (o, (v, a) => {
 					fields.push (a);
@@ -283,7 +289,7 @@ class Object extends Base {
 				});
 			}
 		}
-		if (!config.legacy && me.store.getClass ("objectum.user").get ("id") == me.get ("class")) {
+		if (!config.legacy && me.store.getClass ("objectum.user").get ("id") == me.get ("_class")) {
 			let menuId = null;
 			
 			if (me.get ("role")) {

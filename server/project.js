@@ -429,31 +429,35 @@ async function classFn (req) {
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "remove") {
+	if (req.args._fn == "remove") {
 		o = store.getClass (req.args.id || req.args.code);
 		o.remove ();
 		await o.sync ({session: req.session});
 		
 		return {id: o.get ("id")};
 	}
-	if (req.args.fn == "create") {
+	if (req.args._fn == "create") {
 		delete req.args.id;
 		o = new Class ({store, rec: req.args});
 		await o.sync ({session: req.session});
 	} else
-	if (req.args.fn == "get") {
-		o = store.getClass (req.args.id || req.args.code);
+	if (req.args._fn == "get") {
+//		o = store.getClass (req.args.id || req.args.code);
+		o = store.getClass (req.args.id);
 	} else
-	if (req.args.fn == "set") {
-		o = store.getClass (req.args.id || req.args.code);
+	if (req.args._fn == "set") {
+//		o = store.getClass (req.args.id || req.args.code);
+		o = store.getClass (req.args.id);
 		delete req.args.id;
 		
 		_.each (req.args, function (v, a) {
-			o.set (a, v);
+			if (a [0] != "_") {
+				o.set (a, v);
+			}
 		});
 		await o.sync ({session: req.session});
 	} else {
-		throw new Error ("project.classFn: unknown fn: " + req.args.fn);
+		throw new Error ("project.classFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["query"] = o.data ["view"];
 	delete o.data ["view"];
@@ -474,31 +478,33 @@ async function classAttrFn (req) {
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "remove") {
-		o = store.getClassAttr (req.args.id || req.args.code);
+	if (req.args._fn == "remove") {
+		o = store.getClassAttr (req.args.id);
 		o.remove ();
 		await o.sync ({session: req.session});
 		
 		return {id: o.get ("id")};
 	}
-	if (req.args.fn == "create") {
+	if (req.args._fn == "create") {
 		delete req.args.id;
 		o = new ClassAttr ({store, rec: req.args});
 		await o.sync ({session: req.session});
 	} else
-	if (req.args.fn == "get") {
-		o = store.getClassAttr (req.args.id || req.args.code);
+	if (req.args._fn == "get") {
+		o = store.getClassAttr (req.args.id);
 	} else
-	if (req.args.fn == "set") {
-		o = store.getClassAttr (req.args.id || req.args.code);
+	if (req.args._fn == "set") {
+		o = store.getClassAttr (req.args.id);
 		delete req.args.id;
 		
 		_.each (req.args, function (v, a) {
-			o.set (a, v);
+			if (a [0] != "_") {
+				o.set (a, v);
+			}
 		});
 		await o.sync ({session: req.session});
 	} else {
-		throw new Error ("project.classAttrFn: unknown fn: " + req.args.fn);
+		throw new Error ("project.classAttrFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["model"] = o.data ["class"];
 	delete o.data ["class"];
@@ -519,31 +525,33 @@ async function viewFn (req) {
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "remove") {
-		o = store.getView (req.args.id || req.args.code);
+	if (req.args._fn == "remove") {
+		o = store.getView (req.args.id);
 		o.remove ();
 		await o.sync ({session: req.session});
 		
 		return {id: o.get ("id")};
 	}
-	if (req.args.fn == "create") {
+	if (req.args._fn == "create") {
 		delete req.args.id;
 		o = new View ({store, rec: req.args});
 		await o.sync ({session: req.session});
 	} else
-	if (req.args.fn == "get") {
-		o = store.getView (req.args.id || req.args.code);
+	if (req.args._fn == "get") {
+		o = store.getView (req.args.id);
 	} else
-	if (req.args.fn == "set") {
-		o = store.getView (req.args.id || req.args.code);
+	if (req.args._fn == "set") {
+		o = store.getView (req.args.id);
 		delete req.args.id;
 		
 		_.each (req.args, function (v, a) {
-			o.set (a, v);
+			if (a [0] != "_") {
+				o.set (a, v);
+			}
 		});
 		await o.sync ({session: req.session});
 	} else {
-		throw new Error ("project.viewFn: unknown fn: " + req.args.fn);
+		throw new Error ("project.viewFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["model"] = o.data ["class"];
 	delete o.data ["class"];
@@ -564,31 +572,33 @@ async function viewAttrFn (req) {
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "remove") {
-		o = store.getViewAttr (req.args.id || req.args.code);
+	if (req.args._fn == "remove") {
+		o = store.getViewAttr (req.args.id);
 		o.remove ();
 		await o.sync ({session: req.session});
 		
 		return {id: o.get ("id")};
 	}
-	if (req.args.fn == "create") {
+	if (req.args._fn == "create") {
 		delete req.args.id;
 		o = new ViewAttr ({store, rec: req.args});
 		await o.sync ({session: req.session});
 	} else
-	if (req.args.fn == "get") {
-		o = store.getViewAttr (req.args.id || req.args.code);
+	if (req.args._fn == "get") {
+		o = store.getViewAttr (req.args.id);
 	} else
-	if (req.args.fn == "set") {
-		o = store.getViewAttr (req.args.id || req.args.code);
+	if (req.args._fn == "set") {
+		o = store.getViewAttr (req.args.id);
 		delete req.args.id;
 		
 		_.each (req.args, function (v, a) {
-			o.set (a, v);
+			if (a [0] != "_") {
+				o.set (a, v);
+			}
 		});
 		await o.sync ({session: req.session});
 	} else {
-		throw new Error ("project.viewAttrFn: unknown fn: " + req.args.fn);
+		throw new Error ("project.viewAttrFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["query"] = o.data ["view"];
 	delete o.data ["view"];
@@ -609,31 +619,33 @@ async function actionFn (req) {
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "remove") {
-		o = await store.getAction ({session: req.session, id: req.args.id || req.args.code});
+	if (req.args._fn == "remove") {
+		o = await store.getAction ({session: req.session, id: req.args.id});
 		o.remove ();
 		await o.sync ({session: req.session});
 		
 		return {id: o.get ("id")};
 	}
-	if (req.args.fn == "create") {
+	if (req.args._fn == "create") {
 		delete req.args.id;
 		o = new Action ({store, rec: req.args});
 		await o.sync ({session: req.session});
 	} else
-	if (req.args.fn == "get") {
-		o = await store.getAction ({session: req.session, id: req.args.id || req.args.code});
+	if (req.args._fn == "get") {
+		o = await store.getAction ({session: req.session, id: req.args.id});
 	} else
-	if (req.args.fn == "set") {
-		o = await store.getAction ({session: req.session, id: req.args.id || req.args.code});
+	if (req.args._fn == "set") {
+		o = await store.getAction ({session: req.session, id: req.args.id});
 		delete req.args.id;
 		
 		_.each (req.args, function (v, a) {
-			o.set (a, v);
+			if (a [0] != "_") {
+				o.set (a, v);
+			}
 		});
 		await o.sync ({session: req.session});
 	} else {
-		throw new Error ("project.actionFn: unknown fn: " + req.args.fn);
+		throw new Error ("project.actionFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["model"] = o.data ["class"];
 	delete o.data ["class"];
@@ -642,43 +654,45 @@ async function actionFn (req) {
 };
 
 async function objectFn (req) {
-	if (_.has (req.args, "model")) {
-		req.args ["class"] = req.args ["model"];
-		delete req.args ["model"];
+	if (_.has (req.args, "_model")) {
+		req.args ["_class"] = req.args ["_model"];
+		delete req.args ["_model"];
 	}
 	log.debug ({fn: "project.objectFn", session: req.session.id, args: req.args});
 	
 	let store = await getStore ({code: req.code});
 	let o;
 	
-	if (req.args.fn == "remove") {
+	if (req.args._fn == "remove") {
 		o = await store.getObject ({session: req.session, id: req.args.id});
 		o.remove ();
 		await o.sync ({session: req.session});
 		
 		return {id: o.get ("id")};
 	}
-	if (req.args.fn == "create") {
+	if (req.args._fn == "create") {
 		delete req.args.id;
 		o = new Object ({store, rec: req.args});
 		await o.sync ({session: req.session});
 	} else
-	if (req.args.fn == "get") {
+	if (req.args._fn == "get") {
 		o = await store.getObject ({session: req.session, id: req.args.id});
 	} else
-	if (req.args.fn == "set") {
+	if (req.args._fn == "set") {
 		o = await store.getObject ({session: req.session, id: req.args.id});
 		delete req.args.id;
 		
 		_.each (req.args, function (v, a) {
-			o.set (a, v);
+			if (a [0] != "_") {
+				o.set (a, v);
+			}
 		});
 		await o.sync ({session: req.session});
 	} else {
-		throw new Error ("project.objectFn: unknown fn: " + req.args.fn);
+		throw new Error ("project.objectFn: unknown fn: " + req.args._fn);
 	}
-	o.data ["model"] = o.data ["class"];
-	delete o.data ["class"];
+	o.data ["_model"] = o.data ["_class"];
+	delete o.data ["_class"];
 	
 	return o.data;
 };

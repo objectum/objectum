@@ -155,8 +155,8 @@ async function init () {
 		try {
 			req.args = req.body;
 			
-			let fn = req.args.fn;
-			let rsc = req.args.rsc;
+			let fn = req.args._fn;
+			let rsc = req.args._rsc;
 			
 			if (fn == "auth") {
 				return await project.auth (req, res);
