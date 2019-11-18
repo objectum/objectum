@@ -137,7 +137,7 @@ class Store {
 				let f = fArray [i];
 				let pgo = me.pgObject [f.tableID];
 				
-				if (!pgo) {
+				if (!pgo || !pgo.columns [f.columnID]) {
 					await me.loadPgObjects ({});
 					pgo = me.pgObject [f.tableID];
 				}
