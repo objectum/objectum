@@ -434,7 +434,8 @@ async function getData (req, store) {
 	}
 	let fields = [];
 	let data = {
-		recs: await store.query ({session, sql: getQuery ("data", tokens, req.args), fields, rowMode: "array"})
+		recs: await store.query ({session, sql: getQuery ("data", tokens, req.args), fields, rowMode: "array"}),
+		position: []
 	};
 	data.cols = await getViewAttrs (data.recs, view, caMap, store, fields, selectAliases);
 	
@@ -459,6 +460,39 @@ async function getData (req, store) {
 				data.childs = await store.query ({session, sql: getQuery ("tree", tokens, req.args, parents)});
 			} else {
 				data.childs = [];
+			}
+			// position
+			let pos = {};
+			
+			_.each (fields, f => {
+				if (f.alias == "id") {
+					pos.table = f.table;
+					pos.id = f.column;
+				}
+				if (f.alias == "parent") {
+					pos.parent = f.column;
+				}
+				if (f.alias == "name") {
+					pos.name = f.column;
+				}
+			});
+			if (req.args.parent) {
+				let recs = await store.query ({
+					session, sql: `
+						with recursive getParent as (
+							select ${pos.id}, ${pos.parent}, ${pos.name} from ${pos.table}
+							where fid = ${req.args.parent}
+						
+							union all
+						
+							select a.${pos.id}, a.${pos.parent}, a.${pos.name} from ${pos.table} a
+							join getParent on getParent.${pos.parent} = a.${pos.id}
+						)
+						select ${pos.id} as id, ${pos.parent} as parent, ${pos.name} as name from getParent
+						order by ${pos.id}
+					`
+				});
+				data.position = recs;
 			}
 		}
 	}

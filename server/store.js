@@ -545,8 +545,12 @@ class Store {
 			me.auth.user [rec.login] = o;
 			me.auth.user [rec.id] = o;
 		});
+		me.auth.userClassId = me.getClass ("objectum.user").get ("id");
 		me.auth.roleClassId = me.getClass ("objectum.role").get ("id");
-		me.auth.sroleClassId = me.getClass ("objectum.user").get ("id");
+		//me.auth.sroleClassId = me.getClass ("objectum.user").get ("id");
+
+		//me.auth.login [me.getClass ("objectum.user").attrs ["login"].get ("id")] = 1;
+		//me.auth.password [me.getClass ("objectum.user").attrs ["password"].get ("id")] = 1;
 	}
 	
 	end () {
@@ -661,45 +665,6 @@ class Store {
 			};
 		});
 	}
-	
-/*
-	addInternals () {
-		let me = this;
-		let o = new View ({
-			store: me,
-			rec: {
-				"id": -1,
-				"parent": null,
-				"name": "Internal dictionary",
-				"code": "internal-dictionary",
-				"query": ""
-			}
-		});
-		o.attrs = {
-			"id": new ViewAttr ({
-				store: me,
-				rec: {
-					"id": -1,
-					"name": "id",
-					"code": "id",
-					"order": 1,
-					"area": 1,
-				}
-			}),
-			"name": new ViewAttr ({
-				store: me,
-				rec: {
-					"id": -1,
-					"name": "Name",
-					"code": "name",
-					"order": 2,
-					"area": 1,
-				}
-			})
-		};
-		me.map ["view"]["internal-dictionary"] = o;
-	}
-*/
 	
 	async init () {
 		log.debug ({fn: "store.init"});
@@ -842,21 +807,21 @@ class Store {
 				for (let i = 0; i < auth.length; i ++) {
 					let o = auth [i];
 					
-					if (o.userId) {
-						me.auth.user [o.userId] = me.auth.user [o.userId] || {};
-						me.auth.user [o.userId].id = o.userId;
-						me.auth.user [o.userId].login = o.login || me.auth.user [o.userId].login;
-						me.auth.user [o.userId].password = o.password || me.auth.user [o.userId].password;
-						me.auth.user [o.userId].role = o.role || me.auth.user [o.userId].role;
-						me.auth.user [o.userId].menu = o.menu || me.auth.user [o.userId].menu;
+					if (o.user) {
+						me.auth.user [o.user] = me.auth.user [o.user] || {};
+						me.auth.user [o.user].id = o.user;
+						me.auth.user [o.user].login = o.login || me.auth.user [o.user].login;
+						me.auth.user [o.user].password = o.password || me.auth.user [o.user].password;
+						me.auth.user [o.user].role = o.role || me.auth.user [o.user].role;
+						me.auth.user [o.user].menu = o.menu || me.auth.user [o.user].menu;
 						
 						if (o.login) {
-							me.auth.user [o.login] = me.auth.user [o.userId];
+							me.auth.user [o.login] = me.auth.user [o.user];
 						}
 					}
-					if (o.roleId) {
+					if (o.role) {
 						_.each (me.auth.user, function (rec) {
-							if (rec.role == o.roleId) {
+							if (rec.role == o.role) {
 								rec.menu = o.menu;
 							}
 						});

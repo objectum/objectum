@@ -181,7 +181,7 @@ class Object extends Base {
 //			await me.store.query ({session, sql: `insert into tobject (fid, fclass_id, fstart_id, fend_id) values (${id}, ${me.get ("class")}, ${revisionId}, 0)`});
 		}
 		let data = {};
-		let login, password;
+		//let login, password;
 		
 		for (let i = 0; i < attrs.length; i ++) {
 			let attr = attrs [i];
@@ -192,12 +192,14 @@ class Object extends Base {
 			}
 			let value = me.get (attr);
 			
+/*
 			if (me.store.auth.login [ca.get ("id")]) {
 				login = value;
 			}
 			if (me.store.auth.password [ca.get ("id")]) {
 				password = value;
 			}
+*/
 			if (value === true || value === false) {
 				value = Number (value);
 			}
@@ -254,41 +256,24 @@ class Object extends Base {
 				await me.store.query ({session, sql, params});
 			}
 		}
-		if (newObject) {
-			if (login || password) {
-				me.store.revisions [revisionId]["auth"].created.push ({
-					userId: me.get ("id"), login: me.get ("login"), password: me.get ("password")
-				});
+		if (me.store.auth.userClassId == classObj.get ("id")) {
+			let menu = null;
+			
+			if (me.get ("role")) {
+				let o = await me.store.getObject ({session, id: me.get ("role")});
+				
+				menu = o.get ("menu");
 			}
-			if (me.store.auth.roleClassId == classObj.get ("id")) {
-				me.store.revisions [revisionId]["auth"].created.push ({
-					roleId: me.get ("id"), menu: me.get ("menu")
-				});
-			}
-			if (me.store.auth.sroleClassId == classObj.get ("id")) {
-				me.store.revisions [revisionId]["auth"].created.push ({
-					userId: me.get ("subject") || me.get ("id"), role: me.get ("role")
-				});
-			}
-		} else {
-			await me.store.redisClient.hdelAsync (`${me.store.code}-objects`, me.get ("id"));
-
-			if (login || password) {
-				me.store.revisions [revisionId]["auth"].changed.push ({
-					userId: me.get ("id"), login: me.get ("login"), password: me.get ("password")
-				});
-			}
-			if (me.store.auth.roleClassId == classObj.get ("id")) {
-				me.store.revisions [revisionId]["auth"].changed.push ({
-					roleId: me.get ("id"), menu: me.get ("menu")
-				});
-			}
-			if (me.store.auth.sroleClassId == classObj.get ("id")) {
-				me.store.revisions [revisionId]["auth"].changed.push ({
-					userId: me.get ("subject") || me.get ("id"), role: me.get ("role")
-				});
-			}
+			me.store.revisions [revisionId]["auth"][newObject ? "created" : "changed"].push ({
+				user: me.get ("id"), login: me.get ("login"), password: me.get ("password"), role: me.get ("role"), menu
+			});
+		} else
+		if (me.store.auth.roleClassId == classObj.get ("id")) {
+			me.store.revisions [revisionId]["auth"][newObject ? "created" : "changed"].push ({
+				role: me.get ("id"), menu: me.get ("menu")
+			});
 		}
+/*
 		if (!config.legacy && me.store.getClass ("objectum.user").get ("id") == me.get ("_class")) {
 			let menuId = null;
 			
@@ -307,6 +292,7 @@ class Object extends Base {
 			me.store.auth.user [me.get ("login")] = o;
 			me.store.auth.user [me.get ("id")] = o;
 		}
+*/
 	}
 	
 	commit () {
