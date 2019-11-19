@@ -38,7 +38,7 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 		}
 		return s;
 	}).join (" and ") + "\n";
-	let r = [], whereBeginWas = false, where = [];
+	let r = [], whereSection = false, where = [];
 	
 	for (let i = 0; i < tokens.length; i ++) {
 		let o = tokens [i];
@@ -46,7 +46,7 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 		if (o && typeof (o) == "object" && o ["where"]) {
 			if (o ["where"] == "begin") {
 				r.push (o);
-				whereBeginWas = true;
+				whereSection = true;
 			}
 			if (o ["where"] == "end") {
 				if (where.length) {
@@ -54,12 +54,13 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 				} else {
 					r = [...r, ...f, o];
 				}
+				whereSection = false;
 			}
 			if (o ["where"] == "empty") {
 				r = [...r, {"where": "begin"}, ...f, {"where": "end"}];
 			}
 		} else {
-			if (whereBeginWas) {
+			if (whereSection) {
 				where.push (o);
 			} else {
 				r.push (o);
@@ -71,7 +72,7 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 
 function addOrder (tokens, order, caMap, aliasPrefix) {
 	let orderStr = `\n${aliasPrefix [order [0]]}.${caMap [order [0]].isId ? "fobject_id" : caMap [order [0]].getField ()} ${order [1]}\n`;
-	let r = [], beginWas = false;
+	let r = [], orderSection = false;
 	
 	for (let i = 0; i < tokens.length; i ++) {
 		let o = tokens [i];
@@ -79,16 +80,17 @@ function addOrder (tokens, order, caMap, aliasPrefix) {
 		if (o && typeof (o) == "object" && o ["order"]) {
 			if (o ["order"] == "begin") {
 				r.push (o);
-				beginWas = true;
-			}
+				orderSection = true;
+			} else
 			if (o ["order"] == "end") {
-				r = [...r, orderStr];
-			}
+				r = [...r, orderStr, o];
+				orderSection = false;
+			} else
 			if (o ["order"] == "empty") {
 				r = [...r, {"order": "begin"}, orderStr, {"order": "end"}];
 			}
 		} else {
-			if (!beginWas) {
+			if (!orderSection) {
 				r.push (o);
 			}
 		}
@@ -481,7 +483,7 @@ async function getData (req, store) {
 					session, sql: `
 						with recursive getParent as (
 							select ${pos.id}, ${pos.parent}, ${pos.name} from ${pos.table}
-							where fid = ${req.args.parent}
+							where ${pos.id} = ${req.args.parent}
 						
 							union all
 						
