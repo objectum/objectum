@@ -224,9 +224,13 @@ class Postgres {
 	
 	async create ({connection, cfg}) {
 		await this.query ({sql: `create role ${connection.dbUser} noinherit login password '${connection.dbPassword}'`});
-		await this.query ({sql: `create tablespace ${connection.dbUser} owner ${connection.dbUser} location '${cfg.path}'`});
-		await this.query ({sql: `create database ${connection.db} owner ${connection.dbUser} encoding 'utf8' tablespace ${connection.dbUser}`});
 		
+		if (cfg.path) {
+			await this.query ({sql: `create tablespace ${connection.dbUser} owner ${connection.dbUser} location '${cfg.path}'`});
+			await this.query ({sql: `create database ${connection.db} owner ${connection.dbUser} encoding 'utf8' tablespace ${connection.dbUser}`});
+		} else {
+			await this.query ({sql: `create database ${connection.db} owner ${connection.dbUser} encoding 'utf8'`});
+		}
 		this.disconnect ();
 		
 		await this.connect ();
