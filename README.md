@@ -9,6 +9,43 @@ Isomorhic javascript client https://github.com/objectum/objectum-client
 React components https://github.com/objectum/objectum-react  
 Objectum project example https://github.com/objectum/catalog 
  
+## Quick start
+
+Install CLI:
+```bash
+npm i -g objectum-cli forever
+```
+
+Create objectum project:
+```bash
+mkdir -p /opt/objectum 
+objectum-cli --create-project my_project --path /opt/objectum 
+
+```
+Default parameters: 
+```
+--redis-host 127.0.0.1
+--redis-port 6379
+--objectum-port 8200
+--project-port 3100
+--db-host 127.0.0.1
+--db-port 5432
+--db-dbPassword 1
+--db-dbaPassword 12345
+--password admin
+```
+db-dbaPassword - postgres password.  
+password - password of project 'admin'. 
+
+Start project:
+```bash
+cd /opt/objectum/server 
+./start.sh 
+cd /opt/objectum/projects/my_project 
+./start.sh 
+npm run start
+```
+
 ## Learn by Example project "Catalog"
 
 * [Platform initialization](#platform_init)  
