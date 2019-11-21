@@ -95,6 +95,8 @@ begin
 				fstart_id = NEW.fstart_id
 			where
 				fid = NEW.fid;
+
+			perform trigger_factory (NEW.fid);
 		end if;
 	end if;
 
@@ -814,28 +816,6 @@ $$ language plpgsql;
 create or replace function update_class_triggers (classId bigint) returns void as
 $$
 declare
-    names text[] = array['before_insert_or_update', 'before_insert'];
-    name text;
-    i integer;
-	columnName varchar (256);
-begin
-    for i IN 1 .. array_upper(names, 1)
-    loop
-        name = names [i];
-        raise notice '%', names[i];
-    END LOOP;
-
-	for rec in select fid, fcode, ftype_id from _class_attr where fclass_id = classId
-    loop
-    	columnName = rec.fcode || '_' || rec.fid;
-
-    end loop;
-end;
-$$ language plpgsql;
-
-create or replace function update_class_triggers (classId bigint) returns void as
-$$
-declare
     names text[] = array['before_insert_or_update', 'before_insert', 'before_update', 'before_delete', 'after_insert_or_update', 'after_insert', 'after_update', 'after_delete'];
     name text;
     i integer;
@@ -872,11 +852,12 @@ begin
             end if;
 
             triggerSQL = format ('
-create or replace function user_trigger_%s_%s () returns trigger as
+create or replace function user_trigger_%s_%s () returns trigger as ''
 begin
 %s
 return %s;
 end;
+'' language plpgsql;
 
 drop trigger if exists user_trigger_%1$s_%2$s on %1$s;
 create trigger user_trigger_%1$s_%2$s', tableName, name, body, returnValue, action) || format ('
