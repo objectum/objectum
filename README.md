@@ -22,7 +22,7 @@ mkdir -p /opt/objectum
 objectum-cli --create-project my_project --path /opt/objectum 
 
 ```
-Default parameters: 
+objectum-cli defaults: 
 ```
 --redis-host 127.0.0.1
 --redis-port 6379

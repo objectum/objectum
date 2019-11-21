@@ -509,6 +509,8 @@ begin
 		raise exception 'unknown classId: %', classId;
 	end if;
 
+	perform update_class_triggers (classId);
+
 	tableName := classCode || '_' || classId;
 
 	-- header
@@ -806,5 +808,85 @@ begin
 
         execute 'delete from ' || classCode || '_' || classId || ' where fobject_id = ' || objectId;
     end if;
+end;
+$$ language plpgsql;
+
+create or replace function update_class_triggers (classId bigint) returns void as
+$$
+declare
+    names text[] = array['before_insert_or_update', 'before_insert'];
+    name text;
+    i integer;
+	columnName varchar (256);
+begin
+    for i IN 1 .. array_upper(names, 1)
+    loop
+        name = names [i];
+        raise notice '%', names[i];
+    END LOOP;
+
+	for rec in select fid, fcode, ftype_id from _class_attr where fclass_id = classId
+    loop
+    	columnName = rec.fcode || '_' || rec.fid;
+
+    end loop;
+end;
+$$ language plpgsql;
+
+create or replace function update_class_triggers (classId bigint) returns void as
+$$
+declare
+    names text[] = array['before_insert_or_update', 'before_insert', 'before_update', 'before_delete', 'after_insert_or_update', 'after_insert', 'after_update', 'after_delete'];
+    name text;
+    i integer;
+    body text;
+    triggerSQL text;
+	columnName varchar (256);
+    rec record;
+    classCode text;
+    tableName text;
+    action text;
+    returnValue text;
+begin
+    select fcode into classCode from _class where fid = classId;
+    tableName = classCode || '_' || classId;
+
+    for i in 1 .. array_upper(names, 1)
+    loop
+        name = names [i];
+        action = replace (name, '_', ' ');
+
+        execute 'select fopts::json->''trigger''->>''' || name || ''' from _class where fid=' || classId into body;
+
+        if (body is not null) then
+            for rec in select fid, fcode from _class_attr where fclass_id = classId
+            loop
+                columnName = rec.fcode || '_' || rec.fid;
+                body = replace (body, '{' || rec.fcode || '}', columnName);
+            end loop;
+
+            returnValue = 'NEW';
+
+            if (name = 'before_delete' or name = 'after_delete') then
+                returnValue = 'OLD';
+            end if;
+
+            triggerSQL = format ('
+create or replace function user_trigger_%s_%s () returns trigger as
+begin
+%s
+return %s;
+end;
+
+drop trigger if exists user_trigger_%1$s_%2$s on %1$s;
+create trigger user_trigger_%1$s_%2$s', tableName, name, body, returnValue, action) || format ('
+%s on %s for each row
+execute procedure user_trigger_%2$s_%s ();
+', action, tableName, name);
+            execute triggerSQL;
+        else
+            execute 'drop trigger if exists user_trigger_' || tableName || '_' || name || ' on ' || tableName;
+        end if;
+    end loop;
 end;
 $$ language plpgsql;
