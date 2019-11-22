@@ -8,7 +8,7 @@ React components https://github.com/objectum/objectum-react
 Command-line interface (CLI) https://github.com/objectum/objectum-cli  
 Objectum project example https://github.com/objectum/catalog 
 
-![objectum](https://github.com/objectum/objectum/master/public/images/objectum.png)
+![objectum](https://github.com/objectum/objectum/blob/master/public/images/objectum.png)
  
 ## Quick start
 
