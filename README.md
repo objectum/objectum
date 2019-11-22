@@ -379,7 +379,7 @@ Password: admin
 <a name="model_item" />
 
 ### Model "item"
-Click "Models" in menu. Click "Create". Edit and save. 
+Click "Models" in menu. Click "Create". Edit and save.  
 objectum-cli: 
 ```bash
 cd /opt/objectum/projects/catalog 
@@ -389,7 +389,7 @@ objectum-cli --create-model '{"name": "Item", "code": "item"}'
 <a name="model_properties" />
 
 ### Model properties
-Select tab "Properties" in model. Click "Create". Edit and save. Do it for all properties. 
+Select tab "Properties" in model. Click "Create". Edit and save. Do it for all properties.  
 objectum-cli: 
 ```bash
 cd /opt/objectum/projects/catalog 
@@ -403,8 +403,8 @@ objectum-cli --create-property '{"model": "item", "name": "File", "code": "file"
 <a name="model_item_type" />
 
 ### Dictionary "d.item.type"
-Create model "d.item" for grouping dictionaries of model "item". Create model "d.item.type" with property "name".
-Add property "type" to model "item". 
+Create model "d.item" for grouping dictionaries of model "item". Create model "d.item.type" with property "name". 
+Add property "type" to model "item".  
 objectum-cli: 
 ```bash
 cd /opt/objectum/projects/catalog 
@@ -417,7 +417,7 @@ objectum-cli --create-property '{"model": "item", "name": "Type", "code": "type"
 <a name="model_comment" />
 
 ### Tabular part "t.item.comment" of "item"
-Create model "t.item" for grouping tabular parts of model "item". Create model "t.item.comment" with properties: item, text. 
+Create model "t.item" for grouping tabular parts of model "item". Create model "t.item.comment" with properties: item, text.   
 objectum-cli: 
 ```bash
 cd /opt/objectum/projects/catalog 
