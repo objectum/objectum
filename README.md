@@ -1,5 +1,3 @@
-Under construction.
-
 # Objectum
 Objectum platform makes it easy to create realtime single page applications that run in both Node.js and browsers.
  
@@ -7,6 +5,7 @@ Requirements: [Redis](https://redis.io/), [PostgreSQL >= 9.x](https://www.postgr
 
 Isomorhic javascript client https://github.com/objectum/objectum-client  
 React components https://github.com/objectum/objectum-react  
+Command-line interface (CLI) https://github.com/objectum/objectum-cli  
 Objectum project example https://github.com/objectum/catalog 
  
 ## Quick start
@@ -61,22 +60,17 @@ npm run start
     * [Remove store](#remove_store)
 * [Development](#development)
     * [Model "item"](#model_item)
-    * [Property "name"](#property_name)
+    * [Model properties](#model_properties)
     * [Dictionary "d.item.type"](#model_item_type)
     * [Tabular part "t.item.comment" of "item"](#model_comment)
-    * [Query "item.list"](#query_list)
-    * [Query "t.item.comment"](#query_comment)
-    * Component "Items"
-    * Component "Item"
-        * Information
-        * Comments
-    * Create menu
-    * Create role
-    * Create user    
-    * Deployment
-        * Export store
-        * Import store
-        * Cluster
+    * [ModelList, ModelRecord](#model_list)
+    * [Menus](#menus)
+    * [Roles](#roles)
+    * [Users](#users)    
+    * [Deployment](#deployment)
+        * [Export store](#export_store)
+        * [Import store](#import_store)
+        * [Cluster](#cluster)
 
 <a name="platform_init" />
 
@@ -147,7 +141,7 @@ node index.js
 mkdir -p /opt/objectum/projects/catalog
 cd /opt/objectum/projects/catalog
 npx create-react-app .
-npm i -S fastify fastify-http-proxy objectum-client objectum-react react-dropzone react-modal react-router-dom
+npm i -S express express-http-proxy objectum-client objectum-react
 ```
 
 <a name="add_project_configuration" />
@@ -188,36 +182,31 @@ Add script:
 cat > /opt/objectum/projects/catalog/index.js
 ```
 ```js
-const fastify = require ("fastify") ();
-const proxy = require ("fastify-http-proxy");
 const config = require ("./config");
+const path = require ("path");
+const express = require ("express");
+const proxy = require ("express-http-proxy");
+const app = express ();
 
-fastify.addHook ("onError", async (req, res, error) => {
-	console.error (error);
+app.use (`/api`, proxy (`http://${config.objectum.host}:${config.objectum.port}`, {
+	proxyReqPathResolver: function (req) {
+		let parts = req.url.split('?');
+		let queryString = parts [1];
+
+		return `/projects/${config.code}${parts [0]}${queryString ? "?" + queryString : ""}`;
+	}
+}));
+app.use ("/public/*", proxy (`http://${config.objectum.host}:${config.objectum.port}`, {
+	proxyReqPathResolver: function (req) {
+		return req.baseUrl;
+	}
+}));
+app.use (express.static (path.join (__dirname, "build")));
+app.get ("/*", function (req, res) {
+	res.sendFile (path.join (__dirname, "build", "index.html"));
 });
-
-fastify.register (proxy, {
-	upstream: `http://${config.objectum.host}:${config.objectum.port}`,
-	prefix: `/api/projects/${config.code}/`,
-	rewritePrefix: `/projects/${config.code}/`,
-	http2: false
-});
-
-fastify.register (proxy, {
-	upstream: `http://${config.objectum.host}:${config.objectum.port}`,
-	prefix: "/public",
-	rewritePrefix: "/public",
-	http2: false
-});
-
-async function start () {
-	await fastify.listen (config.port);
-	console.log (`server listening on ${fastify.server.address ().port}`);
-};
-
-start ().catch (err => {
-	console.error (err);
-	process.exit (1);
+app.listen (config.port, function () {
+	console.log (`server listening on port ${config.port}`);
 });
 ```
 
@@ -361,74 +350,141 @@ Password: admin
 
 ### Model "item"
 Click "Models" in menu. Click "Create". Edit and save.
-![Model "Item"](https://github.com/objectum/catalog/blob/master/files/class-item.png) 
+objectum-cli: 
+```bash
+cd /opt/objectum/projects/catalog 
+objectum-cli --create-model '{"name": "Item", "code": "item"}'
+```
 
-<a name="property_name" />
+<a name="model_properties" />
 
-### Property "name"
-Create property.
-![Property "name"](https://github.com/objectum/catalog/blob/master/files/classAttr-name.png) 
+### Model properties
+Select tab "Properties" in model. Click "Create". Edit and save. Do it for all properties.
+objectum-cli: 
+```bash
+cd /opt/objectum/projects/catalog 
+objectum-cli --create-property '{"model": "item", "name": "Date", "code": "date", "type": "date"}'
+objectum-cli --create-property '{"model": "item", "name": "Name", "code": "name", "type": "string"}'
+objectum-cli --create-property '{"model": "item", "name": "Weight", "code": "weight", "type": "number"}'
+objectum-cli --create-property '{"model": "item", "name": "Hidden", "code": "hidden", "type": "boolean"}'
+objectum-cli --create-property '{"model": "item", "name": "File", "code": "file", "type": "file"}'
+```
 
 <a name="model_item_type" />
 
 ### Dictionary "d.item.type"
 Create model "d.item" for grouping dictionaries of model "item". Create model "d.item.type" with property "name".
-![Dictionary "d.item.type"](https://github.com/objectum/catalog/blob/master/files/class-item-type.png) 
-
 Add property "type" to model "item".
-![Property "type""](https://github.com/objectum/catalog/blob/master/files/classAttr-type.png)
+objectum-cli: 
+```bash
+cd /opt/objectum/projects/catalog 
+objectum-cli --create-model '{"name": "Item", "code": "item", "parent": "d"}'
+objectum-cli --create-model '{"name": "Type", "code": "type", "parent": "d.item"}'
+objectum-cli --create-property '{"model": "d.item.type", "name": "Name", "code": "name", "type": "string"}'
+objectum-cli --create-property '{"model": "item", "name": "Type", "code": "type", "type": "d.item.type"}'
+```
 
 <a name="model_comment" />
 
 ### Tabular part "t.item.comment" of "item"
-Create model "t.item" for grouping tabular parts of model "item". Create model "t.item.comment" with property "text".
-![t.item.comment](https://github.com/objectum/catalog/blob/master/files/class-comment.png) 
-
-<a name="query_list" />
-
-### Query "item.list"
-Create query "item" for grouping queries of model "item". Create query "item.list".  
-Query:
-```sql
-{"data": "begin"}
-select
-	{"prop": "a.id", "as": "id"},
-	{"prop": "a.name", "as": "name"}
-{"data": "end"}
-
-{"count": "begin"}
-select
-	count (*) as num
-{"count": "end"}
-
-from
-	{"model": "item", "alias": "a"}
-limit {"param": "limit"}
-offset {"param": "offset"}
+Create model "t.item" for grouping tabular parts of model "item". Create model "t.item.comment" with properties: item, text.
+objectum-cli: 
+```bash
+cd /opt/objectum/projects/catalog 
+objectum-cli --create-model '{"name": "Item", "code": "item", "parent": "t"}'
+objectum-cli --create-model '{"name": "Comment", "code": "comment", "parent": "t.item"}'
+objectum-cli --create-property '{"model": "t.item.comment", "name": "Item", "code": "item", "type": "item"}'
+objectum-cli --create-property '{"model": "t.item.comment", "name": "Text", "code": "text", "type": "string"}'
 ```
 
-<a name="query_comment" />
+<a name="model_list" />
 
-### Query "t.item.comment"
-Create query "t.item" for grouping tabular part queries of model "item". Create query "t.item.comment".
-Query:
-```sql
-{"data": "begin"}
-select
-	{"prop": "a.id", "as": "id"},
-	{"prop": "a.item", "as": "item"},
-	{"prop": "a.text", "as": "text"}
-{"data": "end"}
+### ModelList, ModelRecord
+All models can view using /model_list. Allowed actions: create, edit, remove.
+Items path: /model_list/item
+Dictionary path: /model_list/d_item_type 
 
-{"count": "begin"}
-select
-	count (*) as num
-{"count": "end"}
+<a name="menus" />
 
-from
-	{"model": "t.item.common", "alias": "a"}
-limit {"param": "limit"}
-offset {"param": "offset"}
+### Menus
+Menu used in role. You can create multi level menu.
+
+<a name="roles" />
+
+### Roles
+Roles of users.
+
+<a name="users" />
+
+### Users
+Users.
+    
+<a name="deployment" />
+
+### Deployment
+
+<a name="export_store" />
+
+### Export store
+"catalog" is developer store.
+```js
+let $o = require ("/opt/objectum/server/objectum");
+
+$o.db.execute ({
+	code: "catalog",
+	fn: "export",
+	filterClasses: [],
+	file: "../schema/schema-catalog.json"
+});
+```
+
+<a name="import_store" />
+
+### Import store
+Create client store and import schema-catalog.json. Example "catalog_client".
+```js
+let $o = require ("/opt/objectum/server/objectum");
+
+$o.db.execute ({
+	code: "catalog",
+	fn: "import",
+	file: "../schema/schema-catalog.json"
+});
+```
+
+<a name="cluster" />
+
+### Cluster
+Change /opt/objectum/server/config.js
+```js
+module.exports = {
+	"rootDir": "/opt/objectum/server",
+	"projectsDir": "/opt/objectum/projects",
+	"startPort": 8200,
+	"redis": {
+		"host": "127.0.0.1",
+		"port": 6379
+	},
+	"query": {
+		"maxRowNum": 2000000,
+		"maxCount": 700000
+	},
+	"log": {
+		"level": "info"
+	},
+	cluster: {
+		www: {
+			workers: 3
+		},
+		app: {
+			workers: 3
+		}
+	}
+}
+```
+Change file /opt/objectum/server/index.js
+```js
+require ("objectum").startCluster (require ("./config"));
 ```
 
 ## Author
