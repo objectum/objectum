@@ -63,6 +63,8 @@ npm run start
     * [Model properties](#model_properties)
     * [Dictionary "d.item.type"](#model_item_type)
     * [Tabular part "t.item.comment" of "item"](#model_comment)
+    * [Triggers](#triggers)
+    * [SQL support](#sql_support)
     * [ModelList, ModelRecord](#model_list)
     * [Menus](#menus)
     * [Roles](#roles)
@@ -396,6 +398,37 @@ objectum-cli --create-model '{"name": "Comment", "code": "comment", "parent": "t
 objectum-cli --create-property '{"model": "t.item.comment", "name": "Item", "code": "item", "type": "item"}'
 objectum-cli --create-property '{"model": "t.item.comment", "name": "Text", "code": "text", "type": "string"}'
 ```
+
+<a name="triggers" />
+
+### Triggers
+Available triggers (PL/pgSQL):
+* before_insert_or_update
+* before_insert
+* before_update
+* before_delete
+* after_insert_or_update
+* after_insert
+* after_update
+* after_delete
+
+Add triggers in "Options" of model.
+Example:
+```js
+{
+	"trigger": {
+		"before_insert_or_update": "if (NEW.{date} is null) then\n    NEW.{date} = current_timestamp;\nend if;\n\n"
+	}
+}
+```
+
+<a name="sql_support" />
+
+### SQL support
+```sql
+under construction
+```
+
 
 <a name="model_list" />
 
