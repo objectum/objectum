@@ -52,6 +52,7 @@ npm run start
     * [Create react application](#create_react_application)
     * [Add project configuration](#add_project_configuration)
     * [Add project web-server](#add_project_web_server)
+    * [Add project App.js](#add_project_app_js)
     * [Add project proxy](#add_project_proxy)
     * [Prepare tablespace folder](#prepare_tablespace_folder)
     * [Create store](#create_store)
@@ -210,6 +211,33 @@ app.get ("/*", function (req, res) {
 app.listen (config.port, function () {
 	console.log (`server listening on port ${config.port}`);
 });
+```
+
+<a name="add_project_web_server" />
+
+### Add project App.js
+Change script /opt/objectum/projects/catalog/src/App.js
+```js
+import React, {Component} from "react";
+import store from "objectum-client";
+import {ObjectumApp} from "objectum-react";
+
+class App extends Component {
+	constructor (props) {
+		super (props);
+		
+		store.setUrl ("/api");
+		window.store = store;
+	}
+	
+	render () {
+		return (
+			<ObjectumApp store={store} name="Catalog" />
+		);
+	}
+};
+
+export default App;
 ```
 
 <a name="add_project_proxy" />
