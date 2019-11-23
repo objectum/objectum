@@ -136,6 +136,7 @@ async function init () {
 		"logout": project.logout,
 		"getData": project.getData,
 		"getDict": project.getDict,
+		"getLog": project.getLog,
 		"getRecords": project.getRecords
 	};
 	let rscMap = {

@@ -7,7 +7,7 @@ begin
 	select count (*) into num from _view where fparent_id = OLD.fid;
 
     if (num > 0) then
-        raise exception 'view has child views';
+        raise exception 'query has child views';
     end if;
 
 	return OLD;
@@ -28,13 +28,13 @@ begin
 	select count (*) into num from _class where fparent_id = OLD.fid;
 
     if (num > 0) then
-        raise exception 'class has child classes';
+        raise exception 'model has child models';
     end if;
 
 	select count (*) into num from _class_attr where fclass_id = OLD.fid;
 
     if (num > 0) then
-        raise exception 'class has attributes';
+        raise exception 'model has properties';
     end if;
 
 	return OLD;
@@ -125,7 +125,7 @@ begin
 			execute 'drop table ' || NEW.fcode || '_' || NEW.fid;
 		end if;
 
-    	raise notice 'class removed: %', NEW.fid;
+    	raise notice 'model removed: %', NEW.fid;
 	end if;
 
 	return NEW;
@@ -174,16 +174,16 @@ begin
 			perform column_util (NEW.fid, 'createColumn,createTable,setNotNull,createIndex,createForeignKey');
 		else
 			if (caCode <> NEW.fcode) then
-				raise exception 'can''t change after creation: code - %, %. classAttr: %', caCode, NEW.fcode, NEW.fid;
+				raise exception 'can''t change after creation: code - %, %. property: %', caCode, NEW.fcode, NEW.fid;
 			end if;
 			if (caClassId <> NEW.fclass_id) then
-				raise exception 'can''t change after creation: class - %, %. classAttr: %', caClassId, NEW.fclass_id, NEW.fid;
+				raise exception 'can''t change after creation: class - %, %. property: %', caClassId, NEW.fclass_id, NEW.fid;
 			end if;
 			if (caTypeId <> NEW.ftype_id) then
-				raise exception 'can''t change after creation: type - %, %. classAttr: %', caTypeId, NEW.ftype_id, NEW.fid;
+				raise exception 'can''t change after creation: type - %, %. property: %', caTypeId, NEW.ftype_id, NEW.fid;
 			end if;
 			if (unlogged <> NEW.funlogged or (unlogged is null and NEW.funlogged is not null) or (unlogged is not null and NEW.funlogged is null)) then
-				raise exception 'can''t change after creation: unlogged. classAttr: %',NEW.fid;
+				raise exception 'can''t change after creation: unlogged. property: %',NEW.fid;
 			end if;
 			if (caUnique <> NEW.funique or (caUnique is null and NEW.funique is not null) or (caUnique is not null and NEW.funique is null)) then
 			    if (NEW.funique is null or NEW.funique = 0) then
@@ -508,7 +508,7 @@ begin
 	select fcode, fparent_id into classCode, parentId from _class where fid = classId;
 
 	if (classCode is null) then
-		raise exception 'unknown classId: %', classId;
+		raise exception 'unknown modelId: %', classId;
 	end if;
 
 	perform update_class_triggers (classId);

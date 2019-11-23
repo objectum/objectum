@@ -295,7 +295,7 @@ class Store {
 		if (me.map ["class"][id]) {
 			return me.map ["class"][id];
 		} else {
-			throw new Error (`store.getClass: Unknown class: ${id}`);
+			throw new Error (`store.getModel: Unknown model: ${id}`);
 		}
 	}
 	
@@ -320,7 +320,7 @@ class Store {
 			if (me.map ["classAttr"][opts]) {
 				return me.map ["classAttr"][opts];
 			} else {
-				throw new Error (`store.getClassAttr: Unknown classAttr: ${opts}`);
+				throw new Error (`store.getProperty: Unknown property: ${opts}`);
 			}
 		} else {
 			let o = me.getClass (opts.classCode || opts.classId);
@@ -329,10 +329,10 @@ class Store {
 				if (o.attrs [opts.attrCode]) {
 					return o.attrs [opts.attrCode];
 				} else {
-					throw new Error (`store.getClassAttr: Unknown attrCode: ${opts.attrCode} (class: ${opts.classId || opts.classCode})`);
+					throw new Error (`store.getProperty: Unknown propertyCode: ${opts.attrCode} (model: ${opts.classId || opts.classCode})`);
 				}
 			} else {
-				throw new Error (`store.getClassAttr: Unknown class: ${opts.classCode || opts.classId}`);
+				throw new Error (`store.getProperty: Unknown model: ${opts.classCode || opts.classId}`);
 			}
 		}
 	}
@@ -343,7 +343,7 @@ class Store {
 		if (me.map ["view"][id]) {
 			return me.map ["view"][id];
 		} else {
-			throw new Error (`store.getView: Unknown view: ${id}`);
+			throw new Error (`store.getQuery: Unknown query: ${id}`);
 		}
 	}
 	
@@ -354,7 +354,7 @@ class Store {
 			if (me.map ["viewAttr"][opts]) {
 				return me.map ["viewAttr"][opts];
 			} else {
-				throw new Error (`store.getViewAttr: Unknown viewAttr: ${opts}`);
+				throw new Error (`store.getColumn: Unknown column: ${opts}`);
 			}
 		} else {
 			let o = me.getView (opts.viewCode || opts.viewId);
@@ -363,10 +363,10 @@ class Store {
 				if (o.attrs [opts.attrCode]) {
 					return o.attrs [opts.attrCode];
 				} else {
-					throw new Error (`store.getViewAttr: Unknown attrCode: ${opts.attrCode} (view: ${opts.viewId || opts.viewCode})`);
+					throw new Error (`store.getColumn: Unknown columnCode: ${opts.attrCode} (query: ${opts.viewId || opts.viewCode})`);
 				}
 			} else {
-				throw new Error (`store.getViewAttr: Unknown view: ${opts.viewCode || opts.viewId}`);
+				throw new Error (`store.getColumn: Unknown query: ${opts.viewCode || opts.viewId}`);
 			}
 		}
 	}
@@ -432,7 +432,7 @@ class Store {
 			let rows = await me.query (opts);
 			
 			if (!rows.length) {
-				throw new Error (`store.getObject: Unknown object: ${id}`);
+				throw new Error (`store.getRecord: Unknown record: ${id}`);
 			}
 			object = new Object ({store: me});
 			object.data.id = id;
@@ -491,7 +491,7 @@ class Store {
 		if (id) {
 			return id;
 		} else {
-			throw new Error (`store.getId: unknown code: ${code}, class: ${classCode}`);
+			throw new Error (`store.getId: unknown code: ${code}, model: ${classCode}`);
 		}
 	}
 	

@@ -26,6 +26,29 @@ async function getDict (req, store) {
 	return await store.query ({session, sql});
 };
 
+async function getLog (req, store) {
+	let session = req.session;
+	let o = store.getObject (req.args ["record"]);
+	let ca = store.getClassAttr (req.args ["property"]);
+	let sql = `
+		select
+			a.fid as id,
+			a.${ca.getLogField ()} as value,
+			b.fdate as date,
+			b.fdescription as description,
+			b.fremote_addr as remote_addr
+		from
+			tobject_attr a
+			inner join trevision b on (a.fstart_id = b.fid)
+		where
+			a.fobject_id = ${req.args ["record"]} and
+			a.fclass_attr_id = ${ca.get ("id")}
+		order by
+			b.fdate
+	`;
+	return await store.query ({session, sql});
+};
+
 function addFilters (tokens, filters, caMap, aliasPrefix) {
 	let f = "\n" + _.map (filters, f => {
 		let s = `${aliasPrefix [f [0]]}.${caMap [f [0]].isId ? "fobject_id" : caMap [f [0]].getField ()} ${f [1]}`;
@@ -259,6 +282,13 @@ function getModelView (model, store, args) {
 	
 	let where = `{"where": "empty"}`;
 	
+	if (args.hasOwnProperty ("parent")) {
+		where = `
+		{"where": "begin"}
+			{"prop": "a.parent"} {"tree": "filter"}
+		{"where": "end"}
+		`;
+	}
 	if (m.getPath ().substr (0, 2) == "t.") {
 		let tokens = m.getPath ().split (".");
 		let parentCode = tokens [tokens.length - 2];
@@ -267,6 +297,7 @@ function getModelView (model, store, args) {
 			where = `
 		{"where": "begin"}
 			{"prop": "a.${parentCode}"} = ${args [parentCode]}
+			${args.hasOwnProperty ("parent") ? `and {"prop": "a.parent"} {"tree": "filter"}` : ""}
 		{"where": "end"}
 			`;
 		}
@@ -285,6 +316,13 @@ function getModelView (model, store, args) {
 			count (*) as num
 		{"count": "end"}
 		
+		${args.hasOwnProperty ("parent") ? `
+		{"tree": "begin"}
+		select
+			{"prop": "a.parent", "as": "parent"}, count (*) as num
+		{"tree": "end"}
+		` : ""}
+		
 		from
 			{"model": "${model}", "alias": "a"}
 		
@@ -294,6 +332,12 @@ function getModelView (model, store, args) {
 			${order.join (", ")}
 		{"order": "end"}
 		
+		${args.hasOwnProperty ("parent") ? `
+		{"tree": "begin"}
+		group by
+			{"prop": "a.parent"}
+		{"tree": "end"}
+		` : ""}
 		limit {"param": "limit"}
 		offset {"param": "offset"}
 	`;
@@ -506,6 +550,7 @@ async function getRecords (req, store) {
 
 module.exports = {
 	getDict,
+	getLog,
 	getData,
 	getRecords
 };

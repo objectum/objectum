@@ -425,7 +425,7 @@ async function classFn (req) {
 	log.debug ({fn: "project.classFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
-		throw new Error ("project.classFn: forbidden");
+		throw new Error ("project.modelFn: forbidden");
 	}
 	let store = await getStore ({code: req.code});
 	let o;
@@ -458,7 +458,7 @@ async function classFn (req) {
 		});
 		await o.sync ({session: req.session});
 	} else {
-		throw new Error ("project.classFn: unknown fn: " + req.args._fn);
+		throw new Error ("project.modelFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["query"] = o.data ["view"];
 	delete o.data ["view"];
@@ -474,7 +474,7 @@ async function classAttrFn (req) {
 	log.debug ({fn: "project.classAttrFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
-		throw new Error ("project.classAttrFn: forbidden");
+		throw new Error ("project.propertyFn: forbidden");
 	}
 	let store = await getStore ({code: req.code});
 	let o;
@@ -505,7 +505,7 @@ async function classAttrFn (req) {
 		});
 		await o.sync ({session: req.session});
 	} else {
-		throw new Error ("project.classAttrFn: unknown fn: " + req.args._fn);
+		throw new Error ("project.propertyFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["model"] = o.data ["class"];
 	delete o.data ["class"];
@@ -521,7 +521,7 @@ async function viewFn (req) {
 	log.debug ({fn: "project.viewFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
-		throw new Error ("project.viewFn: forbidden");
+		throw new Error ("project.queryFn: forbidden");
 	}
 	let store = await getStore ({code: req.code});
 	let o;
@@ -552,7 +552,7 @@ async function viewFn (req) {
 		});
 		await o.sync ({session: req.session});
 	} else {
-		throw new Error ("project.viewFn: unknown fn: " + req.args._fn);
+		throw new Error ("project.queryFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["model"] = o.data ["class"];
 	delete o.data ["class"];
@@ -568,7 +568,7 @@ async function viewAttrFn (req) {
 	log.debug ({fn: "project.viewAttrFn", session: req.session.id, args: req.args});
 	
 	if (req.session.username == "autologin" && request.session.userId == null) {
-		throw new Error ("project.viewAttrFn: forbidden");
+		throw new Error ("project.columnFn: forbidden");
 	}
 	let store = await getStore ({code: req.code});
 	let o;
@@ -599,7 +599,7 @@ async function viewAttrFn (req) {
 		});
 		await o.sync ({session: req.session});
 	} else {
-		throw new Error ("project.viewAttrFn: unknown fn: " + req.args._fn);
+		throw new Error ("project.columnFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["query"] = o.data ["view"];
 	delete o.data ["view"];
@@ -659,7 +659,7 @@ async function objectFn (req) {
 		req.args ["_class"] = req.args ["_model"];
 		delete req.args ["_model"];
 	}
-	log.debug ({fn: "project.objectFn", session: req.session.id, args: req.args});
+	log.debug ({fn: "project.recordFn", session: req.session.id, args: req.args});
 	
 	let store = await getStore ({code: req.code});
 	let o;
@@ -690,7 +690,7 @@ async function objectFn (req) {
 		});
 		await o.sync ({session: req.session});
 	} else {
-		throw new Error ("project.objectFn: unknown fn: " + req.args._fn);
+		throw new Error ("project.recordFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["_model"] = o.data ["_class"];
 	delete o.data ["_class"];
@@ -936,6 +936,14 @@ async function getDict (req) {
 	return await data.getDict (req, store);
 };
 
+async function getLog (req) {
+	log.debug ({fn: "project.getLog"});
+	
+	let store = await getStore ({code: req.code});
+	
+	return await data.getLog (req, store);
+};
+
 async function getData (req) {
 	log.debug ({fn: "project.getData"});
 	
@@ -979,5 +987,6 @@ module.exports = {
 	objectFn,
 	getData,
 	getDict,
+	getLog,
 	getRecords
 };
