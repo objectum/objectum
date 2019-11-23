@@ -71,7 +71,7 @@ Password: admin
     * [Tabular part "t.item.comment" of "item"](#model_comment)
     * [Triggers](#triggers)
     * [SQL support](#sql_support)
-    * [ModelList, ModelRecord](#model_list)
+    * [ModelList, ModelTree, ModelRecord](#model_list)
     * [Menus](#menus)
     * [Roles](#roles)
     * [Users](#users)    
@@ -466,7 +466,7 @@ under construction
 <a name="model_list" />
 
 ### ModelList, ModelRecord
-All models can view using /model_list. Allowed actions: create, edit, remove.
+All models can view using /model_list or /model_tree (need "parent" property). Allowed actions: create, edit, remove.
 Items path: /model_list/item
 Dictionary path: /model_list/d_item_type 
 
