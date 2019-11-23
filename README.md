@@ -41,11 +41,12 @@ password - password of project 'admin'.
 Start project:
 ```bash
 cd /opt/objectum/server 
-./start.sh 
+./start.sh (start.bat in windows)
 cd /opt/objectum/projects/my_project 
-./start.sh 
+./start.sh (start.bat in windows)
 npm run start
 ```
+Open URL: http://127.0.0.1:3100
 
 ## Learn by Example project "Catalog"
 
