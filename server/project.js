@@ -111,7 +111,8 @@ async function www (req, res) {
 
 async function wwwPublic (req, res) {
 	let path = req.raw.url.split ("?")[0];
-	let filePath = config.rootDir + path;
+//	let filePath = config.rootDir + path;
+	let filePath = `${__dirname}/../${path}`;
 	let data = await fs_readFile (decodeURI (filePath));
 	let ext = filePath.split (".");
 	
