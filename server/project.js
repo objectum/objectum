@@ -407,7 +407,7 @@ async function rollbackTransaction (req) {
 	log.debug ({fn: "project.rollbackTransaction", session: req.session.id});
 	
 	if (!_.get (sessions [req.session.id], "transaction.active")) {
-		throw new Error ("project.commitTransaction: Transaction not active");
+		throw new Error ("project.rollbackTransaction: Transaction not active");
 	}
 	let store = await getStore ({code: req.code});
 	let revision = await store.rollbackTransaction ({session: req.session});
