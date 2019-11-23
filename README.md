@@ -46,7 +46,9 @@ cd /opt/objectum/projects/my_project
 ./start.sh (start.bat in windows)
 npm run start
 ```
-Open URL: http://127.0.0.1:3100
+Open URL: http://localhost:3000  
+Login: admin  
+Password: admin  
 
 ## Learn by Example project "Catalog"
 
