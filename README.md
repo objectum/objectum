@@ -3,10 +3,11 @@ Objectum platform makes it easy to create realtime single page applications that
  
 Requirements: [Redis](https://redis.io/), [PostgreSQL >= 9.x](https://www.postgresql.org/download/) (datestyle = dmy, iso)
 
-Isomorhic javascript client https://github.com/objectum/objectum-client  
-React components https://github.com/objectum/objectum-react  
-Command-line interface (CLI) https://github.com/objectum/objectum-cli  
-Objectum project example https://github.com/objectum/catalog 
+Objectum ecosystem:
+* Isomorhic javascript client https://github.com/objectum/objectum-client  
+* React components https://github.com/objectum/objectum-react  
+* Command-line interface (CLI) https://github.com/objectum/objectum-cli  
+* Objectum project example https://github.com/objectum/catalog 
 
 <kbd><img src="https://github.com/objectum/objectum/blob/master/public/images/objectum.png" /></kbd>
  

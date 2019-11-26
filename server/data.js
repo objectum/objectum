@@ -57,7 +57,11 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 			f [2] += "%";
 		}
 		if (f [2] !== "") {
-			s += ` '${f [2]}'`;
+			if (f [1] == "in" || f [1] == "not in") {
+				s += `(${f [2].join (",")})`;
+			} else {
+				s += ` '${f [2]}'`;
+			}
 		}
 		return s;
 	}).join (" and ") + "\n";
