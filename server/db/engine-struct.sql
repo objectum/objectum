@@ -43,6 +43,20 @@ create table _view (
 	fstart_id bigint
 );
 
+create table _view_attr (
+	fid bigserial not null,
+	fview_id bigint,
+	fname varchar (256),
+	fcode varchar (256),
+	fdescription text,
+	forder numeric,
+	fclass_attr_id bigint,
+	farea bigint,
+	fcolumn_width bigint,
+	fopts text,
+	fstart_id bigint
+);
+
 create table _object (
 	fid bigserial not null,
 	fclass_id bigint,
@@ -64,6 +78,7 @@ create unlogged table _log (
 alter table _class add primary key (fid);
 alter table _class_attr add primary key (fid);
 alter table _view add primary key (fid);
+alter table _view_attr add primary key (fid);
 alter table _object add primary key (fid);
 alter table _opts add primary key (fid);
 
@@ -72,4 +87,5 @@ create unique index _class_fcode_null on _class (fcode)  where fparent_id is nul
 create unique index _class_attr_fcode on _class_attr (fclass_id, fcode);
 create unique index _view_fcode on _view (fparent_id, fcode);
 create unique index _view_fcode_null on _view (fcode) where fparent_id is null;
+create unique index _view_attr_fcode on _view_attr (fview_id, fcode);
 create unique index _opts_fcode on _opts (fcode);

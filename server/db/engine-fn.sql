@@ -7,7 +7,7 @@ begin
 	select count (*) into num from _view where fparent_id = OLD.fid;
 
     if (num > 0) then
-        raise exception 'query has child views';
+        raise exception 'query has child queries';
     end if;
 
 	return OLD;
@@ -345,6 +345,70 @@ drop trigger if exists tview_after_update on tview;
 create trigger tview_after_update
 after update on tview for each row
 execute procedure trigger_tview_after_update ();
+
+-- tview_attr after insert
+create or replace function trigger_tview_attr_after_insert () returns trigger as
+$$
+declare
+	viewAttrCode varchar (256);
+begin
+	select fcode into viewAttrCode from _view_attr where fid = NEW.fid;
+
+	if (NEW.fend_id = 0) then
+		if (viewAttrCode is null) then
+			insert into _view_attr (
+			    fid, fview_id, fname, fcode, fdescription, forder, fclass_attr_id, farea, fcolumn_width, fopts, fstart_id
+			) values (
+			    NEW.fid, NEW.fview_id, NEW.fname, NEW.fcode, NEW.fdescription, NEW.forder, NEW.fclass_attr_id, NEW.farea, NEW.fcolumn_width, NEW.fopts, NEW.fstart_id
+			);
+		else
+			update _view_attr set
+                fview_id = NEW.fview_id,
+                fname = NEW.fname,
+                fcode = NEW.fcode,
+                fdescription = NEW.fdescription,
+                forder = NEW.forder,
+                fclass_attr_id = NEW.fclass_attr_id,
+                farea = NEW.farea,
+                fcolumn_width = NEW.fcolumn_width,
+                fopts = NEW.fopts,
+                fstart_id = NEW.fstart_id
+			where
+				fid = NEW.fid;
+		end if;
+	end if;
+
+	return NEW;
+end;
+$$ language plpgsql;
+
+drop trigger if exists tview_attr_after_insert on tview_attr;
+
+create trigger tview_attr_after_insert
+after insert on tview_attr for each row
+execute procedure trigger_tview_attr_after_insert ();
+
+-- tview_attr after update
+create or replace function trigger_tview_attr_after_update () returns trigger as
+$$
+declare
+	startId bigint;
+begin
+	select fstart_id into startId from _view_attr where fid = NEW.fid;
+
+	if (startId is not null and NEW.fstart_id = startId) then
+		execute 'delete from _view_attr where fid = ' || NEW.fid;
+	end if;
+
+	return NEW;
+end;
+$$ language plpgsql;
+
+drop trigger if exists tview_attr_after_update on tview_attr;
+
+create trigger tview_attr_after_update
+after update on tview_attr for each row
+execute procedure trigger_tview_attr_after_update ();
 
 -- tobject after insert
 create or replace function trigger_tobject_after_insert () returns trigger as

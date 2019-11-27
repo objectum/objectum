@@ -175,7 +175,7 @@ function getMetaCode (table) {
 
 function isMetaTable (table) {
 	if (["tschema", "trevision", "tview_attr", "taction", "_class_attr", "_object", "_opts", "_log",
-		"_view", "_class", "tclass", "tclass_attr", "tview", "tobject", "tobject_attr"].indexOf (table) > -1
+		"_view", "_view_attr", "_class", "tclass", "tclass_attr", "tview", "tobject", "tobject_attr"].indexOf (table) > -1
 	) {
 		return true;
 	}

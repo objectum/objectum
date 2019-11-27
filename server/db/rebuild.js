@@ -43,7 +43,7 @@ async function rebuild ({store}) {
 	//await store.query ({client: store.client, sql: "begin"});
 	
 	let tables = [
-		"_class", "_class_attr", "_view", "_object", "_opts", "_log", ..._.map (store.recs ["class"], o => o.getTable ())
+		"_class", "_class_attr", "_view", "_view_attr", "_object", "_opts", "_log", ..._.map (store.recs ["class"], o => o.getTable ())
 	];
 	await store.query ({client: store.client, sql: "begin"});
 	
@@ -87,6 +87,10 @@ async function rebuild ({store}) {
 		"_view": {
 			logTable: "tview",
 			fields: ["fid", "fparent_id", "fname", "fcode", "fdescription", "forder", "flayout", "fquery", "fopts", "fstart_id"]
+		},
+		"_view_attr": {
+			logTable: "tview_attr",
+			fields: ["fid", "fview_id", "fname", "fcode", "fdescription", "forder", "fclass_attr_id", "farea", "fcolumn_width", "fopts", "fstart_id"]
 		},
 		"_object": {
 			logTable: "tobject",
