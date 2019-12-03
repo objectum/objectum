@@ -210,6 +210,7 @@ begin
 				forder = NEW.forder,
 				fnot_null = NEW.fnot_null,
 				fsecure = NEW.fsecure,
+				funique = NEW.funique,
 				fremove_rule = NEW.fremove_rule,
 				fopts = NEW.fopts,
 				fstart_id = NEW.fstart_id
