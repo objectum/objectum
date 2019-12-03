@@ -420,10 +420,14 @@ class Store {
 			let opts = {
 				session,
 				sql: `
-					select a.fclass_attr_id, a.fstring, a.ftime, fnumber, b.fclass_id
-					from tobject b
-					left join tobject_attr a on (a.fobject_id=b.fid and a.fend_id = 0)
-					where b.fid = ${id} and b.fend_id = 0
+					select
+						a.fclass_attr_id, a.fstring, a.ftime, a.fnumber,
+						b.fclass_id, b.fstart_id, b.frecord_id, b.fschema_id
+					from
+						tobject b
+						left join tobject_attr a on (a.fobject_id=b.fid and a.fend_id = 0)
+					where
+						b.fid = ${id} and b.fend_id = 0
 				`
 			};
 			if (!session) {
@@ -437,6 +441,9 @@ class Store {
 			object = new Object ({store: me});
 			object.data.id = id;
 			object.data.fclass_id = object.data.classId = object.data ["_class"] = rows [0].fclass_id;
+			object.data.start = rows [0].fstart_id;
+			object.data.record = rows [0].frecord_id;
+			object.data.schema = rows [0].fschema_id;
 			
 			_.each (rows, function (row) {
 				let classAttr = me.map ["classAttr"][row.fclass_attr_id];

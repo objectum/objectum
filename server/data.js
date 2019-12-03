@@ -28,7 +28,7 @@ async function getDict (req, store) {
 
 async function getLog (req, store) {
 	let session = req.session;
-	let o = store.getObject (req.args ["record"]);
+	let userModel = store.getClass ("objectum.user");
 	let ca = store.getClassAttr (req.args ["property"]);
 	let sql = `
 		select
@@ -36,10 +36,13 @@ async function getLog (req, store) {
 			a.${ca.getLogField ()} as value,
 			b.fdate as date,
 			b.fdescription as description,
-			b.fremote_addr as remote_addr
+			b.fremote_addr as remote_addr,
+			b.fsubject_id as user_id,
+			c.${userModel.attrs ["login"].getField ()} as login
 		from
 			tobject_attr a
 			inner join trevision b on (a.fstart_id = b.fid)
+			left join ${userModel.getTable ()} c on (b.fsubject_id = c.fobject_id)
 		where
 			a.fobject_id = ${req.args ["record"]} and
 			a.fclass_attr_id = ${ca.get ("id")}

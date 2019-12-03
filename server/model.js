@@ -140,9 +140,10 @@ class Object extends Base {
 		if (!classObj) {
 			throw new Error (`unknown model: ${me.get ("_class")}`);
 		}
+		await me.store.redisClient.hdelAsync (`${me.store.code}-objects`, me.get ("id"));
+		
 		if (me.removed) {
 			await me.store.query ({session, sql: `delete from ${classObj.getTable ()} where fobject_id = ${me.get ("id")}`});
-			await me.store.redisClient.hdelAsync (`${me.store.code}-objects`, me.get ("id"));
 			
 			if (!config.legacy && me.store.getClass ("objectum.user").get ("id") == me.get ("_class")) {
 				delete me.store.auth.user [me.get ("login")];
@@ -273,6 +274,10 @@ class Object extends Base {
 				role: me.get ("id"), menu: me.get ("menu")
 			});
 		}
+		let updatedObject = await me.store.getObject ({session, id: me.get ("id")});
+		
+		me.data = updatedObject.data;
+		me.originalData = updatedObject.originalData;
 /*
 		if (!config.legacy && me.store.getClass ("objectum.user").get ("id") == me.get ("_class")) {
 			let menuId = null;
