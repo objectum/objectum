@@ -100,6 +100,28 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 	return r;
 };
 
+function removeWhere (tokens) {
+	let r = [], whereSection = false;
+	
+	for (let i = 0; i < tokens.length; i ++) {
+		let o = tokens [i];
+		
+		if (o && typeof (o) == "object" && o ["where"]) {
+			if (o ["where"] == "begin") {
+				whereSection = true;
+			}
+			if (o ["where"] == "end") {
+				whereSection = false;
+			}
+		} else {
+			if (!whereSection) {
+				r.push (o);
+			}
+		}
+	}
+	return r;
+};
+
 function addOrder (tokens, order, caMap, aliasPrefix) {
 	let orderStr = `\n${aliasPrefix [order [0]]}.${caMap [order [0]].isId ? "fobject_id" : caMap [order [0]].getField ()} ${order [1]}\n`;
 	let r = [], orderSection = false;
@@ -185,6 +207,16 @@ function getQuery (code, tokens, args, parents) {
 			}
 			if (o) {
 				if (o ["param"]) {
+					if (args.getColumns) {
+						if (o ["param"] == "offset") {
+							o = 0;
+						} else
+						if (o ["param"] == "limit") {
+							o = 1;
+						} else {
+							o = '0';
+						}
+					} else
 					if (code == "count" || code == "tree") {
 						if (o ["param"] == "offset") {
 							o = 0;
@@ -223,7 +255,7 @@ function getQuery (code, tokens, args, parents) {
 async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 	let cols = _.map (fields, (field, i) => {
 		let name = field.alias;
-		let va = view.attrs [name];
+		let va = view.attrs [selectAliases [i]];
 		let order = 0;
 		let classId = null, classAttrId = null, typeId = 1, area = 1;
 		
@@ -255,7 +287,7 @@ async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 		if (va) {
 			name = va.get ("name");
 			order = va.get ("order");
-			area = va.get ("area");
+			area = Number (va.get ("area"));
 		}
 		return {
 			name,
@@ -482,6 +514,9 @@ async function getData (req, store) {
 	if (req.args.filters && req.args.filters.length) {
 		tokens = addFilters (tokens, req.args.filters, caMap, aliasPrefix);
 	}
+	if (req.args.getColumns) {
+		tokens = removeWhere (tokens);
+	}
 	if (req.args.order) {
 		tokens = addOrder (tokens, req.args.order, caMap, aliasPrefix);
 	}
@@ -492,7 +527,7 @@ async function getData (req, store) {
 	};
 	data.cols = await getViewAttrs (data.recs, view, caMap, store, fields, selectAliases);
 	
-	if (_.has (req.args, "offset") && _.has (req.args, "limit")) {
+	if (_.has (req.args, "offset") && _.has (req.args, "limit") && !req.args.getColumns) {
 		if (hasSelectCount) {
 			let recs = await store.query ({session, sql: getQuery ("count", tokens, req.args)});
 			
