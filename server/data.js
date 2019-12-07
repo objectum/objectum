@@ -13,10 +13,12 @@ async function getDict (req, store) {
 		throw new Error (`"name" not exists in ${cls.getPath ()}`);
 	}
 	let cls2 = store.getClass (ca.get ("class"));
+	let caGroup = cls.attrs ["group"];
 	let sql = `
 		select
 			a.fobject_id as id,
 			${ca.getField ()} as name
+			${caGroup ? `, ${caGroup.getField ()} as group` : ""}
 		from
 			${cls.getTable ()} a
 			${cls2.get ("id") != cls.get ("id") ? `inner join ${cls2.getTable ()} b on (a.fobject_id = b.fobject_id)` : ""}
