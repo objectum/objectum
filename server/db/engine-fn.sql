@@ -71,7 +71,7 @@ begin
 			    perform table_util (NEW.fid, 'createTable,createForeignKey');
 			end if;
 
-			perform trigger_factory (NEW.fid);
+			perform trigger_factory (NEW.fid, 'new');
 		else
 			if (classCode <> NEW.fcode) then
 				raise exception 'can''t change after creation: code';
@@ -546,7 +546,7 @@ create trigger tobject_attr_after_insert
 after insert on tobject_attr for each row
 execute procedure trigger_tobject_attr_after_insert ();
 
-create or replace function trigger_factory (classId bigint) returns void as
+create or replace function trigger_factory (classId bigint, opts text default '') returns void as
 $$
 declare
 	tableName varchar (256);
@@ -576,7 +576,9 @@ begin
 		raise exception 'unknown modelId: %', classId;
 	end if;
 
-	perform update_class_triggers (classId);
+    if (position ('new' in opts) = 0) then
+	    perform update_class_triggers (classId);
+	end if;
 
 	tableName := classCode || '_' || classId;
 
