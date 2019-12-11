@@ -440,6 +440,12 @@ async function getData (req, store) {
 	} else {
 		throw new Error ("query or model not exist");
 	}
+	if (!req.args.hasOwnProperty ("offset")) {
+		req.args.offset = 0;
+	}
+	if (!req.args.hasOwnProperty ("limit")) {
+		req.args.limit = config.query.maxCount;
+	}
 	let query = view.get ("query");
 	let tokens = [], json = "", str = "", classMap = {}, caMap = {}, selectAliases = [], aliasPrefix = {};
 	let hasSelectCount = false, hasTree = false;
