@@ -656,37 +656,11 @@ execute procedure trigger_%1$s_after_delete ();', tableName);
 	    (TG_OP = ''UPDATE'' and ((OLD.%1$s is null and NEW.%1$s is not null) or (OLD.%1$s is not null and NEW.%1$s is null) or (OLD.%1$s <> NEW.%1$s)))
 	) then
 	    if (TG_OP = ''UPDATE'') then
-		    execute ''update tobject_attr set fend_id = '' || revisionId || '' where fend_id = 0 and fobject_id = '' || NEW.fobject_id || '' and fclass_attr_id = %s'';
+		    execute ''update tobject_attr set fend_id = $1 where fend_id = 0 and fobject_id = $2 and fclass_attr_id = $3''
+		    using revisionId, NEW.fobject_id, %s;
         end if;
 
-		value := ''null'';
 		changed := True;', columnName, rec.fid);
-
- 		if (rec.ftype_id = 1 or rec.ftype_id = 5) then
- 			taiu := taiu || format ('
-		if (NEW.%s is not null) then
-			value = '''''''' || replace (NEW.%1$s, '''''''', '''''''''''') || '''''''';
-		end if;', columnName);
-		elsif (rec.ftype_id = 3) then
-		    select position ('DMY' in current_setting ('datestyle')) into pos;
-
-		    if (pos > 0) then
- 			    taiu := taiu || format ('
-		if (NEW.%s is not null) then
-			value = '''''''' || to_char (NEW.%1$s, ''DD.MM.YYYY HH24:MI:SS.MS'') || '''''''';
-		end if;', columnName);
-		    else
- 			    taiu := taiu || format ('
-		if (NEW.%s is not null) then
-			value = '''''''' || to_char (NEW.%1$s, ''MM.DD.YYYY HH24:MI:SS.MS'') || '''''''';
-		end if;', columnName);
-		    end if;
-		else
- 			taiu := taiu || format ('
-		if (NEW.%s is not null) then
-			value = '''''''' || NEW.%1$s::text || '''''''';
-		end if;', columnName);
-		end if;
 
         taiu := taiu || '
 		execute ''insert into tobject_attr (fobject_id, fclass_attr_id, ';
@@ -699,15 +673,15 @@ execute procedure trigger_%1$s_after_delete ();', tableName);
  			taiu := taiu || 'fnumber, ';
  		end if;
 
- 		taiu := taiu || format ('fstart_id, fend_id) values ('' || NEW.fobject_id || '', %s, '' || value || '', '' || revisionId || '', 0)'';
-	end if;', rec.fid);
+ 		taiu := taiu || format ('fstart_id, fend_id) values ($1, $2, $3, $4, 0)'' using NEW.fobject_id, %s, NEW.%s, revisionId;
+	end if;', rec.fid, columnName);
 
     end loop;
 
 	-- footer
 	taiu := taiu || format ('
 	if (changed = True) then
-		execute ''insert into _log (fid, frsc_id, foper_id) values ('' || NEW.fobject_id || '', 12, 2)'';
+		execute ''insert into _log (fid, frsc_id, foper_id) values ($1, 12, 2)'' using NEW.fobject_id;
 	end if;
 
 	return NEW;

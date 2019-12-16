@@ -13,7 +13,7 @@ async function getDict (req, store) {
 		throw new Error (`"name" not exists in ${cls.getPath ()}`);
 	}
 	let cls2 = store.getClass (ca.get ("class"));
-	let caGroup;
+	let caGroup, caOrder = cls.attrs ["order"];
 	
 	for (let code in cls.attrs) {
 		if (cls.attrs [code].get ("type") >= 1000) {
@@ -30,7 +30,7 @@ async function getDict (req, store) {
 			${cls.getTable ()} a
 			${cls2.get ("id") != cls.get ("id") ? `inner join ${cls2.getTable ()} b on (a.fobject_id = b.fobject_id)` : ""}
 		order by
-			name
+			${caOrder ? `a.${caOrder.getField ()}, ` : ""} name
 	`;
 	return await store.query ({session, sql});
 };
