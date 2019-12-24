@@ -833,6 +833,46 @@ class Import {
 		});
 	};
 	
+	// _class.fstart_id, _class_attr.fstart_id, _view.fstart_id, _view_attr.fstart_id from file
+	async updateMetaStartId () {
+		log.info ({fn: "import.updateMetaStartId"});
+		
+		let me = this;
+		let metas = ["class", "class_attr", "view", "view_attr"];
+		
+		for (let i = 0; i < metas.length; i ++) {
+			let meta = metas [i];
+			let startId = {};
+			let fields = me.data.fields ["t" + meta];
+			let idIdx = fields.indexOf ("fid");
+			let startIdx = fields.indexOf ("fstart_id");
+			let endIdx = fields.indexOf ("fend_id");
+			
+			for (let j = 0; j < me.data ["t" + meta].length; j ++) {
+				let o = me.data ["t" + meta][j];
+				
+				if (o.values [endIdx] == 0) {
+					if (!me.newId ["trevision"][o.values [startIdx]]) {
+						throw new Error (`unknown revision: ${o.values [startIdx]}, ${meta}: ${o.values [idIdx]}`);
+					}
+					startId [o.values [idIdx]] = me.newId ["trevision"][o.values [startIdx]];
+				}
+			}
+			let rows = await me.store.query ({session: me.session, sql: `select fid, fstart_id from _${meta}`});
+			
+			for (let k = 0; k < rows.length; k ++) {
+				let row = rows [k];
+				
+				if (row.fstart_id && startId [row.fid] && row.fstart_id < startId [row.fid]) {
+					let sql = `update _${meta} set fstart_id = ${startId [row.fid]} where fid = ${row.fid}`;
+					
+					await me.store.query ({session: me.session, sql});
+					log.debug (`preload: ${sql}`);
+				}
+			}
+		}
+	};
+	
 	async importFromFile ({code, file}) {
 		log.info ({fn: "import.importFromFile"});
 		
@@ -903,6 +943,8 @@ class Import {
 			await me.importRevisions ();
 			
 			me.generateNewId ();
+			
+			await me.updateMetaStartId ();
 			
 			await me.importViews ();
 			await me.importViewAttrs ();
