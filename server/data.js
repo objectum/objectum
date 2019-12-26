@@ -66,6 +66,9 @@ async function getLog (req, store) {
 
 function addFilters (tokens, filters, caMap, aliasPrefix) {
 	let f = "\n" + _.map (filters, f => {
+		if (!caMap [f [0]]) {
+			throw new Error (`unknown column: ${f [0]}`);
+		}
 		let s = `${aliasPrefix [f [0]]}.${caMap [f [0]].isId ? "fobject_id" : caMap [f [0]].getField ()} ${f [1]}`;
 		
 		if (f [1] == "like" || f [1] == "not like") {
