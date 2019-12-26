@@ -515,6 +515,9 @@ async function getData (req, store) {
 						isId: true
 					};
 				} else {
+					if (!classMap [t [0] || ""]) {
+						throw new Error (`unknown model: ${JSON.stringify (o)}`);
+					}
 					ca = classMap [t [0] || ""].attrs [t [1]];
 					
 					if (!ca) {
