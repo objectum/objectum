@@ -15,6 +15,10 @@ let pgTypes = pg.types;
 // types: select typname, oid, typarray from pg_type where typtype = 'b' order by oid
 
 if (pgTypes) {
+	// timestamp
+	pgTypes.setTypeParser (1114, function (val) {
+		return val === null ? null : new Date (val.substr (0, 10) + "T" + val.substr (11) + "Z");
+	});
 	// numeric
 	pgTypes.setTypeParser (1700, function (val) {
 		return val === null ? null : parseFloat (val);
@@ -231,6 +235,8 @@ class Postgres {
 		} else {
 			await this.query ({sql: `create database ${connection.db} owner ${connection.dbUser} encoding 'utf8'`});
 		}
+		await this.query ({sql: `alter database ${connection.db} set timezone to 'UTC'`});
+		
 		this.disconnect ();
 		
 		await this.connect ();
