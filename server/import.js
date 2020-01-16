@@ -762,8 +762,6 @@ class Import {
 	};
 	
 	async dropConstraints (classId) {
-		log.info ({fn: "import.dropConstraints", classId});
-		
 		let me = this;
 		
 		if (me.droppedClassesConstraints [classId]) {
