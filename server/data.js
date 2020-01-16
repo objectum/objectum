@@ -1,8 +1,9 @@
 "use strict";
 
 const _ = require ("lodash");
-const { isMetaTable } = require ("./map");
-const { View, ViewAttr } = require ("./model");
+const {isMetaTable} = require ("./map");
+const {View, ViewAttr} = require ("./model");
+const {accessFilter} = require ("./access");
 
 async function getDict (req, store) {
 	let session = req.session;
@@ -165,7 +166,7 @@ function addOrder (tokens, order, caMap, aliasPrefix) {
 	return r;
 };
 
-function getQuery (code, tokens, args, parents) {
+function getQuery ({code, tokens, args, parents}) {
 	let sql = "", skip = false;
 	
 	for (let i = 0; i < tokens.length; i ++) {
@@ -496,6 +497,8 @@ async function getData (req, store) {
 	if (str) {
 		tokens.push (str);
 	}
+	tokens = await accessFilter ({tokens, classMap, store, session});
+	
 	for (let i = 0; i < tokens.length; i ++) {
 		let o = tokens [i];
 		
@@ -546,14 +549,15 @@ async function getData (req, store) {
 	}
 	let fields = [];
 	let data = {
-		recs: await store.query ({session, sql: getQuery ("data", tokens, req.args), fields, rowMode: "array"}),
+		recs: await store.query ({session, sql: getQuery ({code: "data", tokens, args: req.args}), fields, rowMode: "array"}),
 		position: []
 	};
 	data.cols = await getViewAttrs (data.recs, view, caMap, store, fields, selectAliases);
 	
 	if (_.has (req.args, "offset") && _.has (req.args, "limit") && !req.args.getColumns) {
 		if (hasSelectCount) {
-			let recs = await store.query ({session, sql: getQuery ("count", tokens, req.args)});
+			let sss = getQuery ({code: "count", tokens, args: req.args});
+			let recs = await store.query ({session, sql: getQuery ({code: "count", tokens, args: req.args})});
 			
 			data.length = recs [0].num;
 		}
@@ -569,7 +573,7 @@ async function getData (req, store) {
 						break;
 					}
 				}
-				data.childs = await store.query ({session, sql: getQuery ("tree", tokens, req.args, parents)});
+				data.childs = await store.query ({session, sql: getQuery ({code: "tree", tokens, args: req.args, parents})});
 			} else {
 				data.childs = [];
 			}
@@ -611,12 +615,8 @@ async function getData (req, store) {
 	return data;
 };
 
-async function getRecords (req, store) {
-};
-
 module.exports = {
 	getDict,
 	getLog,
-	getData,
-	getRecords
+	getData
 };

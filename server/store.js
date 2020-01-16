@@ -6,6 +6,7 @@ const { Base, Object, Action, factory } = require ("./model");
 const { Query } = require ("./query");
 const { native, getMetaTable } = require ("./map");
 const legacy = require ("./legacy");
+const data = require ("./data");
 
 // todo: me.redisClient.hset ("sessions", `${session.id}-clock`, config.clock);
 // todo: redisEmulator Promise
@@ -639,6 +640,38 @@ class Store {
 		}
 	}
 	
+	async getData (opts) {
+		let result =  await data.getData (opts, this);
+		
+		function parseRecDates (rec) {
+			for (let a in rec) {
+				let v = rec [a];
+				
+				if (v && v.type) {
+					if (v.type == "date") {
+						let tokens = v.value.split ("-");
+						
+						rec [a] = new Date (tokens [0], tokens [1] - 1, tokens [2]);
+					}
+					if (v.type == "datetime") {
+						rec [a] = new Date (Date.parse (v.value));
+					}
+				}
+			}
+		};
+		result.recs = result.recs.map (rec => {
+			let newRec = {};
+			
+			result.cols.forEach ((col, i) => {
+				newRec [col.code] = rec [i];
+			});
+			parseRecDates (newRec);
+			
+			return newRec;
+		});
+		return result;
+	}
+
 	async loadPgObjects ({table, column}) {
 		log.debug ({fn: "store.loadPgObjects"});
 		
