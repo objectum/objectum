@@ -161,11 +161,12 @@ class Store {
 		
 		this.lastRevision = id;
 		remoteAddr = remoteAddr ? `'${remoteAddr}'` : "null";
-		session.userId = session.userId || "null";
+		
+		let userId = session.userId || "null";
 		
 		let sql = `
 			insert into trevision (fid, fdate, fdescription, fsubject_id, fremote_addr)
-			values (${id}, ${client.currentTimestamp ()}, '${description}', ${session.userId}, ${remoteAddr})
+			values (${id}, ${client.currentTimestamp ()}, '${description}', ${userId}, ${remoteAddr})
 		`;
 		await this.query ({session, sql});
 		return id;
