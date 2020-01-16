@@ -73,8 +73,8 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 		let s = `${aliasPrefix [f [0]]}.${caMap [f [0]].isId ? "fobject_id" : caMap [f [0]].getField ()} ${f [1]}`;
 		
 		if (f [1] == "like" || f [1] == "not like") {
-			f [2] += "%";
-		}
+			s = `lower (${aliasPrefix [f [0]]}.${caMap [f [0]].getField ()}) ${f [1]} '${f [2].toLowerCase ()}%'`;
+		} else
 		if (f [2] !== "") {
 			if (f [1] == "in" || f [1] == "not in") {
 				s += `(${f [2].join (",")})`;
