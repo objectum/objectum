@@ -283,14 +283,17 @@ async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 				typeId = 6;
 			}
 		} else {
-			classId = Number (field.table.split ("_")[1]);
-			classId = store.getClass (classId).getPath ();
-			
+			if (field.table) {
+				classId = Number (field.table.split ("_")[1]);
+				classId = store.getClass (classId).getPath ();
+			}
 			if (field.column == "fobject_id") {
 				classAttrId = null;
 				typeId = 2;
 			} else {
-				classAttrId = Number (field.column.split ("_")[1]);
+				if (field.column) {
+					classAttrId = Number (field.column.split ("_")[1]);
+				}
 			}
 			if (classAttrId) {
 				let ca = store.getClassAttr (classAttrId);

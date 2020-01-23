@@ -144,8 +144,8 @@ class Store {
 				}
 				fields.push ({
 					alias: f.name,
-					table: pgo.table,
-					column: pgo.columns [f.columnID] ? pgo.columns [f.columnID].column : null
+					table: pgo ? pgo.table : null,
+					column: pgo ? (pgo.columns [f.columnID] ? pgo.columns [f.columnID].column : null) : null
 				});
 			}
 		}
