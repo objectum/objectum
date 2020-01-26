@@ -277,8 +277,8 @@ function authAdmin ({store, login, password, req}) {
 		return {
 			sessionId,
 			userId: null,
-			roleId: "admin",
-			menuId: "admin"
+			roleId: store.auth.adminRoleId,
+			menuId: store.auth.adminMenuId
 		};
 	}
 };

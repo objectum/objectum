@@ -48,7 +48,9 @@ class Store {
 				password: {}, // password attributes
 				user: {}, // user records by id, login
 				roleClassId: null,
-				sroleClassId: null
+				sroleClassId: null,
+				adminRoleId: null,
+				adminMenuId: null
 			}
 		});
 	}
@@ -556,6 +558,24 @@ class Store {
 		});
 		me.auth.userClassId = me.getClass ("objectum.user").get ("id");
 		me.auth.roleClassId = me.getClass ("objectum.role").get ("id");
+		
+		let roleRecs = await me.query ({
+			client: me.client, sql: `
+				select
+					a.fobject_id as id,
+					a.${roleCls.attrs ["code"].getField ()} as code,
+					a.${roleCls.attrs ["menu"].getField ()} as menu
+				from
+					${roleCls.getTable ()} a
+			`
+		});
+		_.each (roleRecs, rec => {
+			if (rec.code == "admin") {
+				me.auth.adminRoleId = rec.id;
+				me.auth.adminMenuId = rec.menu;
+			}
+		});
+		
 		//me.auth.sroleClassId = me.getClass ("objectum.user").get ("id");
 
 		//me.auth.login [me.getClass ("objectum.user").attrs ["login"].get ("id")] = 1;
