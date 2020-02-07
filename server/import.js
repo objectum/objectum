@@ -626,8 +626,8 @@ class Import {
 						for (let j = 0; j < qr.length; j ++) {
 							let recordId = qr [j].frecord_id;
 							
+							/*
 							for (let k = 0; k < data.length; k ++) {
-/*
 								if (schema.values [0] != data [k].values [schemaColId]) {
 									continue;
 								}
@@ -635,9 +635,9 @@ class Import {
 									continue;
 								}
 								me.newId [table] [data [k].values [0]] = qr [j].fid;
-*/
-								me.newId [table] [map [recordId]] = qr [j].fid;
 							}
+							*/
+							me.newId [table] [map [recordId]] = qr [j].fid;
 						}
 					}
 				}
