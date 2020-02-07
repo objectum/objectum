@@ -616,11 +616,18 @@ class Import {
 							select distinct (frecord_id) as frecord_id, fid from ${table} where frecord_id is not null and fschema_id = ${schemaId}
 						`});
 						let data = me.data [table];
+						let map = {};
 						
+						for (let k = 0; k < data.length; k ++) {
+							if (schema.values [0] == data [k].values [schemaColId]) {
+								map [data [k].values [recordColId]] = data [k].values [0];
+							}
+						}
 						for (let j = 0; j < qr.length; j ++) {
 							let recordId = qr [j].frecord_id;
 							
 							for (let k = 0; k < data.length; k ++) {
+/*
 								if (schema.values [0] != data [k].values [schemaColId]) {
 									continue;
 								}
@@ -628,6 +635,8 @@ class Import {
 									continue;
 								}
 								me.newId [table] [data [k].values [0]] = qr [j].fid;
+*/
+								me.newId [table] [map [recordId]] = qr [j].fid;
 							}
 						}
 					}
