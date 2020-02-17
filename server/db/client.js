@@ -155,6 +155,14 @@ class Database {
 			
 			await store.init ();
 			await require ("./rebuild").nullNotNullUniqueStat ({store});
+		} else
+		if (cfg.fn == "dropObjectAttrIndexes") {
+			log.info ({fn: "db.rebuild"}, "dropObjectAttrIndexes ...");
+			
+			store = new Store ({code: cfg.code, connection});
+			
+			await store.init ();
+			await require ("./rebuild").dropObjectAttrIndexes ({store});
 		} else {
 			throw new Error (`unknown fn: ${cfg.fn}`);
 		}

@@ -8,6 +8,7 @@ const fs_access = util.promisify (fs.access);
 const common = require ("./common");
 const { Store } = require ("./store");
 const { getMetaCode, getFields } = require ("./map");
+const ProgressBar = require ("progress");
 
 class Import {
 	constructor () {
@@ -100,6 +101,7 @@ class Import {
 		
 		let me = this;
 		let viewFields = me.data.fields.tview;
+		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tview.length, renderThrottle: 200});
 		
 		for (let j = 0; j < me.data.tview.length; j ++) {
 			let view = me.data.tview [j];
@@ -149,6 +151,7 @@ class Import {
 				await me.store.query ({session: me.session, sql: s});
 				me.incCount ("tview", fields ["fid"]);
 			}
+			bar.tick ();
 		}
 	};
 	
@@ -158,6 +161,7 @@ class Import {
 		let me = this;
 		let s;
 		let viewAttrFields = me.data.fields.tview_attr;
+		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tview_attr.length, renderThrottle: 200});
 		
 		for (let j = 0; j < me.data.tview_attr.length; j ++) {
 			let viewAttr = me.data.tview_attr [j];
@@ -211,6 +215,7 @@ class Import {
 				await me.store.query ({session: me.session, sql: s});
 				me.incCount ("tview_attr", fields ["fid"]);
 			}
+			bar.tick ();
 		}
 	};
 	
@@ -219,6 +224,7 @@ class Import {
 		
 		let me = this;
 		let classFields = me.data.fields.tclass;
+		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tclass.length, renderThrottle: 200});
 		
 		for (let j = 0; j < me.data.tclass.length; j ++) {
 			let cls = me.data.tclass [j];
@@ -270,6 +276,7 @@ class Import {
 				await me.store.query ({session: me.session, sql: s});
 				me.incCount ("tclass", fields ["fid"]);
 			}
+			bar.tick ();
 		}
 	};
 	
@@ -278,6 +285,7 @@ class Import {
 		
 		let me = this;
 		let classAttrFields = me.data.fields.tclass_attr;
+		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tclass_attr.length, renderThrottle: 200});
 		
 		for (let j = 0; j < me.data.tclass_attr.length; j ++) {
 			let classAttr = me.data.tclass_attr [j];
@@ -337,6 +345,7 @@ class Import {
 				await me.store.query ({session: me.session, sql: s});
 				me.incCount ("tclass_attr", fields ["fid"]);
 			}
+			bar.tick ();
 		}
 	};
 	
@@ -401,6 +410,7 @@ class Import {
 		let me = this;
 		let objectFields = me.data.fields.tobject;
 		let count = 0;
+		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tobject.length, renderThrottle: 200});
 		
 		for (let j = 0; j < me.data.tobject.length; j ++) {
 			let object = me.data.tobject [j];
@@ -457,6 +467,7 @@ class Import {
 					}
 				}
 			}
+			bar.tick ();
 		}
 	};
 	
@@ -466,6 +477,7 @@ class Import {
 		let me = this;
 		let objectAttrFields = me.data.fields.tobject_attr;
 		let count = 0;
+		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tobject_attr.length, renderThrottle: 200});
 		
 		for (let j = 0; j < me.data.tobject_attr.length; j ++) {
 			let objectAttr = me.data.tobject_attr [j];
@@ -552,10 +564,11 @@ class Import {
 					count++;
 					
 					if (count % 10000 == 0) {
-						log.info ({fn: "import.importObjectAttrs"}, "\t" + count + " records");
+						//log.info ({fn: "import.importObjectAttrs"}, "\t" + count + " records");
 					}
 				}
 			}
+			bar.tick ();
 		}
 	};
 	
@@ -651,6 +664,7 @@ class Import {
 		let me = this;
 		let revisionFields = me.data.fields.trevision;
 		let schemaColId = revisionFields.indexOf ("fschema_id");
+		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.trevision.length, renderThrottle: 200});
 		
 		for (let j = 0; j < me.data.trevision.length; j ++) {
 			let revision = me.data.trevision [j];
@@ -694,6 +708,7 @@ class Import {
 			me.incCount ("trevision", fields ["fid"]);
 			me.newId ["trevision"][id] = me.tableId ["trevision"];
 			me.tableId ["trevision"] ++;
+			bar.tick ();
 		}
 		_.each (me.startRevision, function (revisionId, schemaId) {
 			log.info ({fn: "import.importRevisions"}, "startRevision [" + schemaId + "] = " + revisionId + " ");
@@ -764,9 +779,11 @@ class Import {
 		
 		let me = this;
 		let rows = await me.store.query ({session: me.session, sql: "select fid from _class"});
+		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: rows.length, renderThrottle: 200});
 		
 		for (let i = 0; i < rows.length; i ++) {
 			await me.store.query ({session: me.session, sql: `select trigger_factory (${rows [i].fid})`});
+			bar.tick ();
 		}
 	};
 	
@@ -812,12 +829,15 @@ class Import {
 			where
 				a.fclass_id in (${_.keys (me.droppedClassesConstraints).join (",")}) and a.fnot_null = 1
 		`});
+		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: rows.length, renderThrottle: 200});
+		
 		for (let i = 0; i < rows.length; i ++) {
 			let row = rows [i];
 			let tableName = row.c_code + "_" + row.c_id;
 			let fieldName = row.ca_code + "_" + row.ca_id;
 			
 			await me.store.query ({session: me.session, sql: `alter table ${tableName} alter column ${fieldName} set not null`});
+			bar.tick ();
 		}
 	};
 	

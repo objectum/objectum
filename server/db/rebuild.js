@@ -7,6 +7,7 @@ const fs = require ("fs");
 const util = require ("util");
 const fs_readFile = util.promisify (fs.readFile);
 const fs_writeFile = util.promisify (fs.writeFile);
+const ProgressBar = require ("progress");
 
 async function initStore (store) {
 	const { getMetaTable } = require ("./../map");
@@ -866,6 +867,31 @@ async function migration3to4 ({store}) {
 	//await rebuild ({store});
 };
 
+async function dropObjectAttrIndexes ({store}) {
+	log.debug ({fn: "rebuild.dropObjectAttrIndexes"});
+	
+	let rows = await store.query ({client: store.client, sql: `select fid from _class_attr`});
+	let bar = new ProgressBar (`:current/:total: :bar`, {total: rows.length, renderThrottle: 200});
+	
+	for (let i = 0; i < rows.length; i ++) {
+		let row = rows [i];
+		let indexRows = await store.query ({client: store.client, sql: `
+			select indexname
+			from pg_indexes
+			where tablename = 'tobject_attr_${row.fid}'
+		`});
+		for (let j = 0; j < indexRows.length; j ++) {
+			let indexRow = indexRows [j];
+			let n = indexRow.indexname;
+
+			if (n.indexOf ("fend_id") == - 1 && n.indexOf ("fobject_id") == - 1 && n.indexOf ("fclass_attr_id") == - 1) {
+				await store.query ({client: store.client, sql: `drop index ${n}`});
+			}
+		}
+		bar.tick ();
+	}
+};
+
 module.exports = {
 	rebuild,
 	uniqueStat,
@@ -876,5 +902,6 @@ module.exports = {
 	updateNullNotNull,
 	removeUnusedObjectAttrs,
 	nullNotNullUniqueStat,
-	migration3to4
+	migration3to4,
+	dropObjectAttrIndexes
 };

@@ -865,7 +865,9 @@ class Store {
 				});
 				_.each (r ["object"], a => {
 					_.each (a, function (id) {
-						me.redisClient.hdel (`${me.code}-objects`, id);
+						if (id) {
+							me.redisClient.hdel (`${me.code}-objects`, id);
+						}
 					});
 				});
 				let auth = [...r ["auth"].created, ...r ["auth"].changed];
