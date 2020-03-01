@@ -163,6 +163,14 @@ class Database {
 			
 			await store.init ();
 			await require ("./rebuild").dropObjectAttrIndexes ({store});
+		} else
+		if (cfg.fn == "createObjectAttrIndexes") {
+			log.info ({fn: "db.rebuild"}, "createObjectAttrIndexes ...");
+			
+			store = new Store ({code: cfg.code, connection});
+			
+			await store.init ();
+			await require ("./rebuild").createObjectAttrIndexes ({store});
 		} else {
 			throw new Error (`unknown fn: ${cfg.fn}`);
 		}

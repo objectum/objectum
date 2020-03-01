@@ -884,9 +884,28 @@ async function dropObjectAttrIndexes ({store}) {
 			let indexRow = indexRows [j];
 			let n = indexRow.indexname;
 
-			if (n.indexOf ("fend_id") == - 1 && n.indexOf ("fobject_id") == - 1 && n.indexOf ("fclass_attr_id") == - 1) {
+			//if (n.indexOf ("fend_id") == - 1 && n.indexOf ("fobject_id") == - 1 && n.indexOf ("fclass_attr_id") == - 1) {
 				await store.query ({client: store.client, sql: `drop index ${n}`});
-			}
+			//}
+		}
+		bar.tick ();
+	}
+};
+
+async function createObjectAttrIndexes ({store}) {
+	log.debug ({fn: "rebuild.createObjectAttrIndexes"});
+	
+	let rows = await store.query ({client: store.client, sql: `select fid from _class_attr`});
+	let bar = new ProgressBar (`:current/:total: :bar`, {total: rows.length, renderThrottle: 200});
+	let columns = ["fid", "fobject_id", "fclass_attr_id", "fend_id", "fschema_id", "frecord_id"];
+	
+	for (let i = 0; i < rows.length; i ++) {
+		let row = rows [i];
+		
+		for (let j = 0; j < columns.length; j ++) {
+			await store.query ({client: store.client, sql: `
+				create index tobject_attr_${row.fid}_${columns [j]} on tobject_attr_${row.fid} (${columns [j]})
+			`});
 		}
 		bar.tick ();
 	}
@@ -903,5 +922,6 @@ module.exports = {
 	removeUnusedObjectAttrs,
 	nullNotNullUniqueStat,
 	migration3to4,
-	dropObjectAttrIndexes
+	dropObjectAttrIndexes,
+	createObjectAttrIndexes
 };

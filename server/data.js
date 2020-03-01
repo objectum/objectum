@@ -3,7 +3,6 @@
 const _ = require ("lodash");
 const {isMetaTable} = require ("./map");
 const {View, ViewAttr} = require ("./model");
-const {accessFilter} = require ("./access");
 
 async function getDict (req, store) {
 	let session = req.session;
@@ -65,25 +64,7 @@ async function getLog (req, store) {
 	return await store.query ({session, sql});
 };
 
-function addFilters (tokens, filters, caMap, aliasPrefix) {
-	let f = "\n" + _.map (filters, f => {
-		if (!caMap [f [0]]) {
-			throw new Error (`unknown column: ${f [0]}`);
-		}
-		let s = `${aliasPrefix [f [0]]}.${caMap [f [0]].isId ? "fobject_id" : caMap [f [0]].getField ()} ${f [1]}`;
-		
-		if (f [1] == "like" || f [1] == "not like") {
-			s = `lower (${aliasPrefix [f [0]]}.${caMap [f [0]].getField ()}) ${f [1]} '${f [2].toLowerCase ()}%'`;
-		} else
-		if (f [2] !== "") {
-			if (f [1] == "in" || f [1] == "not in") {
-				s += `(${f [2].join (",")})`;
-			} else {
-				s += ` '${f [2]}'`;
-			}
-		}
-		return s;
-	}).join (" and ") + "\n";
+function addToWhere (tokens, f) {
 	let r = [], whereSection = false, where = [];
 	
 	for (let i = 0; i < tokens.length; i ++) {
@@ -114,6 +95,52 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 		}
 	}
 	return r;
+};
+
+function addFilters (tokens, filters, caMap, aliasPrefix) {
+	let f = _.map (filters, f => {
+		if (!caMap [f [0]]) {
+			throw new Error (`unknown column: ${f [0]}`);
+		}
+		let s = `${aliasPrefix [f [0]]}.${caMap [f [0]].isId ? "fobject_id" : caMap [f [0]].getField ()} ${f [1]}`;
+		
+		if (f [1] == "like" || f [1] == "not like") {
+			s = `lower (${aliasPrefix [f [0]]}.${caMap [f [0]].getField ()}) ${f [1]} '${f [2].toLowerCase ()}%'`;
+		} else
+		if (f [2] !== "") {
+			if (f [1] == "in" || f [1] == "not in") {
+				s += `(${f [2].join (",")})`;
+			} else {
+				s += ` '${f [2]}'`;
+			}
+		}
+		return s;
+	});
+	f = "\n" + f.join (" and ") + "\n";
+	
+	return addToWhere (tokens, f);
+};
+
+function addAccessFilters (tokens, filters) {
+	let f = [];
+	
+	for (let i = 0; i < filters.length; i ++) {
+		if (i) {
+			f.push (" and ");
+		}
+		let filterTokens = `(${filters [i]})`.split ("{");
+		
+		f.push (filterTokens [0]);
+		
+		for (let j = 1; j < filterTokens.length; j ++) {
+			let strTokens = filterTokens [j].split ("}");
+			let json = JSON.parse (`{${strTokens [0]}}`);
+			
+			f.push (json);
+			f.push (strTokens [1]);
+		}
+	}
+	return addToWhere (tokens, f);
 };
 
 function removeWhere (tokens) {
@@ -460,6 +487,7 @@ async function getData (req, store) {
 	let tokens = [], json = "", str = "", classMap = {}, caMap = {}, selectAliases = [], aliasPrefix = {};
 	let hasSelectCount = false, hasTree = false;
 	
+/*
 	for (let i = 0; i < query.length; i ++) {
 		let c = query [i];
 		
@@ -500,8 +528,38 @@ async function getData (req, store) {
 	if (str) {
 		tokens.push (str);
 	}
-	tokens = await accessFilter ({tokens, classMap, store, session});
+*/
+	let queryTokens = query.split ("{");
 	
+	tokens.push (queryTokens [0]);
+	
+	for (let i = 1; i < queryTokens.length; i ++) {
+		let strTokens = queryTokens [i].split ("}");
+		
+		json = JSON.parse (`{${strTokens [0]}}`);
+
+		if (json ["param"]) {
+			tokens.push (json);
+		} else
+		if (json ["class"] || json ["model"]) {
+			let cls = store.getClass (json ["class"] || json ["model"]);
+			
+			tokens.push (cls.getTable () + " " + json ["alias"]);
+			classMap [json ["alias"]] = cls
+		} else {
+			if (json ["count"] == "begin") {
+				hasSelectCount = true;
+			}
+			if (json ["tree"] == "filter") {
+				hasTree = true;
+			}
+			tokens.push (json);
+		}
+		tokens.push (strTokens [1]);
+	}
+	if (req.args.accessFilters && req.args.accessFilters.length) {
+		tokens = addAccessFilters (tokens, req.args.accessFilters);
+	}
 	for (let i = 0; i < tokens.length; i ++) {
 		let o = tokens [i];
 		
