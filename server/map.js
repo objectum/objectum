@@ -36,7 +36,7 @@ const map = {
 		"fcode": "code",
 		"fdescription": "description",
 		"forder": "order",
-		"fformat": "format",
+		"funlogged": "unlogged",
 		"fview_id": "view",
 		"fopts": "opts",
 		"fstart_id": "start",

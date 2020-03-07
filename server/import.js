@@ -667,6 +667,8 @@ class Import {
 		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.trevision.length, renderThrottle: 200});
 		
 		for (let j = 0; j < me.data.trevision.length; j ++) {
+			bar.tick ();
+			
 			let revision = me.data.trevision [j];
 			let schemaId = revision.values [schemaColId];
 			
@@ -708,7 +710,6 @@ class Import {
 			me.incCount ("trevision", fields ["fid"]);
 			me.newId ["trevision"][id] = me.tableId ["trevision"];
 			me.tableId ["trevision"] ++;
-			bar.tick ();
 		}
 		_.each (me.startRevision, function (revisionId, schemaId) {
 			log.info ({fn: "import.importRevisions"}, "startRevision [" + schemaId + "] = " + revisionId + " ");
