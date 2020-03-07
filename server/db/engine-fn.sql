@@ -553,6 +553,7 @@ declare
 	columnName varchar (256);
 	classCode varchar (256);
 	parentId bigint;
+	unlogged bigint;
 	prevClassId bigint;
 	revisionId bigint;
 	taiu text;
@@ -570,7 +571,7 @@ begin
 		return;
 	end;
 
-	select fcode, fparent_id into classCode, parentId from _class where fid = classId;
+	select fcode, fparent_id, funlogged into classCode, parentId, unlogged from _class where fid = classId;
 
 	if (classCode is null) then
 		raise exception 'unknown modelId: %', classId;
@@ -648,36 +649,37 @@ after delete on %1$s for each row
 execute procedure trigger_%1$s_after_delete ();', tableName);
 
 	-- class attributes
-	for rec in select fid, fcode, ftype_id from _class_attr where fclass_id = classId
-    loop
-    	columnName := rec.fcode || '_' || rec.fid;
- 		taiu := taiu || format ('
-    if ((TG_OP = ''INSERT'' and NEW.%s is not null) or
-	    (TG_OP = ''UPDATE'' and ((OLD.%1$s is null and NEW.%1$s is not null) or (OLD.%1$s is not null and NEW.%1$s is null) or (OLD.%1$s <> NEW.%1$s)))
-	) then
-	    if (TG_OP = ''UPDATE'') then
-		    execute ''update tobject_attr set fend_id = $1 where fend_id = 0 and fobject_id = $2 and fclass_attr_id = $3''
-		    using revisionId, NEW.fobject_id, %s;
-        end if;
+	if (unlogged is null or unlogged = 0) then
+        for rec in select fid, fcode, ftype_id from _class_attr where fclass_id = classId
+        loop
+            columnName := rec.fcode || '_' || rec.fid;
+            taiu := taiu || format ('
+        if ((TG_OP = ''INSERT'' and NEW.%s is not null) or
+            (TG_OP = ''UPDATE'' and ((OLD.%1$s is null and NEW.%1$s is not null) or (OLD.%1$s is not null and NEW.%1$s is null) or (OLD.%1$s <> NEW.%1$s)))
+        ) then
+            if (TG_OP = ''UPDATE'') then
+                execute ''update tobject_attr set fend_id = $1 where fend_id = 0 and fobject_id = $2 and fclass_attr_id = $3''
+                using revisionId, NEW.fobject_id, %s;
+            end if;
 
-		changed := True;', columnName, rec.fid);
+            changed := True;', columnName, rec.fid);
 
-        taiu := taiu || '
-		execute ''insert into tobject_attr (fobject_id, fclass_attr_id, ';
+            taiu := taiu || '
+            execute ''insert into tobject_attr (fobject_id, fclass_attr_id, ';
 
- 		if (rec.ftype_id = 1 or rec.ftype_id = 5) then
- 			taiu := taiu || 'fstring, ';
- 		elsif (rec.ftype_id = 3) then
- 			taiu := taiu || 'ftime, ';
- 		else
- 			taiu := taiu || 'fnumber, ';
- 		end if;
+            if (rec.ftype_id = 1 or rec.ftype_id = 5) then
+                taiu := taiu || 'fstring, ';
+            elsif (rec.ftype_id = 3) then
+                taiu := taiu || 'ftime, ';
+            else
+                taiu := taiu || 'fnumber, ';
+            end if;
 
- 		taiu := taiu || format ('fstart_id, fend_id) values ($1, $2, $3, $4, 0)'' using NEW.fobject_id, %s, NEW.%s, revisionId;
-	end if;', rec.fid, columnName);
+            taiu := taiu || format ('fstart_id, fend_id) values ($1, $2, $3, $4, 0)'' using NEW.fobject_id, %s, NEW.%s, revisionId;
+        end if;', rec.fid, columnName);
 
-    end loop;
-
+        end loop;
+    end if;
 	-- footer
 	taiu := taiu || format ('
 	if (changed = True) then
