@@ -135,6 +135,7 @@ function stat (options) {
 			for (s in config.storages) {
 				if (config.storages [s].database == "postgres") {
 					let client = new db.Postgres ({connection: config.storages [s]});
+					
 					client.connect ({systemDB: true, success: function () {
 						client.query ({sql:
 						"select (date_part ('epoch', now () - query_start)) as duration, procpid, current_query\n" +

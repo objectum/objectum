@@ -152,7 +152,7 @@ class Store {
 			}
 		}
 		if ((!session || !this.clientPool [session.id]) && !client.inStore) {
-			client.disconnect ();
+			await client.disconnect ();
 		}
 		return rows;
 	}
@@ -236,8 +236,7 @@ class Store {
 				}
 				await client.query ({sql: `delete from _log`});
 				await client.commitTransaction ();
-				
-				client.disconnect ();
+				await client.disconnect ();
 				
 				delete this.clientPool [session.id];
 				delete this.revision [session.id];
@@ -268,7 +267,8 @@ class Store {
 			}
 			await client.rollbackTransaction ();
 			delete this.clientPool [session.id];
-			client.disconnect ();
+			await client.disconnect ();
+			
 			return revision;
 		}
 	}
@@ -582,12 +582,12 @@ class Store {
 		//me.auth.password [me.getClass ("objectum.user").attrs ["password"].get ("id")] = 1;
 	}
 	
-	end () {
+	async end () {
 		log.debug ({fn: "store.end"});
 		
 		let me = this;
 		
-		me.client.disconnect ();
+		await me.client.disconnect ();
 		me.redisClient.quit ();
 		me.redisSub.quit ();
 		me.redisPub.quit ();

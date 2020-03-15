@@ -111,11 +111,12 @@ class Postgres {
 		clients [me.pid] = me;
 	}
 
-	disconnect () {
+	async disconnect () {
 		let me = this;
 
 		if (me.client && me.client.end) {
-			me.client.end ();
+			await me.client.end ();
+			
 			me.connected = 0;
 		}
 	}
@@ -236,9 +237,7 @@ class Postgres {
 			await this.query ({sql: `create database ${connection.db} owner ${connection.dbUser} encoding 'utf8'`});
 		}
 		await this.query ({sql: `alter database ${connection.db} set timezone to 'UTC'`});
-		
-		this.disconnect ();
-		
+		await this.disconnect ();
 		await this.connect ();
 		await this.query ({sql: `create schema ${connection.dbUser} authorization ${connection.dbUser}`});
 		
@@ -256,7 +255,7 @@ class Postgres {
 	}
 
 	async remove ({connection}) {
-		this.disconnect ();
+		await this.disconnect ();
 		await this.connect ();
 		
 		try {
@@ -265,7 +264,7 @@ class Postgres {
 		} catch (err) {
 			log.error ({fn: "postgres.remove", error: err});
 		}
-		this.disconnect ();
+		await this.disconnect ();
 		await this.connect ({systemDB: true});
 		
 		try {

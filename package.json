@@ -1,6 +1,6 @@
 {
 	"name": "objectum",
-	"version": "4.1.53",
+	"version": "4.1.54",
 	"description": "Objectum - javascript app platform",
 	"main": "index.js",
 	"dependencies": {
@@ -9,7 +9,7 @@
 		"fastify": "^2.1.0",
 		"formidable": "^1.2.1",
 		"lodash": "^4.17.11",
-		"pg": "^4.4.3",
+		"pg": "^7.18.2",
 		"progress": "^2.0.3",
 		"redis": "^2.3.0",
 		"redis-promisify": "^0.1.1",
