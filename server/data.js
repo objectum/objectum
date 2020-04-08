@@ -469,6 +469,9 @@ async function getData (req, store) {
 	let session = req.session;
 	let view;
 	
+	if (req.args._trace) {
+		req.args._trace.push (["getData-start", new Date ().getTime ()]);
+	}
 	if (req.args.query) {
 		view = store.getView (req.args.query);
 	} else
@@ -610,15 +613,14 @@ async function getData (req, store) {
 	}
 	let fields = [];
 	let data = {
-		recs: await store.query ({session, sql: getQuery ({code: "data", tokens, args: req.args}), fields, rowMode: "array"}),
+		recs: await store.query ({session, sql: getQuery ({code: "data", tokens, args: req.args}), fields, rowMode: "array", _trace: req.args._trace}),
 		position: []
 	};
 	data.cols = await getViewAttrs (data.recs, view, caMap, store, fields, selectAliases);
 	
 	if (_.has (req.args, "offset") && _.has (req.args, "limit") && !req.args.getColumns) {
 		if (hasSelectCount) {
-			let sss = getQuery ({code: "count", tokens, args: req.args});
-			let recs = await store.query ({session, sql: getQuery ({code: "count", tokens, args: req.args})});
+			let recs = await store.query ({session, sql: getQuery ({code: "count", tokens, args: req.args}), _trace: req.args._trace});
 			
 			data.length = recs [0].num;
 		}
@@ -672,6 +674,10 @@ async function getData (req, store) {
 				data.position = recs;
 			}
 		}
+	}
+	if (req.args._trace) {
+		req.args._trace.push (["getData-end", new Date ().getTime ()]);
+		data._trace = req.args._trace;
 	}
 	return data;
 };
