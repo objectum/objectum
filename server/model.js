@@ -140,8 +140,9 @@ class Object extends Base {
 		if (!classObj) {
 			throw new Error (`unknown model: ${me.get ("_class")}`);
 		}
-		await me.store.redisClient.hdelAsync (`${me.store.code}-objects`, me.get ("id"));
-		
+		if (me.get ("id")) {
+			await me.store.redisClient.hdelAsync (`${me.store.code}-objects`, me.get ("id"));
+		}
 		if (me.removed) {
 			await me.store.query ({session, sql: `delete from ${classObj.getTable ()} where fobject_id = ${me.get ("id")}`});
 			
@@ -300,8 +301,8 @@ class Object extends Base {
 */
 	}
 	
-	commit () {
-		this.sync.call (this, arguments);
+	async commit () {
+		await this.sync.call (this, arguments);
 	}
 }
 
