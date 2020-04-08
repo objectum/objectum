@@ -661,6 +661,9 @@ async function objectFn (req) {
 	}
 	log.debug ({fn: "project.recordFn", session: req.session.id, args: req.args});
 	
+	if (req.args._trace) {
+		req.args._trace.push (["server-start", new Date ().getTime ()]);
+	}
 	let store = await getStore ({code: req.code});
 	let o;
 	
@@ -669,7 +672,13 @@ async function objectFn (req) {
 		o.remove ();
 		await o.sync ({session: req.session});
 		
-		return {id: o.get ("id")};
+		let result = {id: o.get ("id")};
+		
+		if (req.args._trace) {
+			req.args._trace.push (["server-start", new Date ().getTime ()]);
+			result._trace = req.args._trace;
+		}
+		return result;
 	}
 	if (req.args._fn == "create") {
 		delete req.args.id;
@@ -677,7 +686,7 @@ async function objectFn (req) {
 		await o.sync ({session: req.session});
 	} else
 	if (req.args._fn == "get") {
-		o = await store.getObject ({session: req.session, id: req.args.id});
+		o = await store.getObject ({session: req.session, id: req.args.id, _trace: req.args._trace});
 	} else
 	if (req.args._fn == "set") {
 		o = await store.getObject ({session: req.session, id: req.args.id});
@@ -695,6 +704,13 @@ async function objectFn (req) {
 	o.data ["_model"] = o.data ["_class"];
 	delete o.data ["_class"];
 	
+	if (req.args._trace) {
+		if (o.data._trace) {
+			req.args._trace = [...req.args._trace, ...o.data._trace];
+		}
+		req.args._trace.push (["server-end", new Date ().getTime ()]);
+		o.data._trace = req.args._trace;
+	}
 	return o.data;
 };
 

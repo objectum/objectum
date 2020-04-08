@@ -61,7 +61,7 @@ class Store {
 		return me.clientPool [session.id] || createClient (me);
 	}
 	
-	async query ({session, client, sql, params, fields, rowMode}) {
+	async query ({session, client, sql, params, fields, rowMode, _trace}) {
 		let me = this;
 		
 		if (!client && !session) {
@@ -118,8 +118,15 @@ class Store {
 		}
 */
 		let fArray = fields ? [] : undefined;
+		
+		if (_trace) {
+			_trace.push ([`(${sql})-start`, new Date ().getTime ()]);
+		}
 		let rows = await client.query ({sql, params, rowMode, fields: fArray});
 		
+		if (_trace) {
+			_trace.push ([`(${sql})-end`, new Date ().getTime ()]);
+		}
 		if (fields) {
 /*
 			for (let i = 0; i < fArray.length; i ++) {
@@ -408,7 +415,7 @@ class Store {
 		return new Action ({store: me, row: rows [0]});
 	}
 	
-	async getObject ({session, id}) {
+	async getObject ({session, id, _trace}) {
 		log.debug ({fn: "store.getObject", id});
 		
 		let me = this;
@@ -419,7 +426,9 @@ class Store {
 			object = new Object ({store: me});
 			object.data = JSON.parse (result);
 			object.originalData = _.extend ({}, object.data);
+			delete object.data._trace;
 		}
+/*
 		if (!object) {
 			let opts = {
 				session,
@@ -437,6 +446,10 @@ class Store {
 			if (!session) {
 				opts.client = me.client;
 			}
+			if (_trace) {
+				_trace = [["getObject-start", new Date ().getTime ()]];
+				opts._trace = _trace;
+			}
 			let rows = await me.query (opts);
 			
 			if (!rows.length) {
@@ -449,6 +462,10 @@ class Store {
 			object.data.record = rows [0].frecord_id;
 			object.data.schema = rows [0].fschema_id;
 			
+			if (_trace) {
+				_trace.push (["getObject-end", new Date ().getTime ()]);
+				object.data._trace = _trace;
+			}
 			_.each (rows, function (row) {
 				let classAttr = me.map ["classAttr"][row.fclass_attr_id];
 				
@@ -463,6 +480,57 @@ class Store {
 					value = row.ftime;
 				} else {
 					value = row.fnumber;
+				}
+				object.data [classAttr.get ("code")] = value;
+				object.originalData [classAttr.get ("code")] = value;
+			});
+			if (!me.revision [session.id]) {
+				me.redisClient.hset (`${me.code}-objects`, id, JSON.stringify (object.toJSON ()));
+			}
+		}
+*/
+		if (!object) {
+			let opts = {
+				session,
+				sql: `select fclass_id from tobject where fend_id = 0 and fid = ${id}`
+			};
+			if (!session) {
+				opts.client = me.client;
+			}
+			if (_trace) {
+				_trace = [["getObject-start", new Date ().getTime ()]];
+				opts._trace = _trace;
+			}
+			let rows = await me.query (opts);
+
+			if (!rows.length) {
+				throw new Error (`store.getRecord: Unknown record: ${id}`);
+			}
+			let model = me.getClass (rows [0].fclass_id);
+			
+			opts.sql = `select * from ${model.getTable ()} where fobject_id = ${id}`;
+			
+			rows = await me.query (opts);
+			
+			if (!rows.length) {
+				throw new Error (`store.getRecord: Unknown record: ${id}`);
+			}
+			object = new Object ({store: me});
+			object.data.id = id;
+			object.data.fclass_id = object.data.classId = object.data ["_class"] = rows [0].fclass_id;
+			object.data.start = rows [0].fstart_id;
+			object.data.record = rows [0].frecord_id;
+			object.data.schema = rows [0].fschema_id;
+			
+			if (_trace) {
+				_trace.push (["getObject-end", new Date ().getTime ()]);
+				object.data._trace = _trace;
+			}
+			_.each (model.attrs, classAttr => {
+				let value = rows [0][classAttr.getField ()];
+			
+				if (value === null) {
+					return;
 				}
 				object.data [classAttr.get ("code")] = value;
 				object.originalData [classAttr.get ("code")] = value;
