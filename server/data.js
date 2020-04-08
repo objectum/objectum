@@ -620,9 +620,13 @@ async function getData (req, store) {
 	
 	if (_.has (req.args, "offset") && _.has (req.args, "limit") && !req.args.getColumns) {
 		if (hasSelectCount) {
-			let recs = await store.query ({session, sql: getQuery ({code: "count", tokens, args: req.args}), _trace: req.args._trace});
-			
-			data.length = recs [0].num;
+			if (req.args.limit != config.query.maxCount) {
+				let recs = await store.query ({session, sql: getQuery ({code: "count", tokens, args: req.args}), _trace: req.args._trace});
+				
+				data.length = recs [0].num;
+			} else {
+				data.length = data.recs.length;
+			}
 		}
 		if (hasTree) {
 			if (data.recs.length) {
