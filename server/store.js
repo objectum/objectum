@@ -69,54 +69,6 @@ class Store {
 		}
 		client = client || me.getClient ({session});
 		
-		// hide params
-/*
-		if (params) {
-			for (let i = 0; i < params.length; i ++) {
-				sql = sql.replace (`$${i + 1}`, `#${i + 1}`);
-			}
-		}
-*/
-		// prepare
-/*
-		let s = "", c, newSql = "";
-		
-		for (let i = 0; i < sql.length; i ++) {
-			c = sql [i];
-			if (c == "$") {
-				if (s) {
-					s = s.substr (1);
-					if (client.tags.hasOwnProperty (s)) {
-						newSql += client.tags [s];
-					} else {
-						newSql += `$${s}$`;
-					}
-					s = "";
-				} else {
-					s = c;
-				}
-			} else {
-				if (s) {
-					s += c;
-				} else {
-					newSql += c;
-				}
-			}
-		}
-		if (s) {
-			newSql += s;
-		}
-		sql = newSql;
-*/
-		
-		// returnParams
-/*
-		if (params) {
-			for (let i = 0; i < params.length; i ++) {
-				sql = sql.replace (`#${i + 1}`, `$${i + 1}`);
-			}
-		}
-*/
 		let fArray = fields ? [] : undefined;
 		
 		if (_trace) {
@@ -128,21 +80,6 @@ class Store {
 			_trace.push ([`(${sql})-end`, new Date ().getTime ()]);
 		}
 		if (fields) {
-/*
-			for (let i = 0; i < fArray.length; i ++) {
-				let f = fArray [i];
-				let pgo = me.pgObject [f.tableID];
-				
-				if (!pgo) {
-					await me.loadPgObjects ({});
-					pgo = me.pgObject [f.tableID];
-				}
-				fields [f.name] = {
-					table: pgo.table,
-					column: pgo.columns [f.columnID] ? pgo.columns [f.columnID].column : null
-				};
-			}
-*/
 			for (let i = 0; i < fArray.length; i ++) {
 				let f = fArray [i];
 				let pgo = me.pgObject [f.tableID];

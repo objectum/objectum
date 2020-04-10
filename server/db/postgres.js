@@ -45,6 +45,7 @@ if (pgTypes) {
 	});
 }
 
+let pool;
 let clients = {};
 
 class Postgres {
@@ -82,15 +83,18 @@ class Postgres {
 		};
 */
 	}
-
+	
+/*
 	async connect (opts) {
 		let me = this;
 		let systemDB = opts ? opts.systemDB : false;
-		let client = new pg.Client (systemDB ? me.adminConnection : me.connection);
+		let client;
+		
+		client = new pg.Client (systemDB ? me.adminConnection : me.connection);
 		
 		client.connectAsync = util.promisify (client.connect);
 		client.queryAsync = util.promisify (client.query);
-
+		
 		client.on ("error", function (err) {
 			log.error ({fn: "postgres.connect", err, clientError: true});
 		});
@@ -98,7 +102,48 @@ class Postgres {
 			log.debug ({fn: "postgres.connect", notice});
 		});
 		await client.connectAsync ();
-
+		
+		me.client = client;
+		me.connected = true;
+		
+		if (client.pauseDrain) {
+			client.pauseDrain ();
+		}
+		let rows = await me.query ({sql: "select pg_backend_pid() as pid"});
+		
+		me.pid = rows [0].pid;
+		clients [me.pid] = me;
+	}
+*/
+	
+	async connect (opts) {
+		let me = this;
+		let systemDB = opts ? opts.systemDB : false;
+		let client;
+		
+		if (config.pool) {
+			if (!pool) {
+				pool = new pg.Pool (Object.assign ({
+					connectionString: me.connection,
+					max: 20,
+					idleTimeoutMillis: 15000,
+					connectionTimeoutMillis: 2000
+				}, config.pool));
+			}
+			client = await pool.connect ();
+			
+			client.inPool = true;
+		} else {
+			client = new pg.Client (systemDB ? me.adminConnection : me.connection);
+			
+			await client.connect ();
+		}
+		client.on ("error", function (err) {
+			log.error ({fn: "postgres.connect", err, clientError: true});
+		});
+		client.on ("notice", function (notice) {
+			log.debug ({fn: "postgres.connect", notice});
+		});
 		me.client = client;
 		me.connected = true;
 		
@@ -114,6 +159,9 @@ class Postgres {
 	async disconnect () {
 		let me = this;
 
+		if (me.client && me.client.inPool) {
+			me.client.release ();
+		} else
 		if (me.client && me.client.end) {
 			await me.client.end ();
 			
@@ -131,7 +179,8 @@ class Postgres {
 				await me.connect ();
 			}
 //			let res = await me.client.queryAsync (sql, params);
-			let res = await me.client.queryAsync ({text: sql, values: params, rowMode});
+//			let res = await me.client.queryAsync ({text: sql, values: params, rowMode});
+			let res = await me.client.query ({text: sql, values: params, rowMode});
 			
 			if (fields) {
 				_.each (res.fields, f => {
