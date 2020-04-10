@@ -121,7 +121,7 @@ class Postgres {
 		let systemDB = opts ? opts.systemDB : false;
 		let client;
 		
-		if (config.pool) {
+		if (config.pool && !systemDB) {
 			if (!pool) {
 				pool = new pg.Pool (Object.assign ({
 					connectionString: me.connection,
