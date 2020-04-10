@@ -150,9 +150,16 @@ async function rebuild ({store}) {
 		classAttrBar.tick ();
 		
 		await store.query ({client: store.client, sql: `select column_util (${caId}, 'createColumn');`});
+/*
 		await store.query ({client: store.client, sql: `
 			update ${classObj.getTable ()} set ${ca.getField ()} = oa.${ca.getLogField ()}
 			from (select fobject_id, ${ca.getLogField ()} from tobject_attr where fend_id = 0 and fclass_attr_id = ${caId}) as oa
+			where ${classObj.getTable ()}.fobject_id = oa.fobject_id
+		`});
+*/
+		await store.query ({client: store.client, sql: `
+			update ${classObj.getTable ()} set ${ca.getField ()} = oa.${ca.getLogField ()}
+			from (select fobject_id, ${ca.getLogField ()} from tobject_attr_${caId} where fend_id = 0) as oa
 			where ${classObj.getTable ()}.fobject_id = oa.fobject_id
 		`});
 	}
