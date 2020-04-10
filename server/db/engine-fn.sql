@@ -658,14 +658,14 @@ execute procedure trigger_%1$s_after_delete ();', tableName);
             (TG_OP = ''UPDATE'' and ((OLD.%1$s is null and NEW.%1$s is not null) or (OLD.%1$s is not null and NEW.%1$s is null) or (OLD.%1$s <> NEW.%1$s)))
         ) then
             if (TG_OP = ''UPDATE'') then
-                execute ''update tobject_attr set fend_id = $1 where fend_id = 0 and fobject_id = $2 and fclass_attr_id = $3''
-                using revisionId, NEW.fobject_id, %s;
+                execute ''update tobject_attr_%s set fend_id = $1 where fend_id = 0 and fobject_id = $2 and fclass_attr_id = $3''
+                using revisionId, NEW.fobject_id, %1$s;
             end if;
 
             changed := True;', columnName, rec.fid);
 
             taiu := taiu || '
-            execute ''insert into tobject_attr (fobject_id, fclass_attr_id, ';
+            execute ''insert into tobject_attr_%s (fobject_id, fclass_attr_id, ';
 
             if (rec.ftype_id = 1 or rec.ftype_id = 5) then
                 taiu := taiu || 'fstring, ';
@@ -675,7 +675,7 @@ execute procedure trigger_%1$s_after_delete ();', tableName);
                 taiu := taiu || 'fnumber, ';
             end if;
 
-            taiu := taiu || format ('fstart_id, fend_id) values ($1, $2, $3, $4, 0)'' using NEW.fobject_id, %s, NEW.%s, revisionId;
+            taiu := taiu || format ('fstart_id, fend_id) values ($1, $2, $3, $4, 0)'' using NEW.fobject_id, %1$s, NEW.%s, revisionId;
         end if;', rec.fid, columnName);
 
         end loop;
