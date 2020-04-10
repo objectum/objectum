@@ -119,6 +119,10 @@ async function rebuild ({store}) {
 	// toc
 	await store.query ({client: store.client, sql: "begin"});
 	
+	log.info ("building tables:");
+	
+	let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: store.recs ["class"].length, renderThrottle: 200});
+	
 	for (let i = 0; i < store.recs ["class"].length; i ++) {
 		let classObj = store.recs ["class"][i];
 		let classId = classObj.get ("id");
@@ -126,7 +130,7 @@ async function rebuild ({store}) {
 		if (classId < 1000) {
 			continue;
 		}
-		log.info (`${i + 1} / ${store.recs ["class"].length} ${classObj.getTable ()} objects ...`);
+		bar.tick ();
 		
 		await store.query ({client: store.client, sql: `select table_util (${classId}, 'createTable')`});
 		await store.query ({client: store.client, sql: `
@@ -134,12 +138,16 @@ async function rebuild ({store}) {
 			select fid, fclass_id from tobject where fend_id = 0 and fclass_id in (${[classId, ...classObj.childs].join (",")})
 		`});
 	}
+	log.info ("building columns:");
+	
+	let classAttrBar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: store.recs ["classAttr"].length, renderThrottle: 200});
+	
 	for (let i = 0; i < store.recs ["classAttr"].length; i ++) {
 		let ca = store.recs ["classAttr"][i];
 		let caId = ca.get ("id");
 		let classObj = store.getClass (ca.get ("class"));
-		
-		log.info (`${i + 1} / ${store.recs ["classAttr"].length} ${ca.getField ()} object attrs ...`);
+
+		classAttrBar.tick ();
 		
 		await store.query ({client: store.client, sql: `select column_util (${caId}, 'createColumn');`});
 		await store.query ({client: store.client, sql: `
@@ -152,17 +160,24 @@ async function rebuild ({store}) {
 	
 	await store.query ({client: store.client, sql: "begin"});
 	
+	log.info ("foreign keys:");
+	
+	let fkBar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: store.recs ["class"].length, renderThrottle: 200});
+	
 	for (let i = 0; i < store.recs ["class"].length; i ++) {
-		log.info (`${i + 1} / ${store.recs ["class"].length} foreign key ...`);
-		
+		fkBar.tick ();
 		let classId = store.recs ["class"] [i].get ("id");
 		
 		if (classId >= 1000) {
 			await store.query ({client: store.client, sql: `select table_util (${classId}, 'createForeignKey')`});
 		}
 	}
+	log.info ("constraints:");
+	
+	let cBar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: store.recs ["classAttr"].length, renderThrottle: 200});
+	
 	for (let i = 0; i < store.recs ["classAttr"].length; i ++) {
-		log.info (`${i + 1} / ${store.recs ["classAttr"].length} constraints ...`);
+		cBar.tick ();
 		
 		let ca = store.recs ["classAttr"][i];
 		let caId = ca.get ("id");
@@ -174,8 +189,14 @@ async function rebuild ({store}) {
 	// trigger_factory
 	await store.query ({client: store.client, sql: "begin"});
 	await store.query ({client: store.client, sql: `select set_config ('objectum.revision_id', '1', True)`});
-
+	
+	log.info ("triggers:");
+	
+	let tBar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: store.recs ["class"].length, renderThrottle: 200});
+	
 	for (let i = 0; i < store.recs ["class"].length; i ++) {
+		tBar.tick ();
+		
 		await store.query ({client: store.client, sql: `select trigger_factory (${store.recs ["class"] [i].get ("id")})`});
 	}
 	await store.query ({client: store.client, sql: "commit"});
