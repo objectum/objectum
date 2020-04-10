@@ -664,8 +664,8 @@ execute procedure trigger_%1$s_after_delete ();', tableName);
 
             changed := True;', columnName, rec.fid);
 
-            taiu := taiu || '
-            execute ''insert into tobject_attr_%s (fobject_id, fclass_attr_id, ';
+            taiu := taiu || format ('
+            execute ''insert into tobject_attr_%s (fobject_id, fclass_attr_id, ', rec.fid);
 
             if (rec.ftype_id = 1 or rec.ftype_id = 5) then
                 taiu := taiu || 'fstring, ';
@@ -675,7 +675,7 @@ execute procedure trigger_%1$s_after_delete ();', tableName);
                 taiu := taiu || 'fnumber, ';
             end if;
 
-            taiu := taiu || format ('fstart_id, fend_id) values ($1, $2, $3, $4, 0)'' using NEW.fobject_id, %1$s, NEW.%s, revisionId;
+            taiu := taiu || format ('fstart_id, fend_id) values ($1, $2, $3, $4, 0)'' using NEW.fobject_id, %s, NEW.%s, revisionId;
         end if;', rec.fid, columnName);
 
         end loop;
