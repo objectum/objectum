@@ -659,7 +659,7 @@ execute procedure trigger_%1$s_after_delete ();', tableName);
         ) then
             if (TG_OP = ''UPDATE'') then
                 execute ''update tobject_attr_%s set fend_id = $1 where fend_id = 0 and fobject_id = $2 and fclass_attr_id = $3''
-                using revisionId, NEW.fobject_id, %1$s;
+                using revisionId, NEW.fobject_id, %2$s;
             end if;
 
             changed := True;', columnName, rec.fid);
