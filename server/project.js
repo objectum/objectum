@@ -715,8 +715,11 @@ async function objectFn (req) {
 };
 
 async function getNews (req) {
-	await common.delay (config.news.pollingInterval);
-	
+	if (req.args && req.args.progress) {
+		await common.delay (config.news.pollingProgressInterval);
+	} else {
+		await common.delay (config.news.pollingInterval);
+	}
 	if (!_.has (req.args, "revision")) {
 		throw new Error ("project.getNews: revision not exist");
 	}

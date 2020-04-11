@@ -19,6 +19,7 @@ class Objectum {
 			},
 			news: {
 				pollingInterval: 5000,
+				pollingProgressInterval: 500,
 				gcInterval: 300000
 			}
 		});
