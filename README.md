@@ -1,7 +1,7 @@
 # Objectum
 Objectum platform makes it easy to create realtime single page applications that run in both Node.js and browsers.
  
-Requirements: [Redis](https://redis.io/), [PostgreSQL >= 9.x](https://www.postgresql.org/download/) (datestyle = dmy, iso)
+Requirements: [Redis](https://redis.io/), [PostgreSQL](https://www.postgresql.org/download/) (datestyle = dmy, iso)
 
 Objectum ecosystem:
 * Isomorhic javascript client https://github.com/objectum/objectum-client  
@@ -9,18 +9,21 @@ Objectum ecosystem:
 * Command-line interface (CLI) https://github.com/objectum/objectum-cli  
 * Objectum project example https://github.com/objectum/catalog 
 
-<kbd><img src="https://github.com/objectum/objectum/blob/master/public/images/objectum.png" /></kbd>
- 
 ## Quick start
 
 Install CLI:
 ```bash
-npm i -g objectum-cli forever
+npm i -g objectum-cli
 ```
 
-Create objectum project:
+Install platform:
 ```bash
 mkdir -p /opt/objectum 
+objectum-cli --create-platform --path /opt/objectum 
+
+```
+Create objectum project:
+```bash
 objectum-cli --create-project my_project --path /opt/objectum 
 
 ```
@@ -36,15 +39,19 @@ objectum-cli defaults:
 --db-dbaPassword 12345
 --password admin
 ```
-db-dbaPassword - postgres password.  
+db-dbaPassword - postgres password.
+db-dbPassword - database user 'my_project' password.  
 password - password of project 'admin'. 
 
-Start project:
+Start platform:
 ```bash
 cd /opt/objectum/server 
-./start.sh (start.bat in windows)
+node index-8200.js
+```
+Start project:
+```bash
 cd /opt/objectum/projects/my_project 
-./start.sh (start.bat in windows)
+node index-3100.js
 npm run start
 ```
 Open URL: http://localhost:3000  

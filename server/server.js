@@ -9,12 +9,12 @@ const dbf = require ("./report/dbf");
 const common = require ("./common");
 const project = require ("./project");
 const legacy = require ("./legacy");
-const { sessions } = project;
+const {statHandler, collectStat} = require ("./stat");
+const {sessions} = project;
 
 process.env.TZ = "UTC";
 process.maxTickDepth = Infinity;
 
-let app;
 let memoryUsage = {rss: 0, heapTotal: 0, heapUsed: 0};
 
 // Количество секунд прошедших с 1 января 1970 года (UnixTime)
@@ -91,6 +91,9 @@ async function init () {
 			done (null, {fields, files});
 		});
 	});
+	fastify.get ("/", async (req, res) => {
+		await statHandler ({req, res, sessions});
+	});
 	fastify.get ("/projects/:code/report", xmlss.report);
 	fastify.get ("/projects/:code/copy_file", legacy.copyFile);
 	fastify.get ("/projects/:code/plugins/", legacy.processProjectPlugins);
@@ -159,6 +162,14 @@ async function init () {
 			let fn = req.args._fn;
 			let rsc = req.args._rsc;
 			
+			res.startTime = new Date ();
+			
+			res.res.on ("finish", () => {
+				collectStat ({
+					rsc, fn, project: req.code,
+					duration: new Date ().getTime () - res.startTime.getTime ()
+				});
+			});
 			if (fn == "auth") {
 				return await project.auth (req, res);
 			}
