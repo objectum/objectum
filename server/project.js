@@ -218,7 +218,8 @@ function tryLogin ({store, session}) {
 		sessionId,
 		userId: session.userId,
 		roleId,
-		menuId
+		menuId,
+		code: store.code
 	};
 };
 /*
@@ -278,7 +279,8 @@ function authAdmin ({store, login, password, req}) {
 			sessionId,
 			userId: null,
 			roleId: store.auth.adminRoleId,
-			menuId: store.auth.adminMenuId
+			menuId: store.auth.adminMenuId,
+			code: store.code
 		};
 	}
 };
@@ -310,7 +312,8 @@ function authAutologin ({store, login, req}) {
 			sessionId,
 			userId: null,
 			roleId: "autologin",
-			menuId: "autologin"
+			menuId: "autologin",
+			code: store.code
 		};
 	}
 };
