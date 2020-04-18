@@ -42,7 +42,7 @@ class StatData {
 			me.hour = {num: 0, sum: 0};
 		}
 		if (time.getMinutes () != me.time.getMinutes ()) {
-			me.hour = {num: 0, sum: 0};
+			me.min = {num: 0, sum: 0};
 		}
 		me.time = time;
 	}

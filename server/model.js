@@ -448,7 +448,7 @@ class Class extends Meta {
 	}
 	
 	getTable () {
-		return `${this.get ("code")}_${this.get ("id")}`;
+		return `${this.get ("code").toLowerCase ()}_${this.get ("id")}`;
 	}
 	
 	async sync ({session}) {
@@ -480,7 +480,7 @@ class ClassAttr extends Meta {
 	}
 	
 	getField () {
-		return `${this.get ("code")}_${this.get ("id")}`;
+		return `${this.get ("code").toLowerCase ()}_${this.get ("id")}`;
 	}
 	
 	getLogField () {
