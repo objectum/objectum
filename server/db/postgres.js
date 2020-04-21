@@ -45,7 +45,7 @@ if (pgTypes) {
 	});
 }
 
-let pool;
+let pool = {};
 let clients = {};
 
 class Postgres {
@@ -122,15 +122,15 @@ class Postgres {
 		let client;
 		
 		if (config.pool && !systemDB) {
-			if (!pool) {
-				pool = new pg.Pool (Object.assign ({
+			if (!pool [me.connection]) {
+				pool [me.connection] = new pg.Pool (Object.assign ({
 					connectionString: me.connection,
 					max: 20,
 					idleTimeoutMillis: 15000,
 					connectionTimeoutMillis: 2000
 				}, config.pool));
 			}
-			client = await pool.connect ();
+			client = await pool [me.connection].connect ();
 			
 			client.inPool = true;
 		} else {
@@ -147,9 +147,11 @@ class Postgres {
 		me.client = client;
 		me.connected = true;
 		
+/*
 		if (client.pauseDrain) {
 			client.pauseDrain ();
 		}
+*/
 		let rows = await me.query ({sql: "select pg_backend_pid() as pid"});
 		
 		me.pid = rows [0].pid;

@@ -384,7 +384,7 @@ async function startTransaction (req) {
 	}
 	let revision = await store.startTransaction ({
 		session: req.session,
-		remoteAddr: req.remoteAddress,
+		remoteAddr: common.getRemoteAddress (req),
 		description: req.args.description
 	});
 	sessions [req.session.id].transaction.active = true;
