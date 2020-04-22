@@ -913,7 +913,7 @@ async function upload (req, res, next) {
 		path = files ["file"].path;
 	}
 	if (name) {
-		let filename = `${store.rootDir}/files/${fields.objectId}-${fields.classAttrId}-${name}`;
+		let filename = `${store.rootDir}/public/files/${fields.objectId}-${fields.classAttrId}-${name}`;
 		
 		fs.rename (path, filename, function (err) {
 			if (err) {

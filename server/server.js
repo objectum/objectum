@@ -82,7 +82,7 @@ async function init () {
 		}
 		let form = new formidable.IncomingForm ();
 		
-		form.uploadDir = `${store.rootDir}/files`;
+		form.uploadDir = `${store.rootDir}/public/files`;
 		
 		form.parse (req, function (err, fields, files) {
 			if (err) {
