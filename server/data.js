@@ -296,9 +296,13 @@ function getQuery ({code, tokens, args, parents}) {
 };
 
 async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
+	let selectAliasesMap = {};
+	
+	selectAliases.forEach (a => selectAliasesMap [a.toLowerCase ()] = a);
+	
 	let cols = _.map (fields, (field, i) => {
 		let name = field.alias;
-		let va = view.attrs [selectAliases [i] || name];
+		let va = view.attrs [selectAliasesMap [name] || name];
 		let order = 0;
 		let classId = null, classAttrId = null, typeId = 1, area = 1;
 		
@@ -337,7 +341,7 @@ async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 		}
 		return {
 			name,
-			code: selectAliases [i] || field.alias,
+			code: selectAliasesMap [field.alias] || field.alias,
 			order,
 			area,
 			model: classId,
