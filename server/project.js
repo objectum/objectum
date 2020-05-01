@@ -735,14 +735,21 @@ async function getNews (req) {
 		data = {revision: store.lastRevision, records: []/*, message*/};
 	} else {
 		// send changed objects id from revision to lastRevision
-		let r = [];
+		let r = [], metaChanged = false;
 		
-		for (let revision in store.revisions) {
-			if (revision > clientRevision) {
-				r = r.concat (store.revisions [revision].object.changed);
+		//for (let revision in store.revisions) {
+		for (let i = clientRevision + 1; i <= store.lastRevision; i ++) {
+			let revision = store.revisions [i];
+			
+			if (revision) {
+				r = [...r, ...revision.object.changed, ...revision.object.removed];
+				
+				if (revision.metaChanged) {
+					metaChanged = true;
+				}
 			}
 		}
-		data = {revision: store.lastRevision, records: r/*, message*/};
+		data = {revision: store.lastRevision, metaChanged, records: r/*, message*/};
 	}
 	sessions [req.session.id].news.revision = store.lastRevision;
 	

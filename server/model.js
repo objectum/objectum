@@ -150,6 +150,9 @@ class Object extends Base {
 				delete me.store.auth.user [me.get ("login")];
 				delete me.store.auth.user [me.get ("id")];
 			}
+			if (me.store.revisions [revisionId]["object"]) {
+				me.store.revisions [revisionId]["object"].removed.push (me.get ("id"));
+			}
 			return;
 //			return await me.store.query ({session, sql: `update tobject set fend_id = ${revisionId} where fid = ${me.get ("id")} and fend_id = 0`});
 		}
@@ -274,6 +277,13 @@ class Object extends Base {
 			me.store.revisions [revisionId]["auth"][newObject ? "created" : "changed"].push ({
 				role: me.get ("id"), menu: me.get ("menu")
 			});
+		}
+		if (me.store.revisions [revisionId]["object"]) {
+			if (newObject) {
+				me.store.revisions [revisionId]["object"].created.push (me.get ("id"));
+			} else {
+				me.store.revisions [revisionId]["object"].changed.push (me.get ("id"));
+			}
 		}
 		let updatedObject = await me.store.getObject ({session, id: me.get ("id")});
 		
@@ -456,7 +466,6 @@ class Class extends Meta {
 		
 		await super.sync ({session});
 		me.toc = `${me.get ("code").toLowerCase ()}_${me.get ("id")}`;
-		me.store.redisClient.hdel (`${me.store.code}-requests`, "all");
 	}
 }
 
@@ -503,7 +512,6 @@ class ClassAttr extends Meta {
 		
 		await super.sync ({session});
 		me.toc = `${me.get ("code").toLowerCase ()}_${me.get ("id")}`;
-		me.store.redisClient.hdel (`${me.store.code}-requests`, "all");
 	}
 }
 
@@ -543,7 +551,6 @@ class View extends Meta {
 		let me = this;
 		
 		await super.sync ({session});
-		me.store.redisClient.hdel (`${me.store.code}-requests`, "all");
 	}
 }
 
@@ -566,7 +573,6 @@ class ViewAttr extends Meta {
 		let me = this;
 		
 		await super.sync ({session});
-		me.store.redisClient.hdel (`${me.store.code}-requests`, "all");
 	}
 }
 

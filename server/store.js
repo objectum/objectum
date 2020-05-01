@@ -187,6 +187,15 @@ class Store {
 				
 				if (this.revisions [revision]) {
 					this.revisions [revision].dirty = false;
+					
+					["class", "classAttr", "view", "viewAttr"].forEach (rsc => {
+						if (this.revisions [revision][rsc].created.length ||
+							this.revisions [revision][rsc].changed.length ||
+							this.revisions [revision][rsc].removed.length
+						) {
+							this.revisions [revision].metaChanged = true;
+						}
+					});
 					this.redisPub.publish (`${config.redis.db}-${this.code}-revisions`, JSON.stringify (this.revisions [revision]));
 				}
 				return revision;
@@ -837,6 +846,10 @@ class Store {
 				if (!me.revisions [r.id]) {
 					me.revisions [r.id] = r;
 					log.trace ({fn: "store.sub"}, `new revision: ${r.id}`);
+					
+					if (me.lastRevision < r.id) {
+						me.lastRevision = r.id;
+					}
 					// todo: clear redis cache
 				}
 				_.each (["class", "classAttr", "view", "viewAttr"], rsc => {
@@ -868,12 +881,11 @@ class Store {
 						}
 					});
 				});
-				_.each (r ["object"], a => {
-					_.each (a, function (id) {
-						if (id) {
-							me.redisClient.hdel (`${me.code}-objects`, id);
-						}
-					});
+				if (r.metaChanged) {
+					me.redisClient.hdel (`${me.code}-requests`, "all");
+				}
+				_.each ([...r ["object"].changed, ...r ["object"].removed], id => {
+					me.redisClient.hdel (`${me.code}-objects`, id);
 				});
 				let auth = [...r ["auth"].created, ...r ["auth"].changed];
 				
