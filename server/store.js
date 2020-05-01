@@ -871,6 +871,10 @@ class Store {
 						
 						if (o) {
 							_.each (data, (v, a) => o.set (a, v));
+							
+							if (rsc == "view") {
+								me.map [rsc][o.getPath ()] = o;
+							}
 						}
 					});
 					_.each (r [rsc].removed, function (id) {
