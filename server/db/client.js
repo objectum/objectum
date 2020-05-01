@@ -179,9 +179,12 @@ class Database {
 		}
 		log.info (`duration: ${((new Date ().getTime () - time1) / 1000).toFixed (3)} sec.`);
 		
+/*
 		global.redisClient.quit ();
 		global.redisPub.quit ();
 		global.redisSub.quit ();
+*/
+		process.exit (1);
 	}
 };
 
