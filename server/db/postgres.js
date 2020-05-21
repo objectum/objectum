@@ -46,7 +46,7 @@ if (pgTypes) {
 }
 
 let pool = {};
-let clients = {};
+//let clients = {};
 
 class Postgres {
 	constructor ({code, connection}) {
@@ -137,13 +137,14 @@ class Postgres {
 			client = new pg.Client (systemDB ? me.adminConnection : me.connection);
 			
 			await client.connect ();
+
+			client.on ("error", function (err) {
+				log.error ({fn: "postgres.connect", err, clientError: true});
+			});
+			client.on ("notice", function (notice) {
+				log.debug ({fn: "postgres.connect", notice});
+			});
 		}
-		client.on ("error", function (err) {
-			log.error ({fn: "postgres.connect", err, clientError: true});
-		});
-		client.on ("notice", function (notice) {
-			log.debug ({fn: "postgres.connect", notice});
-		});
 		me.client = client;
 		me.connected = true;
 		
@@ -152,10 +153,12 @@ class Postgres {
 			client.pauseDrain ();
 		}
 */
+/*
 		let rows = await me.query ({sql: "select pg_backend_pid() as pid"});
 		
 		me.pid = rows [0].pid;
 		clients [me.pid] = me;
+*/
 	}
 
 	async disconnect () {
@@ -359,6 +362,6 @@ class Postgres {
 };
 
 module.exports = {
-	Postgres,
-	clients
+	Postgres
+	//clients
 };

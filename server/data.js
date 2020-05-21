@@ -468,7 +468,9 @@ function getModelView (model, store, args) {
 	});
 	return o;
 };
-
+/*
+	todo: $1, $2 parameters, prepare query
+ */
 async function getData (req, store) {
 	let session = req.session;
 	let view;

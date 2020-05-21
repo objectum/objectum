@@ -5,15 +5,16 @@ Requirements: [Redis](https://redis.io/), [PostgreSQL](https://www.postgresql.or
 
 Objectum ecosystem:
 * Isomorhic javascript client https://github.com/objectum/objectum-client  
+* Proxy for server methods and access control https://github.com/objectum/objectum-proxy  
 * React components https://github.com/objectum/objectum-react  
 * Command-line interface (CLI) https://github.com/objectum/objectum-cli  
 * Objectum project example https://github.com/objectum/catalog 
 
 ## Quick start
-
+Project name "catalog".  
 Install CLI:
 ```bash
-npm i -g objectum-cli
+npm install -g objectum-cli
 ```
 
 Install platform:
@@ -24,7 +25,7 @@ objectum-cli --create-platform --path /opt/objectum
 ```
 Create objectum project:
 ```bash
-objectum-cli --create-project my_project --path /opt/objectum 
+objectum-cli --create-project catalog --path /opt/objectum 
 
 ```
 objectum-cli defaults: 
@@ -40,8 +41,8 @@ objectum-cli defaults:
 --password admin
 ```
 db-dbaPassword - postgres password.
-db-dbPassword - database user 'my_project' password.  
-password - password of project 'admin'. 
+db-dbPassword - database user "catalog" password.  
+password - password of project "admin". 
 
 Start platform:
 ```bash
@@ -50,7 +51,7 @@ node index-8200.js
 ```
 Start project:
 ```bash
-cd /opt/objectum/projects/my_project 
+cd /opt/objectum/projects/catalog 
 node index-3100.js
 npm run start
 ```
@@ -59,339 +60,49 @@ Login: admin
 Password: admin  
 
 ## Learn by Example project "Catalog"
+Basic level of development (rapid).
 
-* [Platform initialization](#platform_init)  
-* [Project initialization](#project_init)
-    * [Create react application](#create_react_application)
-    * [Add project configuration](#add_project_configuration)
-    * [Add project web-server](#add_project_web_server)
-    * [Add project App.js](#add_project_app_js)
-    * [Add project proxy](#add_project_proxy)
-    * [Prepare tablespace folder](#prepare_tablespace_folder)
-    * [Create store](#create_store)
-    * [Import store structure](#import_store_structure)
-    * [Start project (DevServer)](#start_project)
-    * [Remove store](#remove_store)
-* [Development](#development)
-    * [Model "item"](#model_item)
-    * [Model properties](#model_properties)
-    * [Dictionary "d.item.type"](#model_item_type)
-    * [Tabular part "t.item.comment" of "item"](#model_comment)
-    * [Triggers](#triggers)
-    * [SQL support](#sql_support)
-    * [ModelList, ModelTree, ModelRecord](#model_list)
-    * [Menus](#menus)
-    * [Roles](#roles)
-    * [Users](#users)    
-    * [Deployment](#deployment)
-        * [Export store](#export_store)
-        * [Import store](#import_store)
-        * [Cluster](#cluster)
+* [Specification](#specification)  
+* [Model "item"](#model_item)
+* [Model properties](#model_properties)
+* [Dictionary "d.item.category"](#model_item_category)
+* [Tabular part "t.item.comment" of "item"](#model_comment)
+* [ModelList, ModelTree, ModelRecord](#model_list)
+* [Menus](#menus)
+* [Roles](#roles)
+* [Users](#users)    
+* [ItemModel](#item_model)    
+* [Access control](#access_control)    
+* [Deployment](#deployment)
+    * [Export store](#export_store)
+    * [Import store](#import_store)
+    * [Cluster](#cluster)
+
+<a name="specification" />
+
+## Specification
+
+* List of items. Clients can create items and guests can view items.
+* Model "Item" properties:
+    * Name - string field
+    * Description - string field. WYSIWYG editor
+    * Photo - file field. Image cropping
+    * Cost - number field
+    * Date - date field
+    * Category - dictionary field
+    * User - item owner
+    * Hidden - boolean field. Guests can't view hidden items
+* Comments - comments to items    
+* User roles
+    * client - can create items
+    * guest - can view all items
+* User registration
 
 <a name="platform_init" />
 
-## Platform initialization
-
-Install platform:
-```bash
-mkdir -p /opt/objectum/server
-cd /opt/objectum/server
-npm i objectum
-```
-
-Add platform configuration:
-```bash
-cat > /opt/objectum/server/config.js
-```
-```js
-module.exports = {
-	"rootDir": "/opt/objectum/server",
-	"projectsDir": "/opt/objectum/projects",
-	"startPort": 8200,
-	"redis": {
-		"host": "127.0.0.1",
-		"port": 6379
-	},
-	"query": {
-		"maxRowNum": 2000000,
-		"maxCount": 700000
-	},
-	"log": {
-		"level": "info"
-	}
-}
-```
-
-Add script:
-```bash
-cat > /opt/objectum/server/index.js
-```
-```js
-require ("objectum").start (require ("./config"));
-```
-
-Add script:
-```bash
-cat > /opt/objectum/server/objectum.js
-```
-```js
-let Objectum = require ("objectum").Objectum;
-
-module.exports = new Objectum (require ("./config"));
-```
-
-Start platform:
-```bash
-cd /opt/objectum/server
-node index.js
-```
-
-<a name="project_init" />
-
-## Project initialization
-
-<a name="create_react_application" />
-
-### Create react application
-```bash
-mkdir -p /opt/objectum/projects/catalog
-cd /opt/objectum/projects/catalog
-npx create-react-app .
-npm i -S express express-http-proxy objectum-client objectum-react
-```
-
-<a name="add_project_configuration" />
-
-### Add project configuration
-postgres password: 12345
-```bash
-cat > /opt/objectum/projects/catalog/config.json
-```
-```json
-{
-	"code": "catalog",
-	"rootDir": "/opt/objectum/projects/catalog",
-	"adminPassword": "D033E22AE348AEB5660FC2140AEC35850C4DA997",
-	"port": 3100,
-	"database": {
-		"host": "localhost",
-		"port": 5432,
-		"db": "catalog",
-		"dbUser": "catalog",
-		"dbPassword": "1",
-		"dbaUser": "postgres",
-		"dbaPassword": "12345"
-	},
-	"objectum": {
-		"host": "localhost",
-		"port": 8200
-	}
-}
-```
-Admin password "admin" <= require ("crypto").createHash ("sha1").update ("admin").digest ("hex").toUpperCase ();
-
-<a name="add_project_web_server" />
-
-### Add project web-server
-Add script:
-```bash
-cat > /opt/objectum/projects/catalog/index.js
-```
-```js
-const config = require ("./config");
-const path = require ("path");
-const express = require ("express");
-const proxy = require ("express-http-proxy");
-const app = express ();
-
-app.use (`/api`, proxy (`http://${config.objectum.host}:${config.objectum.port}`, {
-	proxyReqPathResolver: function (req) {
-		let parts = req.url.split('?');
-		let queryString = parts [1];
-
-		return `/projects/${config.code}${parts [0]}${queryString ? "?" + queryString : ""}`;
-	}
-}));
-app.use ("/public/*", proxy (`http://${config.objectum.host}:${config.objectum.port}`, {
-	proxyReqPathResolver: function (req) {
-		return req.baseUrl;
-	}
-}));
-app.use (express.static (path.join (__dirname, "build")));
-app.get ("/*", function (req, res) {
-	res.sendFile (path.join (__dirname, "build", "index.html"));
-});
-app.listen (config.port, function () {
-	console.log (`server listening on port ${config.port}`);
-});
-```
-
-<a name="add_project_web_server" />
-
-### Add project App.js
-Change script /opt/objectum/projects/catalog/src/App.js
-```js
-import React, {Component} from "react";
-import store from "objectum-client";
-import {ObjectumApp} from "objectum-react";
-
-class App extends Component {
-	constructor (props) {
-		super (props);
-		
-		store.setUrl ("/api");
-		window.store = store;
-	}
-	
-	render () {
-		return (
-			<ObjectumApp store={store} name="Catalog" />
-		);
-	}
-};
-
-export default App;
-```
-
-<a name="add_project_proxy" />
-
-### Add project proxy
-Add script:
-```bash
-cat > /opt/objectum/projects/catalog/src/setupProxy.js
-```
-```js
-const proxy = require ("http-proxy-middleware");
-const config = require ("./../config");
-
-module.exports = function (app) {
-    app.use (proxy ("/api",
-        {target: `http://localhost:${config.port}/`}
-    ));
-    app.use (proxy ("/public",
-        {target: `http://localhost:${config.port}/`}
-    ));
-};
-```
-
-<a name="prepare_tablespace_folder" />
-
-### Prepare tablespace folder
-```bash
-mkdir /opt/objectum/projects/catalog/db
-chown postgres:postgres /opt/objectum/projects/catalog/db
-```
-
-<a name="create_store" />
-
-### Create store:
-"catalog" is developer store.
-Add script:
-```bash
-cat > /opt/objectum/projects/catalog/bin/create.js
-```
-```js
-let $o = require ("/opt/objectum/server/objectum");
-
-$o.db.execute ({
-	code: "catalog",
-	fn: "create",
-	path: "/opt/objectum/projects/catalog/db"
-});
-```
-
-Create store:
-```bash
-cd /opt/objectum/projects/catalog/bin
-node create.js
-```
-
-<a name="import_store_structure" />
-
-### Import store structure
-Import objectum classes and views.
-Add script:
-```bash
-cat > /opt/objectum/projects/catalog/bin/import.js
-```
-```js
-let $o = require ("/opt/objectum/server/objectum");
-
-$o.db.execute ({
-	code: "catalog",
-	fn: "import",
-	file: "schema-objectum.json"
-});
-```
-
-Import store structure:
-```bash
-cd /opt/objectum/projects/catalog/bin
-node import.js
-```
-
-<a name="start_project" />
-
-### Start project (DevServer)
-```bash
-cd /opt/objectum/projects/catalog
-node index.js
-npm start
-```
-
-Open URL: http://localhost:3000  
-Login: admin  
-Password: admin  
-
-<a name="remove_store" />
-
-### Remove store
-Add script:
-```bash
-cat > /opt/objectum/projects/catalog/bin/remove.js
-```
-```js
-let $o = require ("/opt/objectum/server/objectum");
-
-$o.db.execute ({
-	code: "catalog",
-	fn: "remove"
-});
-```
-
-You can remove store (drop tablespace, role, user from PostgreSQL):
-```bash
-cd /opt/objectum/projects/catalog/bin
-node remove.js
-```
-
-<a name="development" />
-
-## Development
-Start objectum platform:
-```bash
-cd /opt/objectum/server
-node index.js
-
-```
-Start project server:
-```bash
-cd /opt/objectum/projects/catalog
-node index.js
-```
-Start project development server:
-```bash
-cd /opt/objectum/projects/catalog
-npm run start
-```
-
-Open URL: http://localhost:3000  
-Login: admin  
-Password: admin  
-
 <a name="model_item" />
 
-### Model "item"
+## Model "item"
 Click "Models" in menu. Click "Create". Edit and save.  
 objectum-cli: 
 ```bash
@@ -406,25 +117,37 @@ Select tab "Properties" in model. Click "Create". Edit and save. Do it for all p
 objectum-cli: 
 ```bash
 cd /opt/objectum/projects/catalog 
-objectum-cli --create-property '{"model": "item", "name": "Date", "code": "date", "type": "date"}'
 objectum-cli --create-property '{"model": "item", "name": "Name", "code": "name", "type": "string"}'
-objectum-cli --create-property '{"model": "item", "name": "Weight", "code": "weight", "type": "number"}'
+objectum-cli --create-property '{"model": "item", "name": "Description", "code": "description", "type": "string"}'
+objectum-cli --create-property '{"model": "item", "name": "Photo", "code": "photo", "type": "file"}'
+objectum-cli --create-property '{"model": "item", "name": "Cost", "code": "cost", "type": "number"}'
+objectum-cli --create-property '{"model": "item", "name": "Date", "code": "date", "type": "date"}'
+objectum-cli --create-property '{"model": "item", "name": "User", "code": "user", "type": "objectum.user"}'
 objectum-cli --create-property '{"model": "item", "name": "Hidden", "code": "hidden", "type": "boolean"}'
-objectum-cli --create-property '{"model": "item", "name": "File", "code": "file", "type": "file"}'
+```
+Property "Photo" cropping options add in field "Options":
+```bash
+{
+    "image": {
+        "width": 450,
+        "height": 300,
+        "aspect": 1.5        
+    }
+}
 ```
 
-<a name="model_item_type" />
+<a name="model_item_category" />
 
-### Dictionary "d.item.type"
-Create model "d.item" for grouping dictionaries of model "item". Create model "d.item.type" with property "name". 
-Add property "type" to model "item".  
+### Dictionary "d.item.category"
+Create model "d.item" for grouping dictionaries of model "item". Create model "d.item.category" with property "name". 
+Add property "category" to model "item".  
 objectum-cli: 
 ```bash
 cd /opt/objectum/projects/catalog 
 objectum-cli --create-model '{"name": "Item", "code": "item", "parent": "d"}'
-objectum-cli --create-model '{"name": "Type", "code": "type", "parent": "d.item"}'
-objectum-cli --create-property '{"model": "d.item.type", "name": "Name", "code": "name", "type": "string"}'
-objectum-cli --create-property '{"model": "item", "name": "Type", "code": "type", "type": "d.item.type"}'
+objectum-cli --create-model '{"name": "Type", "code": "category", "parent": "d.item"}'
+objectum-cli --create-property '{"model": "d.item.category", "name": "Name", "code": "name", "type": "string"}'
+objectum-cli --create-property '{"model": "item", "name": "Category", "code": "category", "type": "d.item.category"}'
 ```
 
 <a name="model_comment" />
@@ -440,41 +163,10 @@ objectum-cli --create-property '{"model": "t.item.comment", "name": "Item", "cod
 objectum-cli --create-property '{"model": "t.item.comment", "name": "Text", "code": "text", "type": "string"}'
 ```
 
-<a name="triggers" />
-
-### Triggers
-Available triggers (PL/pgSQL):
-* before_insert_or_update
-* before_insert
-* before_update
-* before_delete
-* after_insert_or_update
-* after_insert
-* after_update
-* after_delete
-
-Add triggers in "Options" of model.
-Example:
-```js
-{
-	"trigger": {
-		"before_insert_or_update": "if (NEW.{date} is null) then\n    NEW.{date} = current_timestamp;\nend if;\n\n"
-	}
-}
-```
-
-<a name="sql_support" />
-
-### SQL support
-```sql
-under construction
-```
-
-
 <a name="model_list" />
 
 ### ModelList, ModelRecord
-All models can view using /model_list or /model_tree (need "parent" property). Allowed actions: create, edit, remove.
+All modell records can view using /model_list or /model_tree (need "parent" property). Allowed actions: create, edit, remove.
 Items path: /model_list/item
 Dictionary path: /model_list/d_item_type 
 
@@ -482,16 +174,50 @@ Dictionary path: /model_list/d_item_type
 
 ### Menus
 Menu used in role. You can create multi level menu.
+Create menu for role "client":
+* Click "Menus" in menu. Click "Create".
+    * Name "Client"
+* Click "Menu items". Click "Create".
+    * Name "Items", path "/model_list/item"
+* Click "Menus" in menu. Click "Create".
+    * Name "Guest"
+* Click "Menu items". Click "Create".
+    * Name "Items", path "/model_list/item"
 
 <a name="roles" />
 
 ### Roles
 Roles of users.
+Create role "client":
+* Click "Roles" in menu. Click "Create".
+    * Name "Client"
+    * Menu - select menu "Client"
+* Click "Roles" in menu. Click "Create".
+    * Name "Guest"
+    * Menu - select menu "Guest"
 
 <a name="users" />
 
 ### Users
-Users.
+Create users:
+* Login "client", password "client" with role "Client".
+* Login "guest", password "guest" with role "Guest".
+
+<a name="item_model" />
+
+### ItemModel
+/src/models/ItemModel.js:
+```js
+import {Record} from "objctum-client";
+
+class ItemModel extends Record {
+    
+}
+```
+
+<a name="access_control" />
+
+### Access control
     
 <a name="deployment" />
 
@@ -529,7 +255,8 @@ $o.db.execute ({
 <a name="cluster" />
 
 ### Cluster
-Change /opt/objectum/server/config.js
+You can start platform in cluster mode.  
+Change /opt/objectum/server/config.js:
 ```js
 module.exports = {
 	"rootDir": "/opt/objectum/server",
@@ -546,12 +273,12 @@ module.exports = {
 	"log": {
 		"level": "info"
 	},
-	cluster: {
-		www: {
-			workers: 3
+	"cluster": {
+		"www": {
+			"workers": 3
 		},
-		app: {
-			workers: 3
+		"app": {
+			"workers": 3
 		}
 	}
 }

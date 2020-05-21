@@ -8,7 +8,7 @@ const storePool = {};
 const sessions = {};
 const common = require ("./common");
 const { Store } = require ("./store");
-const { clients } = require ("./db/postgres");
+//const { clients } = require ("./db/postgres");
 const { Class, ClassAttr, View, ViewAttr, Action, Object } = require ("./model");
 const legacy = require ("./legacy");
 const mimetypes = require ("./mimetypes");
@@ -52,6 +52,7 @@ async function init () {
 				delete sessions [r.removed];
 			}
 		}
+/*
 		if (channel == config.redis.db + "-connections") {
 			let r = JSON.parse (message);
 			
@@ -78,6 +79,7 @@ async function init () {
 				}
 			}
 		}
+*/
 	});
 	redisSub.subscribe (config.redis.db + "-stores");
 	redisSub.subscribe (config.redis.db + "-sessions");
