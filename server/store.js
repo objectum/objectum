@@ -553,6 +553,7 @@ class Store {
 					a.${userCls.attrs ["login"].getField ()} as login,
 					a.${userCls.attrs ["password"].getField ()} as password,
 					a.${userCls.attrs ["role"].getField ()} as role,
+					b.${roleCls.attrs ["code"].getField ()} as role_code,
 					b.${roleCls.attrs ["menu"].getField ()} as menu
 				from
 					${userCls.getTable ()} a
@@ -565,6 +566,7 @@ class Store {
 				password: rec.password,
 				id: rec.id,
 				role: rec.role,
+				roleCode: rec.role_code,
 				menu: rec.menu
 			};
 			me.auth.user [rec.login] = o;
