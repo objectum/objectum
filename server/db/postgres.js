@@ -309,6 +309,8 @@ class Postgres {
 	}
 
 	async remove ({connection}) {
+		delete config.pool;
+		
 		await this.disconnect ();
 		await this.connect ();
 		
