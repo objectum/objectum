@@ -50,7 +50,7 @@ class Export {
 	async getTopClassesCodes () {
 		let me = this;
 		
-		log.info ({cls: "Export", fn: "getTopClassesCodes"});
+		log.debug ({fn: "getTopModelPaths"});
 		
 		let rows = await this.store.query ({session: me.session, sql: `
 			select
@@ -66,7 +66,7 @@ class Export {
 	async getTopViewsCodes () {
 		let me = this;
 		
-		log.info ({cls: "Export", fn: "getTopViewsCodes"});
+		log.debug ({fn: "getTopQueryPaths"});
 		
 		let rows = await this.store.query ({session: me.session, sql: `
 			select
@@ -123,7 +123,7 @@ class Export {
 	};
 
 	async exportClasses () {
-		log.info ({cls: "Export", fn: "exportClasses"});
+		log.info ({fn: "exportModels"});
 
 		let me = this;
 		let codes = me.data.options.classes;
@@ -338,7 +338,7 @@ class Export {
 	}
 	
 	async exportViews () {
-		log.info ({cls: "Export", fn: "exportViews"});
+		log.info ({fn: "exportQueries"});
 		
 		let me = this;
 		let codes = me.data.options.views;
@@ -419,7 +419,7 @@ class Export {
 	}
 	
 	async exportRevisions () {
-		log.info ({cls: "Export", fn: "exportRevisions"});
+		log.info ({fn: "exportRevisions"});
 		
 		let me = this;
 		
@@ -453,7 +453,7 @@ class Export {
 	}
 	
 	async exportSchemas () {
-		log.info ({cls: "Export", fn: "exportSchemas"});
+		log.info ({fn: "exportSchemas"});
 		
 		let me = this;
 
@@ -539,7 +539,7 @@ class Export {
 	async clearBadTimeFields () {
 		let me = this;
 		
-		log.info ({cls: "Export", fn: "clearBadTimeFields"});
+		log.debug ({fn: "clearBadTimeFields"});
 		
 		await this.store.query ({session: me.session, sql: `
 			update tobject_attr set ftime = null
@@ -602,7 +602,7 @@ class Export {
 	};
 	
 	async exportToFile (opts) {
-		log.info ({cls: "Export", fn: "exportToFile"});
+		log.info ({fn: "exportToFile"});
 		
 		let me = this;
 		let timeStart = new Date ().getTime ();
@@ -662,7 +662,7 @@ class Export {
 		stat += `queryCount: ${me.store.queryCount}\n`;
 		stat += `duration: ${(new Date ().getTime () - timeStart) / 1000} sec.\n`;
 		
-		log.info ({cls: "Export", stat});
+		log.info ({stat});
 		me.store.end ();
 	}
 }

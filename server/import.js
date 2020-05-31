@@ -97,7 +97,7 @@ class Import {
 	}
 	
 	async importViews () {
-		log.info ({fn: "import.importViews"});
+		log.info ({fn: "importQueries"});
 		
 		let me = this;
 		let viewFields = me.data.fields.tview;
@@ -156,7 +156,7 @@ class Import {
 	};
 	
 	async importViewAttrs () {
-		log.info ({fn: "import.importViewAttrs"});
+		log.info ({fn: "importColumns"});
 		
 		let me = this;
 		let s;
@@ -220,7 +220,7 @@ class Import {
 	};
 	
 	async importClasses () {
-		log.info ({fn: "import.importClasses"});
+		log.info ({fn: "importModels"});
 		
 		let me = this;
 		let classFields = me.data.fields.tclass;
@@ -281,7 +281,7 @@ class Import {
 	};
 	
 	async importClassAttrs () {
-		log.info ({fn: "import.importClassAttrs"});
+		log.info ({fn: "importProperties"});
 		
 		let me = this;
 		let classAttrFields = me.data.fields.tclass_attr;
@@ -350,7 +350,7 @@ class Import {
 	};
 	
 	async importActions () {
-		log.info ({fn: "import.importActions"});
+		log.debug ({fn: "importActions"});
 		
 		let me = this;
 		let actionFields = me.data.fields.taction;
@@ -405,11 +405,10 @@ class Import {
 	};
 	
 	async importObjects () {
-		log.info ({fn: "import.importObjects"});
+		log.info ({fn: "importRecords"});
 		
 		let me = this;
 		let objectFields = me.data.fields.tobject;
-		let count = 0;
 		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tobject.length, renderThrottle: 200});
 		
 		for (let j = 0; j < me.data.tobject.length; j ++) {
@@ -460,11 +459,6 @@ class Import {
 					
 					await me.store.query ({session: me.session, sql: s});
 					me.incCount ("tobject", fields ["fid"]);
-					count ++;
-					
-					if (count % 10000 == 0) {
-						log.info ({fn: "import.importObjects"}, "\t" + count + " records");
-					}
 				}
 			}
 			bar.tick ();
@@ -472,11 +466,10 @@ class Import {
 	};
 	
 	async importObjectAttrs () {
-		log.info ({fn: "import.importObjectAttrs"});
+		log.info ({fn: "importRecordData"});
 		
 		let me = this;
 		let objectAttrFields = me.data.fields.tobject_attr;
-		let count = 0;
 		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tobject_attr.length, renderThrottle: 200});
 		
 		for (let j = 0; j < me.data.tobject_attr.length; j ++) {
@@ -561,11 +554,6 @@ class Import {
 					
 					await me.store.query ({session: me.session, sql: s});
 					me.incCount ("tobject_attr", fields ["fid"]);
-					count++;
-					
-					if (count % 10000 == 0) {
-						//log.info ({fn: "import.importObjectAttrs"}, "\t" + count + " records");
-					}
 				}
 			}
 			bar.tick ();
@@ -607,7 +595,7 @@ class Import {
 	
 	// TODO: Получение карты соответствия schemaId, recordId и localId
 	async getNewId () {
-		log.info ({fn: "import.getNewId"});
+		log.info ({fn: "getNewId"});
 		
 		let me = this;
 		
@@ -659,7 +647,7 @@ class Import {
 	};
 	
 	async importRevisions () {
-		log.info ({fn: "import.importRevisions"});
+		log.info ({fn: "importRevisions"});
 		
 		let me = this;
 		let revisionFields = me.data.fields.trevision;
@@ -712,14 +700,14 @@ class Import {
 			me.tableId ["trevision"] ++;
 		}
 		_.each (me.startRevision, function (revisionId, schemaId) {
-			log.info ({fn: "import.importRevisions"}, "startRevision [" + schemaId + "] = " + revisionId + " ");
+			log.info ({fn: "importRevisions"}, "startRevision [" + schemaId + "] = " + revisionId + " ");
 		});
 		me.newId ["trevision"][2147483647] = 0;
 		me.newId ["trevision"][0] = 0;
 	};
 	
 	async importSchemas () {
-		log.info ({fn: "import.importSchemas"});
+		log.info ({fn: "importSchemas"});
 		
 		let me = this;
 		let schemaFields = me.data.fields.tschema;
@@ -744,7 +732,7 @@ class Import {
 	};
 	
 	generateNewId () {
-		log.info ({fn: "import.generateNewId"});
+		log.info ({fn: "generateNewId"});
 		
 		let me = this;
 		let tables = ["tclass", "tclass_attr", "tview", "tview_attr", "taction", "tobject", "tobject_attr"];
@@ -776,7 +764,7 @@ class Import {
 	};
 	
 	async updateTriggers () {
-		log.info ({fn: "import.updateTriggers"});
+		log.info ({fn: "updateTriggers"});
 		
 		let me = this;
 		let rows = await me.store.query ({session: me.session, sql: "select fid from _class"});
@@ -814,7 +802,7 @@ class Import {
 	};
 	
 	async restoreConstraints () {
-		log.info ({fn: "import.restoreConstraints"});
+		log.info ({fn: "restoreConstraints"});
 		
 		let me = this;
 		
@@ -843,7 +831,7 @@ class Import {
 	};
 	
 	parseDates (list) {
-		log.info ({fn: "import.parseDates"});
+		log.debug ({fn: "parseDates"});
 		
 		list.forEach (row => {
 			row.values.forEach ((v, i) => {
@@ -904,7 +892,7 @@ class Import {
 */
 
 	async updateMetaStartId () {
-		log.info ({fn: "import.updateMetaStartId"});
+		log.info ({fn: "updateMetaStartId"});
 		
 		let me = this;
 		let metas = ["class", "class_attr", "view", "view_attr"];
@@ -943,7 +931,7 @@ class Import {
 	};
 	
 	async importFromFile ({code, file}) {
-		log.info ({fn: "import.importFromFile"});
+		log.info ({fn: "importFromFile"});
 		
 		let me = this;
 		let session = {
@@ -977,7 +965,7 @@ class Import {
 					return true;
 				}
 			});
-			log.info ({fn: "import.importFromFile"}, "loadConfig");
+			log.debug ({fn: "importFromFile"}, "loadConfig");
 			
 			const {loadConfig} = require ("./project");
 			
@@ -991,7 +979,7 @@ class Import {
 			if (!_classExists) {
 				throw new Error ("please rebuild store.");
 			}
-			log.info ({fn: "import.importFromFile"}, "startTransaction");
+			log.debug ({fn: "importFromFile"}, "startTransaction");
 			
 			await me.store.startTransaction ({session, remoteAddr: "127.0.0.1", description: "import_" + code});
 			await me.store.query ({session, sql: "select set_config ('objectum.revision_id', '0', True)"});
@@ -1034,13 +1022,13 @@ class Import {
 			await me.store.commitTransaction ({session});
 			await me.store.client.updateSequences ();
 			
-			log.info ({fn: "import.importFromFile"}, "records count:\n" + JSON.stringify (me.count, 0, "\t"));
+			log.info ({fn: "importFromFile", count: me.count});
 			
 			let redisClient = redis.createClient (config.redis.port, config.redis.host);
 			
 			redisClient.del (code + "-objects");
 			redisClient.quit ();
-			me.store.end ();
+			await me.store.end ();
 		} catch (err) {
 			await me.store.rollbackTransaction ({session});
 			throw err;

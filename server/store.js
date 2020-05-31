@@ -544,8 +544,14 @@ class Store {
 		if (config.legacy) {
 			return await legacy.readAuthInfo.call (this);
 		}
-		let userCls = me.getClass ("objectum.user");
-		let roleCls = me.getClass ("objectum.role");
+		let userCls, roleCls;
+		
+		try {
+			userCls = me.getClass ("objectum.user");
+			roleCls = me.getClass ("objectum.role");
+		} catch (err) {
+			return;
+		}
 		let recs = await me.query ({
 			client: me.client, sql: `
 				select
