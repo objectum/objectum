@@ -185,6 +185,7 @@ class Postgres {
 			}
 //			let res = await me.client.queryAsync (sql, params);
 //			let res = await me.client.queryAsync ({text: sql, values: params, rowMode});
+
 			let res = await me.client.query ({text: sql, values: params, rowMode});
 			
 			if (fields) {
@@ -311,19 +312,21 @@ class Postgres {
 	async remove ({connection}) {
 		delete config.pool;
 		
-		await this.disconnect ();
-		await this.connect ();
-		
 		try {
+			await this.disconnect ();
+			await this.connect ();
+
 			await this.query ({sql: `drop schema ${connection.dbUser} cascade`});
 			log.info (`schema ${connection.dbUser} dropped`);
 		} catch (err) {
 			log.error ({fn: "postgres.remove", error: err});
 		}
-		await this.disconnect ();
-		await this.connect ({systemDB: true});
-		
 		try {
+			if (this.connected) {
+				await this.disconnect ();
+			}
+			await this.connect ({systemDB: true});
+			
 			await this.query ({sql: `drop database ${connection.db}`});
 			log.info (`database ${connection.db} dropped`);
 		} catch (err) {
