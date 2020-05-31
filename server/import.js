@@ -1022,7 +1022,7 @@ class Import {
 			await me.store.commitTransaction ({session});
 			await me.store.client.updateSequences ();
 			
-			log.info ({fn: "importFromFile", count: me.count});
+			log.info ({count: me.count});
 			
 			let redisClient = redis.createClient (config.redis.port, config.redis.host);
 			
