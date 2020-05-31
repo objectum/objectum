@@ -70,7 +70,7 @@ class Database {
 				views: cfg.views || "all",
 				except: {
 					tobject: [{
-						fclass_id: cfg.filterClasses || cfg.filterRecords || []
+						fclass_id: cfg.filterClasses || cfg.filterRecords || cfg.exceptRecords || []
 					}]
 				},
 				space: _.has (cfg, "space") ? cfg.space : "\t"
