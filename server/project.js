@@ -471,7 +471,7 @@ async function classFn (req) {
 		throw new Error ("project.modelFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["query"] = o.data ["view"];
-	delete o.data ["view"];
+	//delete o.data ["view"];
 
 	return o.data;
 };
@@ -518,7 +518,7 @@ async function classAttrFn (req) {
 		throw new Error ("project.propertyFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["model"] = o.data ["class"];
-	delete o.data ["class"];
+	//delete o.data ["class"];
 	
 	return o.data;
 };
@@ -565,7 +565,7 @@ async function viewFn (req) {
 		throw new Error ("project.queryFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["model"] = o.data ["class"];
-	delete o.data ["class"];
+	//delete o.data ["class"];
 	
 	return o.data;
 };
@@ -612,7 +612,7 @@ async function viewAttrFn (req) {
 		throw new Error ("project.columnFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["query"] = o.data ["view"];
-	delete o.data ["view"];
+	//delete o.data ["view"];
 	
 	return o.data;
 };
@@ -659,7 +659,7 @@ async function actionFn (req) {
 		throw new Error ("project.actionFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["model"] = o.data ["class"];
-	delete o.data ["class"];
+	//delete o.data ["class"];
 	
 	return o.data;
 };
@@ -712,7 +712,7 @@ async function objectFn (req) {
 		throw new Error ("project.recordFn: unknown fn: " + req.args._fn);
 	}
 	o.data ["_model"] = o.data ["_class"];
-	delete o.data ["_class"];
+	//delete o.data ["_class"];
 	
 	if (req.args._trace) {
 		if (o.data._trace) {
