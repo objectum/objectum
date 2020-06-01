@@ -373,6 +373,11 @@ async function auth (req, res, next) {
 		authUser ({store, login, password, req}) ||
 		{error: "401 Unauthenticated"}
 	;
+	// todo: fix store.auth.user.roleCode update
+	if (result.roleId && !result.roleCode && result.userId) {
+		await store.readAuthInfo ();
+		result.roleCode = store.auth.user [result.userId].roleCode;
+	}
 	return result;
 };
 

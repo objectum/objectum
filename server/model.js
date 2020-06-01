@@ -262,20 +262,21 @@ class Object extends Base {
 			}
 		}
 		if (me.store.auth.userClassId == classObj.get ("id")) {
-			let menu = null;
+			let menu = null, roleCode = null;
 			
 			if (me.get ("role")) {
 				let o = await me.store.getObject ({session, id: me.get ("role")});
 				
 				menu = o.get ("menu");
+				roleCode = o.get ("code");
 			}
 			me.store.revisions [revisionId]["auth"][newObject ? "created" : "changed"].push ({
-				user: me.get ("id"), login: me.get ("login"), password: me.get ("password"), role: me.get ("role"), menu
+				user: me.get ("id"), login: me.get ("login"), password: me.get ("password"), role: me.get ("role"), roleCode, menu
 			});
 		} else
 		if (me.store.auth.roleClassId == classObj.get ("id")) {
 			me.store.revisions [revisionId]["auth"][newObject ? "created" : "changed"].push ({
-				role: me.get ("id"), menu: me.get ("menu")
+				role: me.get ("id"), roleCode: me.get ("code"), menu: me.get ("menu")
 			});
 		}
 		if (me.store.revisions [revisionId]["object"]) {
