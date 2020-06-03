@@ -519,6 +519,10 @@ async function startProjectPlugins ({store}) {
 	
 	try {
 		await fs_access (pluginsFile);
+	} catch (err) {
+		return;
+	}
+	try {
 		let m = require (pluginsFile);
 		
 		if (m.init) {
