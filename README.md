@@ -1,7 +1,7 @@
 # Objectum
 Objectum platform makes it easy to create realtime single page applications that run in both Node.js and browsers.
  
-Requirements: [PostgreSQL](https://www.postgresql.org/download/), [Redis](https://redis.io/)
+Requirements: [NodeJS](https://nodejs.org), [PostgreSQL](https://www.postgresql.org/download/), [Redis](https://redis.io/)
 
 Objectum ecosystem:
 * Javascript platform https://github.com/objectum/objectum  
@@ -11,8 +11,48 @@ Objectum ecosystem:
 * Command-line interface (CLI) https://github.com/objectum/objectum-cli  
 * Objectum project example https://github.com/objectum/catalog 
 
-## Quick start
-Project name "catalog" (https://github.com/objectum/catalog)  
+## Demo
+https://github.com/objectum/catalog  
+
+## Learn by Example project "Catalog"
+
+* [Specification](#specification)
+* [Project initialization](#project_initialization)  
+* [Model creation](#model_creation)  
+* [ModelList, ModelTree, ModelRecord](#model_list)
+* [Menus](#menus)
+* [Roles](#roles)
+* [Users](#users)    
+* [ItemModel (client)](#item_model_client)    
+* [ItemModel (server)](#item_model_server)    
+* [Access control](#access_control)    
+* [Admin actions](#admin_actions)
+* [Deployment](#deployment)
+    * [Export store](#export_store)
+    * [Import store](#import_store)
+    * [Cluster](#cluster)
+
+<a name="specification" />
+
+## Specification
+
+* List of items. Users can create items and guests can view items.
+* Model "Item" properties:
+    * Name - string field
+    * Description - string field. WYSIWYG editor
+    * Photo - file field. Image cropping
+    * Cost - number field
+    * Date - date field
+    * Type - dictionary field
+* Comments - comments to items    
+* User roles
+    * user - can create items
+    * guest - can view all items
+
+<a name="project_initialization" />
+
+## Project initialization
+
 Install CLI:
 ```bash
 npm install -g objectum-cli
@@ -59,43 +99,6 @@ npm run start
 Open URL: http://localhost:3000  
 Login: admin  
 Password: admin  
-
-## Learn by Example project "Catalog"
-Basic level of development (rapid).
-
-* [Specification](#specification)
-* [Model creation](#model_creation)  
-* [ModelList, ModelTree, ModelRecord](#model_list)
-* [Menus](#menus)
-* [Roles](#roles)
-* [Users](#users)    
-* [ItemModel (client)](#item_model_client)    
-* [ItemModel (server)](#item_model_server)    
-* [Access control](#access_control)    
-* [Admin actions](#admin_actions)
-* [Deployment](#deployment)
-    * [Export store](#export_store)
-    * [Import store](#import_store)
-    * [Cluster](#cluster)
-
-<a name="specification" />
-
-## Specification
-
-* List of items. Users can create items and guests can view items.
-* Model "Item" properties:
-    * Name - string field
-    * Description - string field. WYSIWYG editor
-    * Photo - file field. Image cropping
-    * Cost - number field
-    * Date - date field
-    * Type - dictionary field
-* Comments - comments to items    
-* User roles
-    * user - can create items
-    * guest - can view all items
-
-<a name="platform_init" />
 
 <a name="model_creation" />
 
