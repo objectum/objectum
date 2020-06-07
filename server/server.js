@@ -222,7 +222,6 @@ async function start ({port}) {
 
 	if (!config.createStoresOnDemand) {
 		await project.createStores ();
-		console.log ("stores created.");
 		project.newsGC ();
 	}
 	if (port == config.startPort || process.env.mainWorker) {

@@ -838,6 +838,9 @@ async function createStores () {
 		let code = codes [i];
 		await getStore ({code});
 	}
+	if (codes.length) {
+		console.log ("stores created.");
+	}
 };
 
 async function getTableRecords ({session, store, table, fields}) {
