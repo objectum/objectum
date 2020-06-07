@@ -5,7 +5,8 @@ const _ = require ("lodash");
 class Objectum {
 	constructor (config) {
 		let me = this;
-		
+
+		config.rootDir = config.rootDir || `${__dirname}/..`;
 		global.config = config;
 		
 		_.defaults (config, {

@@ -89,10 +89,14 @@ async function init () {
 
 async function loadConfig ({code}) {
 	if (!config.stores [code]) {
+		config.projectsDir = config.projectsDir || `${__dirname}/../../projects`;
+		
 		if (config.projectsDir) {
 			let data = await fs_readFile (`${config.projectsDir}/${code}/config.json`, "utf8");
 
-			config.stores [code] = JSON.parse (data);
+			data = JSON.parse (data);
+			data.rootDir = data.rootDir || `${config.projectsDir}/${code}`;
+			config.stores [code] = data;
 		} else {
 			throw new Error ("config.projectsDir undefined");
 		}

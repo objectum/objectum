@@ -1,7 +1,7 @@
 # Objectum
 Objectum platform makes it easy to create realtime single page applications that run in both Node.js and browsers.
  
-Requirements: [NodeJS](https://nodejs.org), [PostgreSQL](https://www.postgresql.org/download/), [Redis](https://redis.io/)
+Requirements: [NodeJS (ES Modules)](https://nodejs.org), [PostgreSQL](https://www.postgresql.org/download/), [Redis](https://redis.io/)
 
 Objectum ecosystem:
 * Javascript platform https://github.com/objectum/objectum  

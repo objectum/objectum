@@ -154,7 +154,6 @@ function report (req, res, next) {
 		let rep = new ReportXSLX ();
 
 		rep.build (opts);
-		fs.writeFile (config.rootDir + "/debug.json", JSON.stringify (opts, null, "\t"));
 		log.debug ({workbook: rep.workbook});
 
 		if (req.query.convert_csv) {
