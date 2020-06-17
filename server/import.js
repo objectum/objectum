@@ -1022,7 +1022,12 @@ class Import {
 			await me.store.commitTransaction ({session});
 			await me.store.client.updateSequences ();
 			
-			log.info ({count: me.count});
+			let count = {}, rscMap = {"tclass": "model", "tclass_attr": "property", "tview": "query", "tview_attr": "column", "tobject": "record", "tobject_attr": "record data", "trevision": "revision", "tschema": "schema", "taction": "action"};
+			
+			_.each (me.count, (v, a) => {
+				count [rscMap [a] || a] = me.count [a];
+			});
+			log.info ({count});
 			
 			let redisClient = redis.createClient (config.redis.port, config.redis.host);
 			

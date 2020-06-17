@@ -652,17 +652,14 @@ class Export {
 		} else {
 			await fs_writeFile (opts.file, JSON.stringify (me.data));
 		}
-		let stat = "";
+		let count = {}, rscMap = {"tclass": "model", "tclass_attr": "property", "tview": "query", "tview_attr": "column", "tobject": "record", "tobject_attr": "record data", "trevision": "revision", "tschema": "schema", "taction": "action"};
 		
 		for (let table in ifields) {
 			if (me.data [table]) {
-				stat += `${table}: ${me.data [table].length}\n`;
+				count [rscMap [table] || table] = me.data [table].length;
 			}
 		}
-		stat += `queryCount: ${me.store.queryCount}\n`;
-		stat += `duration: ${(new Date ().getTime () - timeStart) / 1000} sec.\n`;
-		
-		log.info ({stat});
+		log.info ({count});
 		me.store.end ();
 	}
 }
