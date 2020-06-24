@@ -112,7 +112,7 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 		} else
 		if (f [2] !== "") {
 			if (f [1] == "in" || f [1] == "not in") {
-				s += `(${f [2].join (",")})`;
+				s += `(${(f [2].length ? f [2] : ['0']).join (",")})`;
 			} else {
 				s += ` '${f [2]}'`;
 			}
