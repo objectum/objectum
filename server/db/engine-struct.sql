@@ -60,7 +60,9 @@ create table _view_attr (
 create table _object (
 	fid bigserial not null,
 	fclass_id bigint,
-	fstart_id bigint
+	fstart_id bigint,
+	fschema_id bigint,
+	frecord_id bigint
 );
 
 create table _opts (

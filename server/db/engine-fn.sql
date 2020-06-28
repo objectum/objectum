@@ -434,7 +434,7 @@ begin
 	end;
 
     if (NEW.fend_id = 0) then
-        insert into _object (fid, fclass_id, fstart_id) values (id, classId, startId);
+        insert into _object (fid, fclass_id, fstart_id, fschema_id, frecord_id) values (id, classId, startId, NEW.fschema_id, NEW.frecord_id);
         insert into _log (fid, frsc_id, foper_id) values (id, 12, 1);
         perform create_object_record (classId, id, classId);
     end if;
