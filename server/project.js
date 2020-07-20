@@ -89,7 +89,7 @@ async function init () {
 
 async function loadConfig ({code}) {
 	if (!config.stores [code]) {
-		config.projectsDir = config.projectsDir || `${__dirname}/../../projects`;
+		config.projectsDir = config.projectsDir || `${config.rootDir}/../projects`;
 		
 		if (config.projectsDir) {
 			let data = await fs_readFile (`${config.projectsDir}/${code}/config.json`, "utf8");

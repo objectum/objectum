@@ -107,7 +107,7 @@ async function init () {
 	fastify.get ("/third-party/*", project.www);
 	fastify.get ("/public/*", project.wwwPublic);
 	fastify.get ("/favicon.ico", (req, res) => {
-		require ("fs").readFile (config.rootDir + "/server/favicon.ico", (err, data) => {
+		require ("fs").readFile (__dirname + "/server/favicon.ico", (err, data) => {
 			res.send (data);
 		});
 	});
