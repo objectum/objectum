@@ -544,13 +544,13 @@ class Import {
 						await me.store.query ({session: me.session, sql: `
 							update tobject_attr set fend_id = ${fields ["fend_id"]} where fid = ${fields ["fid"]} and fend_id = 0
 						`});
-						me.incCount ("tobject_attr", fields ["fid"]);
+						me.incCount ("tobject_attr_" + fields ["fclass_attr_id"], fields ["fid"]);
 					}
 				} else {
 					fields ["fstart_id"] = me.newId ["trevision"][fields ["fstart_id"]];
 					fields ["fend_id"] = me.newId ["trevision"][fields ["fend_id"]];
 					
-					let s = me.generateInsert ({table: "tobject_attr", fields});
+					let s = me.generateInsert ({table: "tobject_attr_" + fields ["fclass_attr_id"], fields});
 					
 					await me.store.query ({session: me.session, sql: s});
 					me.incCount ("tobject_attr", fields ["fid"]);
