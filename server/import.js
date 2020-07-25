@@ -472,6 +472,10 @@ class Import {
 		let objectAttrFields = me.data.fields.tobject_attr;
 		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tobject_attr.length, renderThrottle: 200});
 		
+		let caMap = {}, caRecs = await me.store.query ({session: me.session, sql: "select fid from _class_attr"});
+		
+		caRecs.forEach (rec => caMap [rec.fid] = rec);
+		
 		for (let j = 0; j < me.data.tobject_attr.length; j ++) {
 			let objectAttr = me.data.tobject_attr [j];
 			let fields = {};
@@ -550,7 +554,7 @@ class Import {
 					fields ["fstart_id"] = me.newId ["trevision"][fields ["fstart_id"]];
 					fields ["fend_id"] = me.newId ["trevision"][fields ["fend_id"]];
 					
-					let s = me.generateInsert ({table: "tobject_attr", fields});
+					let s = me.generateInsert ({table: caMap [fields ["fclass_attr_id"]] ? ("tobject_attr_" + fields ["fclass_attr_id"]) : "tobject_attr", fields});
 					
 					await me.store.query ({session: me.session, sql: s});
 					me.incCount ("tobject_attr", fields ["fid"]);
