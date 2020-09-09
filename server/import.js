@@ -788,19 +788,29 @@ class Import {
 		}
 		let rows = await me.store.query ({session: me.session, sql: `
 			select
-				a.fcode as ca_code, a.fid as ca_id, b.fcode as c_code, b.fid as c_id
+				a.fcode as ca_code,
+				a.fid as ca_id,
+				b.fcode as c_code,
+				b.fid as c_id,
+				a.ftype_id as type_id,
+				a.fnot_null as not_null
 			from
 				_class_attr a
 				inner join _class b on (a.fclass_id = b.fid)
 			where
-				a.fclass_id = ${classId} and a.fnot_null = 1
+				a.fclass_id = ${classId} and (a.fnot_null = 1 or a.ftype_id >= 1000)
 		`});
 		for (let i = 0; i < rows.length; i ++) {
 			let row = rows [i];
 			let tableName = row.c_code + "_" + row.c_id;
 			let fieldName = row.ca_code + "_" + row.ca_id;
 			
-			await me.store.query ({session: me.session, sql: `alter table ${tableName} alter column ${fieldName} drop not null`});
+			if (row.type_id >= 1000) {
+				await me.store.query ({session: me.session, sql: `alter table ${tableName} drop constraint ${tableName}_${fieldName}_fk`});
+			}
+			if (row.not_null == 1) {
+				await me.store.query ({session: me.session, sql: `alter table ${tableName} alter column ${fieldName} drop not null`});
+			}
 		}
 		me.droppedClassesConstraints [classId] = true;
 	};
@@ -815,12 +825,20 @@ class Import {
 		}
 		let rows = await me.store.query ({session: me.session, sql: `
 			select
-				a.fcode as ca_code, a.fid as ca_id, b.fcode as c_code, b.fid as c_id
+				a.fcode as ca_code,
+				a.fid as ca_id,
+				b.fcode as c_code,
+				b.fid as c_id,
+				a.ftype_id as type_id,
+				a.fremove_rule as remove_rule,
+				a.fnot_null as not_null,
+				c.fcode as ref_code
 			from
 				_class_attr a
 				inner join _class b on (a.fclass_id = b.fid)
+				left join _class c on (a.ftype_id = c.fid)
 			where
-				a.fclass_id in (${_.keys (me.droppedClassesConstraints).join (",")}) and a.fnot_null = 1
+				a.fclass_id in (${_.keys (me.droppedClassesConstraints).join (",")}) and (a.fnot_null = 1 or a.ftype_id >= 1000)
 		`});
 		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: rows.length, renderThrottle: 200});
 		
@@ -829,7 +847,25 @@ class Import {
 			let tableName = row.c_code + "_" + row.c_id;
 			let fieldName = row.ca_code + "_" + row.ca_id;
 			
-			await me.store.query ({session: me.session, sql: `alter table ${tableName} alter column ${fieldName} set not null`});
+			if (row.type_id >= 1000) {
+				let removeRule = "set null";
+				
+				if (row.remove_rule == "cascade") {
+					removeRule = "cascade";
+				}
+				if (row.remove_rule == "set null") {
+					removeRule = "set null";
+				}
+				if (row.remove_rule == "no action") {
+					removeRule = "";
+				}
+				let refTable = `${row.ref_code}_${row.type_id}`;
+				
+				await me.store.query ({session: me.session, sql: `alter table ${tableName} add constraint ${tableName}_${fieldName}_fk foreign key (${fieldName}) references ${refTable} (fobject_id) on delete ${removeRule}`});
+			}
+			if (row.not_null == 1) {
+				await me.store.query ({session: me.session, sql: `alter table ${tableName} alter column ${fieldName} set not null`});
+			}
 			bar.tick ();
 		}
 	};
