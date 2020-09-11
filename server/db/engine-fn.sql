@@ -72,6 +72,7 @@ begin
 			end if;
 
 			perform trigger_factory (NEW.fid, 'new');
+			perform update_class_unique_indexes (NEW.fid);
 		else
 			if (classCode <> NEW.fcode) then
 				raise exception 'can''t change after creation: code';
@@ -97,6 +98,7 @@ begin
 				fid = NEW.fid;
 
 			perform trigger_factory (NEW.fid);
+			perform update_class_unique_indexes (NEW.fid);
 		end if;
 	end if;
 
@@ -910,6 +912,49 @@ execute procedure user_trigger_%2$s_%s ();
             execute triggerSQL;
         else
             execute 'drop trigger if exists user_trigger_' || tableName || '_' || name || ' on ' || tableName;
+        end if;
+    end loop;
+end;
+$$ language plpgsql;
+
+create or replace function update_class_unique_indexes (classId bigint) returns void as
+$$
+declare
+    names text[] = array['uniqueIndex1', 'uniqueIndex2', 'uniqueIndex3', 'uniqueIndex4', 'uniqueIndex5'];
+    name text;
+    myJson json;
+    prop text;
+    s text;
+    classCode text;
+    tableName text;
+    caCode text;
+    caId text;
+begin
+    select fcode into classCode from _class where fid = classId;
+    tableName = classCode || '_' || classId;
+
+    for i in 1 .. array_upper(names, 1)
+    loop
+        name = names [i];
+        execute 'select fopts::json->''' || name || ''' from _class where fid=' || classId into myJson;
+        s = '';
+
+        for prop in select * from json_array_elements (myJson)
+        loop
+            if (s <> '') then
+                s = s || ',';
+            end if;
+
+            caCode = replace (prop, '"', '');
+            select fid into caId from _class_attr where fclass_id = classId and fcode = caCode;
+
+            s = s || caCode || '_' || caId;
+        end loop;
+
+        execute 'drop index if exists ' || tableName || '_' || name;
+
+        if (s <> '') then
+            execute 'create unique index ' || tableName || '_' || name || ' on ' || tableName || ' (' || s || ')';
         end if;
     end loop;
 end;
