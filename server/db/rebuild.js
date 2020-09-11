@@ -197,7 +197,7 @@ async function rebuild ({store}) {
 	await store.query ({client: store.client, sql: "begin"});
 	await store.query ({client: store.client, sql: `select set_config ('objectum.revision_id', '1', True)`});
 	
-	log.info ("triggers:");
+	log.info ("triggers and unique indexes:");
 	
 	let tBar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: store.recs ["class"].length, renderThrottle: 200});
 	
@@ -205,6 +205,7 @@ async function rebuild ({store}) {
 		tBar.tick ();
 		
 		await store.query ({client: store.client, sql: `select trigger_factory (${store.recs ["class"] [i].get ("id")})`});
+		await store.query ({client: store.client, sql: `select update_class_unique_indexes (${store.recs ["class"] [i].get ("id")})`});
 	}
 	await store.query ({client: store.client, sql: "commit"});
 	await store.client.updateSequences ();
