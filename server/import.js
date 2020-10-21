@@ -465,6 +465,42 @@ class Import {
 		}
 	};
 	
+	// Восстанавливает удаленный объект
+	async restoreObject (id, cMap, caMap) {
+		log.info ({fn: "restoreObject", id});
+		
+		let me = this;
+		let recs = await me.store.query ({session: me.session, sql: `select fclass_id, fstart_id, fschema_id, frecord_id from tobject where fid=${id}`})
+		let rec = recs [0];
+		let cls = cMap [rec.fclass_id];
+		let table = `${cls.fcode}_${cls.fid}`;
+		
+		await me.store.query ({session: me.session, sql: `update tobject set fend_id=0 where fid=${id}`})
+		await me.store.query ({
+			session: me.session,
+			sql: `insert into _object (fid, fclass_id, fstart_id, fschema_id, frecord_id) values (${id}, ${rec.fclass_id}, ${rec.fstart_id}, ${rec.fschema_id}, ${rec.frecord_id}`
+		});
+		let sql = `insert into ${table} (fobject_id`, params = [id];
+		
+		recs = await me.store.query ({session: me.session, sql: `select * from tobject_attr where fobject_id=${id} and fend_id=0`})
+		
+		recs.forEach (rec => {
+			if (rec.fclass_attr_id < 1000 || (rec.fclass_attr_id >= 1000 && caMap [rec.fclass_attr_id])) {
+				let f = "fnumber";
+				
+				if (rec.fclass_attr_id == 1) {
+					f = "fstring";
+				}
+				if (rec.fclass_attr_id == 3) {
+					f = "ftime";
+				}
+				sql += `, ${caMap [rec.fclass_attr_id].fcode}_${caMap [rec.fclass_attr_id].fid}`;
+				params.push (rec [f]);
+			}
+		});
+		await me.store.query ({session: me.session, sql, params});
+	};
+	
 	async importObjectAttrs () {
 		log.info ({fn: "importRecordData"});
 		
@@ -472,9 +508,13 @@ class Import {
 		let objectAttrFields = me.data.fields.tobject_attr;
 		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tobject_attr.length, renderThrottle: 200});
 		
-		let caMap = {}, caRecs = await me.store.query ({session: me.session, sql: "select fid from _class_attr"});
+		let cMap = {}, cRecs = await me.store.query ({session: me.session, sql: "select fid, fcode from _class"});
+		let caMap = {}, caRecs = await me.store.query ({session: me.session, sql: "select fid, fcode from _class_attr"});
+		let objectMap = {}, objectRecs = await me.store.query ({session: me.session, sql: "select fid from tobject where fend_id=0"});
 		
+		cRecs.forEach (rec => cMap [rec.fid] = rec);
 		caRecs.forEach (rec => caMap [rec.fid] = rec);
+		objectRecs.forEach (rec => objectMap [rec.id] = rec);
 		
 		for (let j = 0; j < me.data.tobject_attr.length; j ++) {
 			let objectAttr = me.data.tobject_attr [j];
@@ -554,6 +594,10 @@ class Import {
 					fields ["fstart_id"] = me.newId ["trevision"][fields ["fstart_id"]];
 					fields ["fend_id"] = me.newId ["trevision"][fields ["fend_id"]];
 					
+					if (typeId >= 1000 && fields ["fend_id"] == 0 && fields ["fnumber"] && !objectMap [fields ["fnumber"]]) {
+						// Объект удалили, надо восстановить
+						await me.restoreObject (fields ["fnumber"], cMap, caMap);
+					}
 					let s = me.generateInsert ({table: caMap [fields ["fclass_attr_id"]] ? ("tobject_attr_" + fields ["fclass_attr_id"]) : "tobject_attr", fields});
 					
 					await me.store.query ({session: me.session, sql: s});
