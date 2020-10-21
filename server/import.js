@@ -22,7 +22,7 @@ class Import {
 		}
 		// Счетчик добавленных записей в таблицах
 		this.count = {
-			tclass: 0, tclass_attr: 0, tview: 0, tview_attr: 0, taction: 0, tobject: 0, tobject_attr: 0, trevision: 0
+			tclass: 0, tclass_attr: 0, tview: 0, tview_attr: 0, taction: 0, tobject: 0, tobject_attr: 0, trevision: 0, restoredRecords: 0
 		}
 		// Тип данных атрибута класса
 		this.classAttrType = {};
@@ -467,38 +467,55 @@ class Import {
 	
 	// Восстанавливает удаленный объект
 	async restoreObject (id, cMap, caMap) {
-		log.info ({fn: "restoreObject", id});
-		
 		let me = this;
 		let recs = await me.store.query ({session: me.session, sql: `select fclass_id, fstart_id, fschema_id, frecord_id from tobject where fid=${id}`})
 		let rec = recs [0];
 		let cls = cMap [rec.fclass_id];
-		let table = `${cls.fcode}_${cls.fid}`;
 		
 		await me.store.query ({session: me.session, sql: `update tobject set fend_id=0 where fid=${id}`})
 		await me.store.query ({
 			session: me.session,
-			sql: `insert into _object (fid, fclass_id, fstart_id, fschema_id, frecord_id) values (${id}, ${rec.fclass_id}, ${rec.fstart_id}, ${rec.fschema_id}, ${rec.frecord_id}`
+			sql: `insert into _object (fid, fclass_id, fstart_id, fschema_id, frecord_id) values (${id}, ${rec.fclass_id}, ${rec.fstart_id}, ${rec.fschema_id}, ${rec.frecord_id})`
 		});
-		let sql = `insert into ${table} (fobject_id`, params = [id];
-		
 		recs = await me.store.query ({session: me.session, sql: `select * from tobject_attr where fobject_id=${id} and fend_id=0`})
 		
-		recs.forEach (rec => {
-			if (rec.fclass_attr_id < 1000 || (rec.fclass_attr_id >= 1000 && caMap [rec.fclass_attr_id])) {
+		let insertTOC = async (cls, originalCls) => {
+			if (cls.fparent_id) {
+				await insertTOC (cMap [cls.fparent_id], originalCls);
+			}
+			let table = `${cls.fcode}_${cls.fid}`;
+			let sql = `insert into ${table} (fobject_id, fclass_id`, params = [id, originalCls.fid];
+			
+			recs.forEach (rec => {
+				let ca = caMap [rec.fclass_attr_id];
+				
+				if (ca.fclass_id != cls.fid) {
+					return;
+				}
 				let f = "fnumber";
 				
-				if (rec.fclass_attr_id == 1) {
+				if (ca.ftype__id == 1) {
 					f = "fstring";
 				}
-				if (rec.fclass_attr_id == 3) {
+				if (ca.ftype__id == 3) {
 					f = "ftime";
 				}
-				sql += `, ${caMap [rec.fclass_attr_id].fcode}_${caMap [rec.fclass_attr_id].fid}`;
+				sql += `, ${ca.fcode}_${ca.fid}`;
 				params.push (rec [f]);
-			}
-		});
-		await me.store.query ({session: me.session, sql, params});
+			});
+			sql += ") values (";
+			
+			params.forEach ((p, i) => {
+				if (i) {
+					sql += ", ";
+				}
+				sql += "$" + (i + 1);
+			});
+			sql += ")";
+			await me.store.query ({session: me.session, sql, params});
+		};
+		await insertTOC (cls, cls);
+		me.incCount ("restoredRecords");
 	};
 	
 	async importObjectAttrs () {
@@ -508,13 +525,14 @@ class Import {
 		let objectAttrFields = me.data.fields.tobject_attr;
 		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tobject_attr.length, renderThrottle: 200});
 		
-		let cMap = {}, cRecs = await me.store.query ({session: me.session, sql: "select fid, fcode from _class"});
-		let caMap = {}, caRecs = await me.store.query ({session: me.session, sql: "select fid, fcode from _class_attr"});
+		let cMap = {}, cRecs = await me.store.query ({session: me.session, sql: "select fid, fcode, fparent_id from _class"});
+		let caMap = {}, caRecs = await me.store.query ({session: me.session, sql: "select fid, fcode, ftype_id, fclass_id from _class_attr"});
 		let objectMap = {}, objectRecs = await me.store.query ({session: me.session, sql: "select fid from tobject where fend_id=0"});
+		let restoreMap = {};
 		
 		cRecs.forEach (rec => cMap [rec.fid] = rec);
 		caRecs.forEach (rec => caMap [rec.fid] = rec);
-		objectRecs.forEach (rec => objectMap [rec.id] = rec);
+		objectRecs.forEach (rec => objectMap [rec.fid] = rec);
 		
 		for (let j = 0; j < me.data.tobject_attr.length; j ++) {
 			let objectAttr = me.data.tobject_attr [j];
@@ -594,9 +612,19 @@ class Import {
 					fields ["fstart_id"] = me.newId ["trevision"][fields ["fstart_id"]];
 					fields ["fend_id"] = me.newId ["trevision"][fields ["fend_id"]];
 					
-					if (typeId >= 1000 && fields ["fend_id"] == 0 && fields ["fnumber"] && !objectMap [fields ["fnumber"]]) {
+					//if (typeId >= 1000 && fields ["fend_id"] == 0 && fields ["fnumber"] && !objectMap [fields ["fnumber"]]) {
+					if (typeId >= 1000 && fields ["fnumber"]) {
 						// Объект удалили, надо восстановить
-						await me.restoreObject (fields ["fnumber"], cMap, caMap);
+						if (fields ["fend_id"] == 0) {
+							if (!objectMap [fields ["fnumber"]]) {
+								restoreMap [fields ["fnumber"]] = restoreMap [fields ["fnumber"]] || 0;
+								restoreMap [fields ["fnumber"]] ++;
+							}
+						} else {
+							if (restoreMap [fields ["fnumber"]]) {
+								restoreMap [fields ["fnumber"]] --;
+							}
+						}
 					}
 					let s = me.generateInsert ({table: caMap [fields ["fclass_attr_id"]] ? ("tobject_attr_" + fields ["fclass_attr_id"]) : "tobject_attr", fields});
 					
@@ -605,6 +633,24 @@ class Import {
 				}
 			}
 			bar.tick ();
+		}
+		// restore
+		let restoreId = [];
+		
+		_.each (restoreMap, (v, id) => {
+			if (v) {
+				restoreId.push (id);
+			}
+		});
+		if (restoreId.length) {
+			log.info ({fn: "restoreRecords"});
+			
+			let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: restoreId.length, renderThrottle: 200});
+			
+			for (let i = 0; i < restoreId.length; i ++) {
+				await me.restoreObject (restoreId [i], cMap, caMap);
+				bar.tick ();
+			}
 		}
 	};
 	
@@ -1032,6 +1078,7 @@ class Import {
 		me.count.tobject = 0;
 		me.count.tobject_attr = 0;
 		me.count.trevision = 0;
+		me.count.restoredRecords = 0;
 
 		if (file == "schema-objectum.json") {
 			file = `${__dirname}/schema/${file}`;
