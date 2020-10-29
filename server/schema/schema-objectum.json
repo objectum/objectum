@@ -259,6 +259,23 @@
 				2,
 				1007
 			]
+		},
+		{
+			"values": [
+				1008,
+				1000,
+				"Option",
+				"option",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1085,
+				0,
+				2,
+				1008
+			]
 		}
 	],
 	"tclass_attr": [
@@ -723,6 +740,90 @@
 				2,
 				1021
 			]
+		},
+		{
+			"values": [
+				1022,
+				1008,
+				"Code",
+				"code",
+				null,
+				1,
+				1,
+				null,
+				null,
+				null,
+				null,
+				null,
+				null,
+				1086,
+				1088,
+				2,
+				1022
+			]
+		},
+		{
+			"values": [
+				1022,
+				1008,
+				"Code",
+				"code",
+				null,
+				1,
+				1,
+				1,
+				null,
+				null,
+				null,
+				null,
+				null,
+				1088,
+				0,
+				2,
+				1022
+			]
+		},
+		{
+			"values": [
+				1023,
+				1008,
+				"Value",
+				"value",
+				null,
+				2,
+				1,
+				0,
+				null,
+				null,
+				null,
+				null,
+				null,
+				1087,
+				0,
+				2,
+				1023
+			]
+		},
+		{
+			"values": [
+				1024,
+				1008,
+				"User",
+				"user",
+				null,
+				3,
+				1002,
+				null,
+				null,
+				null,
+				null,
+				"cascade",
+				null,
+				1089,
+				0,
+				2,
+				1024
+			]
 		}
 	],
 	"taction": [],
@@ -855,6 +956,16 @@
 				0,
 				2,
 				1017
+			]
+		},
+		{
+			"values": [
+				1018,
+				1008,
+				1090,
+				0,
+				2,
+				1018
 			]
 		}
 	],
@@ -2103,6 +2214,34 @@
 				0,
 				2,
 				1088
+			]
+		},
+		{
+			"values": [
+				1089,
+				1018,
+				1022,
+				"admin",
+				null,
+				null,
+				1090,
+				0,
+				2,
+				1089
+			]
+		},
+		{
+			"values": [
+				1090,
+				1018,
+				1023,
+				"{}",
+				null,
+				null,
+				1090,
+				0,
+				2,
+				1090
 			]
 		}
 	],
@@ -4689,6 +4828,78 @@
 				"Creating, model: objectum.menuItem",
 				2,
 				1084
+			]
+		},
+		{
+			"values": [
+				1085,
+				{
+					"type": "datetime",
+					"value": "2020-10-29T12:50:03.720Z"
+				},
+				"Creating",
+				2,
+				1085
+			]
+		},
+		{
+			"values": [
+				1086,
+				{
+					"type": "datetime",
+					"value": "2020-10-29T12:52:04.346Z"
+				},
+				"Creating",
+				2,
+				1086
+			]
+		},
+		{
+			"values": [
+				1087,
+				{
+					"type": "datetime",
+					"value": "2020-10-29T12:52:56.593Z"
+				},
+				"Creating",
+				2,
+				1087
+			]
+		},
+		{
+			"values": [
+				1088,
+				{
+					"type": "datetime",
+					"value": "2020-10-29T12:53:23.359Z"
+				},
+				"Saving, id: 1022",
+				2,
+				1088
+			]
+		},
+		{
+			"values": [
+				1089,
+				{
+					"type": "datetime",
+					"value": "2020-10-29T12:53:57.427Z"
+				},
+				"Creating",
+				2,
+				1089
+			]
+		},
+		{
+			"values": [
+				1090,
+				{
+					"type": "datetime",
+					"value": "2020-10-29T12:56:23.834Z"
+				},
+				"Creating, model: objectum.option",
+				2,
+				1090
 			]
 		}
 	]
