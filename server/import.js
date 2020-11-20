@@ -92,6 +92,33 @@ class Import {
 	    return s;
 	}
 	
+	generateUpdate ({table, fields, where}) {
+		let s = `update ${table} set `;
+		
+		for (let key in fields) {
+			let value = "null";
+			
+			if (fields [key] !== null) {
+				value = fields [key];
+				
+				if (typeof (value) == "string") {
+					if (value.length == 24 && value [10] == "T" && value [23] == "Z") { // 2012-08-20T13:17:48.456Z
+						value = "'" + common.getUTCTimestamp (new Date (value)) + "'";
+					} else {
+						value = "E" + common.ToSQLString (value);
+					}
+				} else
+				if (typeof (value) == "object" && value.getMonth) {
+					value = "'" + common.getUTCTimestamp (value) + "'";
+				}
+			}
+			s += `${key} = ${value}`;
+		}
+		s +=  ` where ${where}`;
+		
+		return s;
+	}
+	
 	incCount (table, id) {
 		this.count [table] ++;
 	}
@@ -629,6 +656,21 @@ class Import {
 					let s = me.generateInsert ({table: caMap [fields ["fclass_attr_id"]] ? ("tobject_attr_" + fields ["fclass_attr_id"]) : "tobject_attr", fields});
 					
 					await me.store.query ({session: me.session, sql: s});
+					
+					// update TOC
+					let caRec = caMap [fields ["fclass_attr_id"]];
+					
+					if (caRec) {
+						let cRec = cMap [caRec.fclass_id];
+						let sql = me.generateUpdate ({
+							table: `${cRec.fcode}_${cRec.fid}`,
+							fields: {
+								[`${caRec.fcode}_${caRec.fid}`]: fields ["fstring"] || fields ["ftime"] || fields ["fnumber"]
+							},
+							where: `fobject_id=${fields ["fobject_id"]}`
+						});
+						await me.store.query ({session: me.session, sql});
+					}
 					me.incCount ("tobject_attr", fields ["fid"]);
 				}
 			}

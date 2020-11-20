@@ -175,7 +175,7 @@ class Postgres {
 	}
 	
 	async query ({sql, params, fields, rowMode}) {
-		log.debug ({fn: "postgres.query", sql, params});
+		log.trace ({fn: "postgres.query", sql, params});
 		
 		let me = this;
 		
