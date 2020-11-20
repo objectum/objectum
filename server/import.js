@@ -519,10 +519,10 @@ class Import {
 				}
 				let f = "fnumber";
 				
-				if (ca.ftype__id == 1) {
+				if (ca.ftype_id == 1 && ca.ftype_id == 5) {
 					f = "fstring";
 				}
-				if (ca.ftype__id == 3) {
+				if (ca.ftype_id == 3) {
 					f = "ftime";
 				}
 				sql += `, ${ca.fcode}_${ca.fid}`;
@@ -656,6 +656,7 @@ class Import {
 					await me.store.query ({session: me.session, sql: s});
 					
 					// update TOC
+/*
 					let caRec = caMap [fields ["fclass_attr_id"]];
 					
 					if (caRec) {
@@ -669,6 +670,7 @@ class Import {
 						});
 						await me.store.query ({session: me.session, sql, params});
 					}
+*/
 					me.incCount ("tobject_attr", fields ["fid"]);
 				}
 			}

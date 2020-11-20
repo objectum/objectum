@@ -545,11 +545,11 @@ begin
 end;
 $$ language plpgsql;
 
---drop trigger if exists tobject_attr_after_insert on tobject_attr;
+drop trigger if exists tobject_attr_after_insert on tobject_attr;
 
---create trigger tobject_attr_after_insert
---after insert on tobject_attr for each row
---execute procedure trigger_tobject_attr_after_insert ();
+create trigger tobject_attr_after_insert
+after insert on tobject_attr for each row
+execute procedure trigger_tobject_attr_after_insert ();
 
 create or replace function trigger_factory (classId bigint, opts text default '') returns void as
 $$
