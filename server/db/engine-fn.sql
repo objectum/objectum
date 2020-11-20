@@ -195,15 +195,18 @@ begin
 			    end if;
 			end if;
 			if (caNotNull <> NEW.fnot_null or (caNotNull is null and NEW.fnot_null is not null) or (caNotNull is not null and NEW.fnot_null is null)) then
-                select current_setting ('objectum.revision_id') into revisionId;
+                -- select current_setting ('objectum.revision_id') into revisionId;
 
-                if (revisionId > 0) then
+                -- if (revisionId > 0) then
+	            begin
                     if (NEW.fnot_null is null or NEW.fnot_null = 0) then
                         execute 'alter table ' || tableName || ' alter column ' || columnName || ' drop not null';
                     else
                         execute 'alter table ' || tableName || ' alter column ' || columnName || ' set not null';
                     end if;
-                end if;
+                exception when others then
+                end;
+                -- end if;
 			end if;
 
 			update _class_attr set
