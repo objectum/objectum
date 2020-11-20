@@ -93,31 +93,28 @@ class Import {
 	}
 	
 	generateUpdate ({table, fields, where}) {
-		let s = `update ${table} set `;
-		let conditions = [];
+		let sql = `update ${table} set `;
+		let conditions = [], params = [];
 		
 		for (let key in fields) {
-			let value = "null";
+			let value = null;
 			
 			if (fields [key] !== null && fields [key] !== undefined) {
 				value = fields [key];
 				
-				if (typeof (value) == "string") {
-					if (value.length == 24 && value [10] == "T" && value [23] == "Z") { // 2012-08-20T13:17:48.456Z
-						value = "'" + common.getUTCTimestamp (new Date (value)) + "'";
-					} else {
-						value = "E" + common.ToSQLString (value);
-					}
+				if (typeof (value) == "string" && value.length == 24 && value [10] == "T" && value [23] == "Z") { // 2012-08-20T13:17:48.456Z
+					value = common.getUTCTimestamp (new Date (value));
 				} else
 				if (typeof (value) == "object" && value.getMonth) {
-					value = "'" + common.getUTCTimestamp (value) + "'";
+					value = common.getUTCTimestamp (value);
 				}
 			}
-			conditions.push (`${key} = ${value}`);
+			conditions.push (`${key} = $${conditions.length + 1}`);
+			params.push (value);
 		}
-		s +=  `${conditions.join (", ")} where ${where}`;
+		sql +=  `${conditions.join (", ")} where ${where}`;
 		
-		return s;
+		return {sql, params};
 	}
 	
 	incCount (table, id) {
@@ -663,14 +660,14 @@ class Import {
 					
 					if (caRec) {
 						let cRec = cMap [caRec.fclass_id];
-						let sql = me.generateUpdate ({
+						let {sql, params} = me.generateUpdate ({
 							table: `${cRec.fcode}_${cRec.fid}`,
 							fields: {
 								[`${caRec.fcode}_${caRec.fid}`]: fields ["fstring"] || fields ["ftime"] || fields ["fnumber"]
 							},
 							where: `fobject_id=${fields ["fobject_id"]}`
 						});
-						await me.store.query ({session: me.session, sql});
+						await me.store.query ({session: me.session, sql, params});
 					}
 					me.incCount ("tobject_attr", fields ["fid"]);
 				}
