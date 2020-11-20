@@ -94,11 +94,12 @@ class Import {
 	
 	generateUpdate ({table, fields, where}) {
 		let s = `update ${table} set `;
+		let conditions = [];
 		
 		for (let key in fields) {
 			let value = "null";
 			
-			if (fields [key] !== null) {
+			if (fields [key] !== null && fields [key] !== undefined) {
 				value = fields [key];
 				
 				if (typeof (value) == "string") {
@@ -112,9 +113,9 @@ class Import {
 					value = "'" + common.getUTCTimestamp (value) + "'";
 				}
 			}
-			s += `${key} = ${value}`;
+			conditions.push (`${key} = ${value}`);
 		}
-		s +=  ` where ${where}`;
+		s +=  `${conditions.join (", ")} where ${where}`;
 		
 		return s;
 	}
