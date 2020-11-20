@@ -519,7 +519,7 @@ class Import {
 				}
 				let f = "fnumber";
 				
-				if (ca.ftype_id == 1 && ca.ftype_id == 5) {
+				if (ca.ftype_id == 1 || ca.ftype_id == 5) {
 					f = "fstring";
 				}
 				if (ca.ftype_id == 3) {
