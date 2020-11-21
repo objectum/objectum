@@ -639,7 +639,20 @@ class Import {
 					
 					//if (typeId >= 1000 && fields ["fend_id"] == 0 && fields ["fnumber"] && !objectMap [fields ["fnumber"]]) {
 					if (typeId >= 1000 && fields ["fnumber"]) {
+						/*
+							Обработка:
+								Для существующих объектов objectMap [fields ["fobject_id"]]
+								Для удаленных объектов fields ["fnumber"]
+							Ссылка добавляется:
+								Добавить в массив fields ["fobject_id"]
+							Ссылка удаляется:
+								Убрать из массива fields ["fobject_id"]
+							Восстановление:
+								Если в массиве есть элементы
+						 */
 						// Объект удалили, надо восстановить
+						
+/*
 						if (fields ["fend_id"] == 0) {
 							if (!objectMap [fields ["fnumber"]]) {
 								restoreMap [fields ["fnumber"]] = restoreMap [fields ["fnumber"]] || 0;
@@ -648,6 +661,17 @@ class Import {
 						} else {
 							if (restoreMap [fields ["fnumber"]]) {
 								restoreMap [fields ["fnumber"]] --;
+							}
+						}
+*/
+						if (objectMap [fields ["fobject_id"]] && !objectMap [fields ["fnumber"]]) {
+							if (fields ["fend_id"] == 0) {
+								restoreMap [fields ["fnumber"]] = restoreMap [fields ["fnumber"]] || {};
+								restoreMap [fields ["fnumber"]][fields ["fobject_id"]] = true;
+							} else {
+								if (restoreMap [fields ["fnumber"]] && restoreMap [fields ["fnumber"]][fields ["fobject_id"]]) {
+									delete restoreMap [fields ["fnumber"]][fields ["fobject_id"]];
+								}
 							}
 						}
 					}
@@ -679,13 +703,20 @@ class Import {
 		// restore
 		let restoreId = [];
 		
+/*
 		_.each (restoreMap, (v, id) => {
 			if (v) {
 				restoreId.push (id);
 			}
 		});
+*/
+		_.each (restoreMap, (o, id) => {
+			if (!_.isEmpty (o)) {
+				restoreId.push (id);
+			}
+		});
 		if (restoreId.length) {
-			log.info ({fn: "restoreRecords"});
+			log.info ({fn: "restoreRecords", restoreId});
 			
 			let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: restoreId.length, renderThrottle: 200});
 			
