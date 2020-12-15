@@ -617,7 +617,7 @@ async function getData (req, store) {
 	if (req.args.getColumns) {
 		tokens = removeWhere (tokens);
 	}
-	if (req.args.order) {
+	if (req.args.order && _.isArray (req.args.order)) {
 		tokens = addOrder (tokens, req.args.order, caMap, aliasPrefix);
 	}
 	let fields = [];
