@@ -260,7 +260,7 @@ function getQuery ({code, tokens, args, parents}) {
 						if (o ["param"] == "limit") {
 							o = 1;
 						} else {
-							o = '0';
+							o = '010101';
 						}
 					} else
 					if (code == "count" || code == "tree") {
