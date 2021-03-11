@@ -469,6 +469,9 @@ class Import {
 					) {
 						fields ["fend_id"] = me.newId ["trevision"][fields ["fend_id"]];
 						
+						me.removedObjects [fields ["fclass_id"]] = me.removedObjects [fields ["fclass_id"]] || [];
+						me.removedObjects [fields ["fclass_id"]].push (fields ["fid"]);
+						
 						await me.store.query ({session: me.session, sql: `
 							update tobject set fend_id = ${fields ["fend_id"]} where fid = ${fields ["fid"]} and fend_id = 0
 						`});
@@ -978,6 +981,54 @@ class Import {
 		me.droppedClassesConstraints [classId] = true;
 	};
 	
+	async fixRefs () {
+		log.info ({fn: "fixRefs"});
+		
+		let me = this;
+		let sql = `
+			select
+				a.fcode as ca_code,
+				a.fid as ca_id,
+				b.fcode as c_code,
+				b.fid as c_id,
+				a.ftype_id as type_id,
+				a.fremove_rule as remove_rule
+			from
+				_class_attr a
+				inner join _class b on (a.fclass_id = b.fid)
+			where
+				a.ftype_id in (${_.keys (me.removedObjects).join (",")})
+		`;
+		let rows = await me.store.query ({session: me.session, sql});
+		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: rows.length, renderThrottle: 200});
+		
+		for (let i = 0; i < rows.length; i ++) {
+			let row = rows [i];
+			let tableName = row.c_code + "_" + row.c_id;
+			let fieldName = row.ca_code + "_" + row.ca_id;
+			let recs = await me.store.query ({session: me.session, sql: `select fobject_id from ${tableName} where ${fieldName} in (${me.removedObjects [row.type_id]})`});
+			
+			if (recs.length) {
+				let objects = recs.map (rec => rec.fobject_id);
+				
+				if (row.remove_rule == "cascade") {
+					log.info (`delete: ${objects}`);
+					await me.store.query ({
+						session: me.session,
+						sql: `update tobject set fend_id = ${me.store.revision [me.session.id]} where fclass_id = ${row.c_id} and fend_id = 0 and fid in (${objects})`
+					});
+				} else {
+					log.info (`set null: ${objects}`);
+					await me.store.query ({
+						session: me.session,
+						sql: `update tobject_attr set fnumber = null, fend_id = ${me.store.revision [me.session.id]} where fclass_attr_id = ${row.ca_id} and fend_id = 0 and fobject_id in (${objects})`
+					});
+				}
+			}
+			bar.tick ();
+		}
+	};
+	
 	async restoreConstraints () {
 		log.info ({fn: "restoreConstraints"});
 		
@@ -1032,7 +1083,7 @@ class Import {
 			bar.tick ();
 		}
 	};
-	
+
 	parseDates (list) {
 		log.debug ({fn: "parseDates"});
 		
@@ -1214,10 +1265,12 @@ class Import {
 			await me.importActions ();
 			
 			me.droppedClassesConstraints = {};
+			me.removedObjects = {};
 			
 			await me.importObjects ();
 			await me.importObjectAttrs ();
 			
+			await me.fixRefs ();
 			await me.restoreConstraints ();
 			
 			await me.store.query ({session, sql: "delete from _log"});

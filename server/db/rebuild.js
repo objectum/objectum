@@ -197,10 +197,9 @@ async function rebuild ({store}) {
 		if (ca.get ("type") >= 1000) {
 			let c1 = store.map ["class"][ca.get ("class")];
 			let c2 = store.map ["class"][ca.get ("type")];
-			
 			let recs = await store.query ({
 				client: store.client,
-				sql: `select fobject_id from ${c1.getTable ()} where ${ca.getField ()} not in (select fobject_id from ${c2.getTable ()})`
+				sql: `select fobject_id from ${c1.getTable ()} where ${ca.getField ()} is not null and ${ca.getField ()} not in (select fobject_id from ${c2.getTable ()})`
 			});
 			if (recs.length) {
 				let objects = recs.map (rec => rec.fobject_id);
@@ -214,7 +213,7 @@ async function rebuild ({store}) {
 				} else {
 					log.info (`set null: ${objects}`);
 					
-					await store.query ({client: store.client, sql: `update tobject_attr set fnumber = null where fclass_attr_id=${ca.get ("id")} and fobject_id in (${objects})`});
+					await store.query ({client: store.client, sql: `update tobject_attr set fnumber = null where fclass_attr_id=${ca.get ("id")} and fend_id = 0 and fobject_id in (${objects})`});
 					await store.query ({client: store.client, sql: `update ${c1.getTable ()} set ${ca.getField ()} = null where fobject_id in (${objects})`});
 				}
 			}
