@@ -597,7 +597,7 @@ async function getData (req, store) {
 					ca = classMap [t [0] || ""].attrs [t [1]];
 					
 					if (!ca) {
-						throw new Error (`unknown attr: ${t [1]}, class: ${classMap [t [0] || ""].getPath ()}`);
+						throw new Error (`unknown property: ${t [1]}, model: ${classMap [t [0] || ""].getPath ()}`);
 					}
 					f = t [0] + "." + ca.getField ();
 				}

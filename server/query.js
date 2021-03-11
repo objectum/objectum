@@ -62,7 +62,7 @@ class Query {
 						}
 					} else {
 						if (!me.attrs [a]) {
-							console.error ("unknown attr: " + a);
+							console.error ("unknown property: " + a);
 						}
 						let toc, ca, pos = sysCls.indexOf (me.attrs [a].cls);
 
@@ -125,7 +125,7 @@ class Query {
 				me.lastTypeId = 2;
 			} else {
 				if (!me.attrs [a]) {
-					throw new Error ("Unknown attr: " + a);
+					throw new Error ("Unknown property: " + a);
 				}
 				let toc, pos = sysCls.indexOf (me.attrs [a].cls);
 				let ca = me.store.getClassAttr ({classCode: me.attrs [a].cls, attrCode: o [a]});

@@ -179,6 +179,47 @@ async function rebuild ({store}) {
 			await store.query ({client: store.client, sql: `select table_util (${classId}, 'createForeignKey')`});
 		}
 	}
+	log.info ("fix refs:");
+	
+	let revisionId = await store.client.getNextId ({table: "trevision"});
+
+	await store.query ({client: store.client, sql: `
+		insert into trevision (fid, fdate, fdescription)
+		values (${revisionId}, ${store.client.currentTimestamp ()}, 'rebuild fix refs)')
+	`});
+	let frBar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: store.recs ["classAttr"].length, renderThrottle: 200});
+	
+	for (let i = 0; i < store.recs ["classAttr"].length; i ++) {
+		frBar.tick ();
+		
+		let ca = store.recs ["classAttr"][i];
+		
+		if (ca.get ("type") >= 1000) {
+			let c1 = store.map ["class"][ca.get ("class")];
+			let c2 = store.map ["class"][ca.get ("type")];
+			
+			let recs = await store.query ({
+				client: store.client,
+				sql: `select fobject_id from ${c1.getTable ()} where ${ca.getField ()} not in (select fobject_id from ${c2.getTable ()})`
+			});
+			if (recs.length) {
+				let objects = recs.map (rec => rec.fobject_id);
+				
+				if (ca.get ("removeRule") == "cascade") {
+					log.info (`delete: ${objects}`);
+					
+					await store.query ({client: store.client, sql: `update tobject set fend_id=${revisionId} where fid in (${objects})`});
+					await store.query ({client: store.client, sql: `delete from _object where fid in (${objects})`});
+					await store.query ({client: store.client, sql: `delete from ${c1.getTable ()} where fobject_id in (${objects})`});
+				} else {
+					log.info (`set null: ${objects}`);
+					
+					await store.query ({client: store.client, sql: `update tobject_attr set fnumber = null where fclass_attr_id=${ca.get ("id")} and fobject_id in (${objects})`});
+					await store.query ({client: store.client, sql: `update ${c1.getTable ()} set ${ca.getField ()} = null where fobject_id in (${objects})`});
+				}
+			}
+		}
+	}
 	log.info ("constraints:");
 	
 	let cBar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: store.recs ["classAttr"].length, renderThrottle: 200});
@@ -188,7 +229,18 @@ async function rebuild ({store}) {
 		
 		let ca = store.recs ["classAttr"][i];
 		let caId = ca.get ("id");
-
+		
+		if (ca.get ("type") >= 1000) {
+			let c1 = store.map ["class"][ca.get ("class")];
+			let c2 = store.map ["class"][ca.get ("type")];
+			
+			if (ca.get ("removeRule") == "cascade") {
+				await store.query ({
+					client: store.client,
+					sql: `select fobject_id, ${ca.getField ()} from ${c1.getTable ()} where ${ca.getField ()} not in (select fobject_id from ${c2.getTable ()})`
+				});
+			}
+		}
 		await store.query ({client: store.client, sql: `select column_util (${caId}, 'setNotNull,createIndex,createForeignKey');`});
 	}
 	await store.query ({client: store.client, sql: "commit"});
