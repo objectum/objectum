@@ -481,7 +481,7 @@ class Import {
 					fields ["fstart_id"] = me.newId ["trevision"][fields ["fstart_id"]];
 					fields ["fend_id"] = me.newId ["trevision"][fields ["fend_id"]];
 					
-					await me.dropConstraints (fields ["fclass_id"]);
+					await me.dropClassConstraints (fields ["fclass_id"]);
 					
 					let s = me.generateInsert ({table: "tobject", fields});
 					
@@ -554,7 +554,13 @@ class Import {
 		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: me.data.tobject_attr.length, renderThrottle: 200});
 		
 		let cMap = {}, cRecs = await me.store.query ({session: me.session, sql: "select fid, fcode, fparent_id from _class"});
-		let caMap = {}, caRecs = await me.store.query ({session: me.session, sql: "select fid, fcode, ftype_id, fclass_id from _class_attr"});
+		let caMap = {}, caRecs = await me.store.query ({session: me.session, sql: `
+			select
+				a.fid, a.fcode, a.ftype_id, a.fclass_id, a.fnot_null, a.ftype_id, b.fcode as class_code
+			from
+				_class_attr a
+				inner join _class b on (a.fclass_id = b.fid)
+		`});
 		let objectMap = {}, objectRecs = await me.store.query ({session: me.session, sql: "select fid from tobject where fend_id=0"});
 		let restoreMap = {};
 		
@@ -671,6 +677,8 @@ class Import {
 							if (fields ["fend_id"] == 0) {
 								restoreMap [fields ["fnumber"]] = restoreMap [fields ["fnumber"]] || {};
 								restoreMap [fields ["fnumber"]][fields ["fobject_id"]] = true;
+								
+								await me.dropClassAttrConstraints (caMap [fields ["fclass_attr_id"]]);
 							} else {
 								if (restoreMap [fields ["fnumber"]] && restoreMap [fields ["fnumber"]][fields ["fobject_id"]]) {
 									delete restoreMap [fields ["fnumber"]][fields ["fobject_id"]];
@@ -946,39 +954,43 @@ class Import {
 		}
 	};
 	
-	async dropConstraints (classId) {
+	async dropClassAttrConstraints (ca) {
 		let me = this;
 		
-		if (me.droppedClassesConstraints [classId]) {
+		if (me.droppedClassAttrConstraints [ca.fid]) {
 			return;
 		}
-		let rows = await me.store.query ({session: me.session, sql: `
+		let tableName = ca.class_code + "_" + ca.fclass_id;
+		let fieldName = ca.fcode + "_" + ca.fid;
+		
+		if (ca.ftype_id >= 1000) {
+			await me.store.query ({session: me.session, sql: `alter table ${tableName} drop constraint ${tableName}_${fieldName}_fk`});
+		}
+		if (ca.fnot_null == 1) {
+			await me.store.query ({session: me.session, sql: `alter table ${tableName} alter column ${fieldName} drop not null`});
+		}
+		me.droppedClassAttrConstraints [ca.fid] = true;
+	};
+	
+	async dropClassConstraints (classId) {
+		let me = this;
+		
+		if (me.droppedClassConstraints [classId]) {
+			return;
+		}
+		let recs = await me.store.query ({session: me.session, sql: `
 			select
-				a.fcode as ca_code,
-				a.fid as ca_id,
-				b.fcode as c_code,
-				b.fid as c_id,
-				a.ftype_id as type_id,
-				a.fnot_null as not_null
+				a.fcode, a.fid, b.fcode as class_code, a.fclass_id, a.ftype_id, a.fnot_null
 			from
 				_class_attr a
 				inner join _class b on (a.fclass_id = b.fid)
 			where
 				a.fclass_id = ${classId} and (a.fnot_null = 1 or a.ftype_id >= 1000)
 		`});
-		for (let i = 0; i < rows.length; i ++) {
-			let row = rows [i];
-			let tableName = row.c_code + "_" + row.c_id;
-			let fieldName = row.ca_code + "_" + row.ca_id;
-			
-			if (row.type_id >= 1000) {
-				await me.store.query ({session: me.session, sql: `alter table ${tableName} drop constraint ${tableName}_${fieldName}_fk`});
-			}
-			if (row.not_null == 1) {
-				await me.store.query ({session: me.session, sql: `alter table ${tableName} alter column ${fieldName} drop not null`});
-			}
+		for (let i = 0; i < recs.length; i ++) {
+			await me.dropClassAttrConstraints (recs [i]);
 		}
-		me.droppedClassesConstraints [classId] = true;
+		me.droppedClassConstraints [classId] = true;
 	};
 	
 	async fixRefs () {
@@ -1034,7 +1046,7 @@ class Import {
 		
 		let me = this;
 		
-		if (!_.keys (me.droppedClassesConstraints).length) {
+		if (!_.keys (me.droppedClassAttrConstraints).length) {
 			return;
 		}
 		let rows = await me.store.query ({session: me.session, sql: `
@@ -1052,7 +1064,7 @@ class Import {
 				inner join _class b on (a.fclass_id = b.fid)
 				left join _class c on (a.ftype_id = c.fid)
 			where
-				a.fclass_id in (${_.keys (me.droppedClassesConstraints).join (",")}) and (a.fnot_null = 1 or a.ftype_id >= 1000)
+				a.fid in (${_.keys (me.droppedClassAttrConstraints).join (",")}) and (a.fnot_null = 1 or a.ftype_id >= 1000)
 		`});
 		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: rows.length, renderThrottle: 200});
 		
@@ -1264,7 +1276,8 @@ class Import {
 			await me.importClassAttrs (); // not null constraints
 			await me.importActions ();
 			
-			me.droppedClassesConstraints = {};
+			me.droppedClassConstraints = {};
+			me.droppedClassAttrConstraints = {};
 			me.removedObjects = {};
 			
 			await me.importObjects ();
