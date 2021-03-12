@@ -997,6 +997,10 @@ class Import {
 		log.info ({fn: "fixRefs"});
 		
 		let me = this;
+		
+		if (!_.keys (me.removedObjects)) {
+			return;
+		}
 		let sql = `
 			select
 				a.fcode as ca_code,
