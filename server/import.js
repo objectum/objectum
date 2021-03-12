@@ -998,7 +998,7 @@ class Import {
 		
 		let me = this;
 		
-		if (!_.keys (me.removedObjects)) {
+		if (!_.keys (me.removedObjects).length) {
 			return;
 		}
 		let sql = `
