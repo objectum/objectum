@@ -11,7 +11,7 @@ Objectum ecosystem:
 * Command-line interface (CLI) https://github.com/objectum/objectum-cli  
 * Objectum project example https://github.com/objectum/catalog 
 
-## [Documentation](http://objectum.org/objectum) 
+## [Documentation](http://objectum.org) 
 
 ## Author
 
