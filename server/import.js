@@ -1086,6 +1086,7 @@ class Import {
 				if (row.remove_rule == "set null") {
 					removeRule = "set null";
 				}
+				// legacy
 				if (row.remove_rule == "no action") {
 					removeRule = "";
 				}

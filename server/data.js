@@ -10,7 +10,7 @@ async function getDict (req, store) {
 	let ca = cls.attrs ["name"];
 	
 	if (!ca) {
-		throw new Error (`"name" not exists in ${cls.getPath ()}`);
+		throw new Error (`"name" not exist in ${cls.getPath ()}`);
 	}
 	let cls2 = store.getClass (ca.get ("class"));
 	let caGroup;
@@ -270,9 +270,15 @@ function getQuery ({code, tokens, args, parents}) {
 						if (o ["param"] == "limit") {
 							o = config.query.maxCount;
 						} else {
+							if (!args.hasOwnProperty (o.param)) {
+								throw new Error (`param not exist: ${o.param}`);
+							}
 							o = args [o.param];
 						}
 					} else {
+						if (!args.hasOwnProperty (o.param)) {
+							throw new Error (`param not exist: ${o.param}`);
+						}
 						o = args [o.param];
 					}
 				} else
