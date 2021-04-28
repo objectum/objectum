@@ -2341,6 +2341,46 @@
 				null,
 				null,
 				1071,
+				1095,
+				2,
+				1001
+			]
+		},
+		{
+			"values": [
+				1001,
+				1000,
+				"Models",
+				"model",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    a.fid as id,\n    a.fname as name,\n    a.fcode as code,\n    a.fparent_id as parent,\n    b.fcode as store_code,\n    a.frecord_id as store_record\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n    a.fparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n    tclass a\n    left join tschema b on (a.fschema_id = b.fid)\n\n{\"where\": \"begin\"}\n    a.fend_id = 0 and a.fparent_id {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"order\": \"begin\"}\n    a.fcode, a.fid\n{\"order\": \"end\"}\n\n{\"tree\": \"begin\"}\ngroup by\n    a.fparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}  \n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1095,
+				1103,
+				2,
+				1001
+			]
+		},
+		{
+			"values": [
+				1001,
+				1000,
+				"Models",
+				"model",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    a.fid as id,\n    a.fname as name,\n    a.fcode as code,\n    a.fparent_id as parent,\n    b.fcode as store_code,\n    a.frecord_id as store_record\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n    a.fparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n    tclass a\n    left join tschema b on (a.fschema_id = b.fid)\n\n{\"where\": \"begin\"}\n    a.fid >= 1000 and a.fend_id = 0 and a.fparent_id {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"order\": \"begin\"}\n    a.fcode, a.fid\n{\"order\": \"end\"}\n\n{\"tree\": \"begin\"}\ngroup by\n    a.fparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}  \n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1103,
 				0,
 				2,
 				1001
@@ -2421,6 +2461,26 @@
 				null,
 				null,
 				1073,
+				1099,
+				2,
+				1002
+			]
+		},
+		{
+			"values": [
+				1002,
+				1000,
+				"Queries",
+				"query",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    a.fid as id,\n    a.fname as name,\n    a.fcode as code,\n    a.fparent_id as parent,\n    b.fcode as store_code,\n    a.frecord_id as store_record\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n    a.fparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n    tview a\n    left join tschema b on (a.fschema_id = b.fid)\n    \n{\"where\": \"begin\"}\n    a.fend_id = 0 and a.fparent_id {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"order\": \"begin\"}\n    a.fcode, a.fid\n{\"order\": \"end\"}\n\n{\"tree\": \"begin\"}\ngroup by\n    a.fparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1099,
 				0,
 				2,
 				1002
@@ -2601,6 +2661,26 @@
 				null,
 				null,
 				1080,
+				1091,
+				2,
+				1004
+			]
+		},
+		{
+			"values": [
+				1004,
+				1000,
+				"Properties",
+				"property",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    a.fid as id,\n    a.fname as name,\n    a.fcode as code,\n    a.ftype_id as type,\n    a.fnot_null as not_null,\n    a.fsecure as secure,\n    a.funique as unique,\n    a.fremove_rule as remove_rule,\n    a.forder as order,\n    b.fcode as store_code,\n    a.frecord_id as store_record\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\nfrom\n    tclass_attr a\n    left join tschema b on (a.fschema_id = b.fid)\n    \n{\"where\": \"begin\"}\n    a.fend_id = 0 and a.fclass_id = {\"param\": \"modelId\"}\n{\"where\": \"end\"}\n\n{\"order\": \"begin\"}\n    a.forder, a.fcode, a.fid\n{\"order\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1091,
 				0,
 				2,
 				1004
@@ -3455,6 +3535,24 @@
 				null,
 				null,
 				1001,
+				1092,
+				2,
+				1013
+			]
+		},
+		{
+			"values": [
+				1013,
+				1004,
+				"Unique",
+				"unique",
+				null,
+				7,
+				null,
+				1,
+				null,
+				null,
+				1092,
 				0,
 				2,
 				1013
@@ -3473,6 +3571,24 @@
 				null,
 				null,
 				1001,
+				1092,
+				2,
+				1014
+			]
+		},
+		{
+			"values": [
+				1014,
+				1004,
+				"Secure",
+				"secure",
+				null,
+				6,
+				null,
+				1,
+				null,
+				null,
+				1092,
 				0,
 				2,
 				1014
@@ -3872,6 +3988,222 @@
 				0,
 				2,
 				1036
+			]
+		},
+		{
+			"values": [
+				1037,
+				1004,
+				"store_code",
+				"store_code",
+				null,
+				10,
+				null,
+				1,
+				null,
+				null,
+				1092,
+				1093,
+				2,
+				1037
+			]
+		},
+		{
+			"values": [
+				1037,
+				1004,
+				"store.code",
+				"store_code",
+				null,
+				10,
+				null,
+				1,
+				null,
+				null,
+				1093,
+				0,
+				2,
+				1037
+			]
+		},
+		{
+			"values": [
+				1038,
+				1004,
+				"store_record",
+				"store_record",
+				null,
+				11,
+				null,
+				1,
+				null,
+				null,
+				1092,
+				1094,
+				2,
+				1038
+			]
+		},
+		{
+			"values": [
+				1038,
+				1004,
+				"store.record",
+				"store_record",
+				null,
+				11,
+				null,
+				1,
+				null,
+				null,
+				1094,
+				0,
+				2,
+				1038
+			]
+		},
+		{
+			"values": [
+				1039,
+				1001,
+				"store_code",
+				"store_code",
+				null,
+				5,
+				null,
+				1,
+				null,
+				null,
+				1096,
+				1097,
+				2,
+				1039
+			]
+		},
+		{
+			"values": [
+				1039,
+				1001,
+				"store.code",
+				"store_code",
+				null,
+				5,
+				null,
+				1,
+				null,
+				null,
+				1097,
+				0,
+				2,
+				1039
+			]
+		},
+		{
+			"values": [
+				1040,
+				1001,
+				"store_record",
+				"store_record",
+				null,
+				6,
+				null,
+				1,
+				null,
+				null,
+				1096,
+				1098,
+				2,
+				1040
+			]
+		},
+		{
+			"values": [
+				1040,
+				1001,
+				"store.record",
+				"store_record",
+				null,
+				6,
+				null,
+				1,
+				null,
+				null,
+				1098,
+				0,
+				2,
+				1040
+			]
+		},
+		{
+			"values": [
+				1041,
+				1002,
+				"store_code",
+				"store_code",
+				null,
+				5,
+				null,
+				1,
+				null,
+				null,
+				1100,
+				1101,
+				2,
+				1041
+			]
+		},
+		{
+			"values": [
+				1041,
+				1002,
+				"store.code",
+				"store_code",
+				null,
+				5,
+				null,
+				1,
+				null,
+				null,
+				1101,
+				0,
+				2,
+				1041
+			]
+		},
+		{
+			"values": [
+				1042,
+				1002,
+				"store_record",
+				"store_record",
+				null,
+				6,
+				null,
+				1,
+				null,
+				null,
+				1100,
+				1102,
+				2,
+				1042
+			]
+		},
+		{
+			"values": [
+				1042,
+				1002,
+				"store.record",
+				"store_record",
+				null,
+				6,
+				null,
+				1,
+				null,
+				null,
+				1102,
+				0,
+				2,
+				1042
 			]
 		}
 	],
@@ -4900,6 +5232,162 @@
 				"Creating, model: objectum.option",
 				2,
 				1090
+			]
+		},
+		{
+			"values": [
+				1091,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T12:56:08.574Z"
+				},
+				"Saving, id: 1004",
+				2,
+				1091
+			]
+		},
+		{
+			"values": [
+				1092,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T12:56:12.788Z"
+				},
+				"Synchronize columns",
+				2,
+				1092
+			]
+		},
+		{
+			"values": [
+				1093,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T12:56:27.693Z"
+				},
+				"Saving, id: 1037",
+				2,
+				1093
+			]
+		},
+		{
+			"values": [
+				1094,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T12:56:35.669Z"
+				},
+				"Saving, id: 1038",
+				2,
+				1094
+			]
+		},
+		{
+			"values": [
+				1095,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T12:59:24.504Z"
+				},
+				"Saving, id: 1001",
+				2,
+				1095
+			]
+		},
+		{
+			"values": [
+				1096,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T12:59:27.095Z"
+				},
+				"Synchronize columns",
+				2,
+				1096
+			]
+		},
+		{
+			"values": [
+				1097,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T12:59:33.697Z"
+				},
+				"Saving, id: 1039",
+				2,
+				1097
+			]
+		},
+		{
+			"values": [
+				1098,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T12:59:41.317Z"
+				},
+				"Saving, id: 1040",
+				2,
+				1098
+			]
+		},
+		{
+			"values": [
+				1099,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T13:01:46.803Z"
+				},
+				"Saving, id: 1002",
+				2,
+				1099
+			]
+		},
+		{
+			"values": [
+				1100,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T13:01:49.409Z"
+				},
+				"Synchronize columns",
+				2,
+				1100
+			]
+		},
+		{
+			"values": [
+				1101,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T13:01:56.059Z"
+				},
+				"Saving, id: 1041",
+				2,
+				1101
+			]
+		},
+		{
+			"values": [
+				1102,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T13:02:04.053Z"
+				},
+				"Saving, id: 1042",
+				2,
+				1102
+			]
+		},
+		{
+			"values": [
+				1103,
+				{
+					"type": "datetime",
+					"value": "2021-04-28T13:20:55.656Z"
+				},
+				"Saving, id: 1001",
+				2,
+				1103
 			]
 		}
 	]
