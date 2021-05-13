@@ -24,6 +24,7 @@ create or replace function trigger_class_before_delete () returns trigger as
 $$
 declare
 	num bigint;
+	revisionId bigint;
 begin
 	select count (*) into num from _class where fparent_id = OLD.fid;
 
@@ -31,9 +32,10 @@ begin
         raise exception 'model has child models';
     end if;
 
+	select current_setting ('objectum.revision_id') into revisionId;
 	select count (*) into num from _class_attr where fclass_id = OLD.fid;
 
-    if (num > 0) then
+    if (num > 0 and revisionId > 0) then
         raise exception 'model has properties';
     end if;
 
