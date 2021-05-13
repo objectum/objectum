@@ -95,7 +95,7 @@ async function rebuild ({store}) {
 		},
 		"_object": {
 			logTable: "tobject",
-			fields: ["fid", "fstart_id"]
+			fields: ["fid", "fclass_id", "fstart_id"]
 		}
 	};
 	await store.query ({client: store.client, sql: "begin"});

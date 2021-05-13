@@ -271,13 +271,17 @@ $$
 declare
 	startId bigint;
 	classCode varchar (256);
+	num bigint;
 begin
 	select fstart_id, fclass_code into startId, classCode from _class_attr where fid = NEW.fid;
 
 	if (NEW.fstart_id = startId) then
 		execute 'delete from _class_attr where fid = ' || NEW.fid;
-		execute 'alter table ' || classCode || '_' || NEW.fclass_id || ' drop column ' || NEW.fcode || '_' || NEW.fid || ' cascade';
+    	select count (*) into num from _class where fid = OLD.fclass_id;
 
+    	if (num > 0) then
+		    execute 'alter table ' || classCode || '_' || NEW.fclass_id || ' drop column ' || NEW.fcode || '_' || NEW.fid || ' cascade';
+        end if;
 		perform trigger_factory (NEW.fclass_id);
 	end if;
 
