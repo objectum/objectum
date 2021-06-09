@@ -2381,6 +2381,46 @@
 				null,
 				null,
 				1103,
+				1104,
+				2,
+				1001
+			]
+		},
+		{
+			"values": [
+				1001,
+				1000,
+				"Models",
+				"model",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    c.fid as id,\n    a.fname as name,\n    a.fcode as code,\n    a.fparent_id as parent,\n    b.fcode as store_code,\n    a.frecord_id as store_record\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n    a.fparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n    tclass a\n    left join tschema b on (a.fschema_id = b.fid)\n\tinner join _class c on (a.fid = b.fid)\n\n{\"where\": \"begin\"}\n    a.fid >= 1000 and a.fend_id = 0 and a.fparent_id {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"order\": \"begin\"}\n    a.fcode, a.fid\n{\"order\": \"end\"}\n\n{\"tree\": \"begin\"}\ngroup by\n    a.fparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}  \n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1104,
+				1105,
+				2,
+				1001
+			]
+		},
+		{
+			"values": [
+				1001,
+				1000,
+				"Models",
+				"model",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    c.fid as id,\n    a.fname as name,\n    a.fcode as code,\n    a.fparent_id as parent,\n    b.fcode as store_code,\n    a.frecord_id as store_record\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n    a.fparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n    tclass a\n    left join tschema b on (a.fschema_id = b.fid)\n\tinner join _class c on (a.fid = c.fid)\n\n{\"where\": \"begin\"}\n    a.fid >= 1000 and a.fend_id = 0 and a.fparent_id {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"order\": \"begin\"}\n    a.fcode, a.fid\n{\"order\": \"end\"}\n\n{\"tree\": \"begin\"}\ngroup by\n    a.fparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}  \n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1105,
 				0,
 				2,
 				1001
@@ -2481,6 +2521,26 @@
 				null,
 				null,
 				1099,
+				1106,
+				2,
+				1002
+			]
+		},
+		{
+			"values": [
+				1002,
+				1000,
+				"Queries",
+				"query",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    c.fid as id,\n    a.fname as name,\n    a.fcode as code,\n    a.fparent_id as parent,\n    b.fcode as store_code,\n    a.frecord_id as store_record\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\n{\"tree\": \"begin\"}\nselect\n    a.fparent_id as parent, count (*) as num\n{\"tree\": \"end\"}\n\nfrom\n    tview a\n    left join tschema b on (a.fschema_id = b.fid)\n\tinner join _view c on (a.fid = c.fid)\n    \n{\"where\": \"begin\"}\n    a.fend_id = 0 and a.fparent_id {\"tree\": \"filter\"}\n{\"where\": \"end\"}    \n\n{\"order\": \"begin\"}\n    a.fcode, a.fid\n{\"order\": \"end\"}\n\n{\"tree\": \"begin\"}\ngroup by\n    a.fparent_id\n{\"tree\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1106,
 				0,
 				2,
 				1002
@@ -5388,6 +5448,42 @@
 				"Saving, id: 1001",
 				2,
 				1103
+			]
+		},
+		{
+			"values": [
+				1104,
+				{
+					"type": "datetime",
+					"value": "2021-06-09T12:46:51.362Z"
+				},
+				"Saving, id: 1001",
+				2,
+				1104
+			]
+		},
+		{
+			"values": [
+				1105,
+				{
+					"type": "datetime",
+					"value": "2021-06-09T12:48:55.397Z"
+				},
+				"Saving, id: 1001",
+				2,
+				1105
+			]
+		},
+		{
+			"values": [
+				1106,
+				{
+					"type": "datetime",
+					"value": "2021-06-09T12:53:20.390Z"
+				},
+				"Saving, id: 1002",
+				2,
+				1106
 			]
 		}
 	]

@@ -7,7 +7,7 @@ begin
 	select count (*) into num from _view where fparent_id = OLD.fid;
 
     if (num > 0) then
-        raise exception 'query has child queries';
+        raise exception 'Query has child queries (remove them first)';
     end if;
 
 	return OLD;
@@ -29,14 +29,14 @@ begin
 	select count (*) into num from _class where fparent_id = OLD.fid;
 
     if (num > 0) then
-        raise exception 'model has child models';
+        raise exception 'Model has child models (remove them first)';
     end if;
 
 	select current_setting ('objectum.revision_id') into revisionId;
 	select count (*) into num from _class_attr where fclass_id = OLD.fid;
 
     if (num > 0 and revisionId > 0) then
-        raise exception 'model has properties';
+        raise exception 'Model has properties (remove them first)';
     end if;
 
 	return OLD;
@@ -56,6 +56,7 @@ declare
 	classCode varchar (256);
 	parentId bigint;
 	unlogged bigint;
+	num bigint;
 begin
 	if (NEW.fend_id = 0) then
 		tableName = NEW.fcode || '_' || NEW.fid;
@@ -63,6 +64,14 @@ begin
 		select fcode, fparent_id, funlogged into classCode, parentId, unlogged from _class where fid = NEW.fid;
 
 		if (classCode is null) then
+		    if (NEW.fparent_id is not null) then
+    		    select count (fid) into num from _class_attr where fclass_id = NEW.fparent_id;
+
+    		    if (num > 0) then
+	    			raise exception 'Parent model has properties (parent model must be namespace, without properties)';
+    		    end if;
+    		end if;
+
 			insert into _class (
 				fid, fparent_id, fname, fcode, fdescription, forder, fformat, fview_id, funlogged, fopts, fstart_id
 			) values (
@@ -77,15 +86,15 @@ begin
 			perform update_class_unique_indexes (NEW.fid);
 		else
 			if (classCode <> NEW.fcode) then
-				raise exception 'can''t change after creation: code';
+				raise exception 'Can''t change after creation: code';
 			end if;
 
 			if (parentId <> NEW.fparent_id or (parentId is null and NEW.fparent_id is not null) or (parentId is not null and NEW.fparent_id is null)) then
-				raise exception 'can''t change after creation: parent_id';
+				raise exception 'Can''t change after creation: parent_id';
 			end if;
 
 			if (unlogged <> NEW.funlogged or (unlogged is null and NEW.funlogged is not null) or (unlogged is not null and NEW.funlogged is null)) then
-				raise exception 'can''t change after creation: unlogged';
+				raise exception 'Can''t change after creation: unlogged';
 			end if;
 
 			update _class set
@@ -129,7 +138,7 @@ begin
 			execute 'drop table ' || NEW.fcode || '_' || NEW.fid;
 		end if;
 
-    	raise notice 'model removed: %', NEW.fid;
+    	raise notice 'Model removed: %', NEW.fid;
 	end if;
 
 	return NEW;
@@ -159,6 +168,7 @@ declare
 	removeRule varchar (64);
 	unlogged bigint;
 	revisionId bigint;
+	num bigint;
 begin
 	select fcode into classCode from _class where fid = NEW.fclass_id;
 
@@ -169,6 +179,12 @@ begin
 		tableName := classCode || '_' || NEW.fclass_id;
 
 		if (caCode is null) then
+            select count (fid) into num from _class where fparent_id = NEW.fclass_id;
+
+            if (num > 0) then
+                raise exception 'Model has child models (this model is namespace)';
+            end if;
+
 			insert into _class_attr (
 				fid, fclass_id, fclass_code, fname, fcode, fdescription, forder, ftype_id, fnot_null, fsecure, funique, fremove_rule, funlogged, fopts, fstart_id
 			) values (
@@ -178,16 +194,16 @@ begin
 			perform column_util (NEW.fid, 'createColumn,createTable,setNotNull,createIndex,createForeignKey');
 		else
 			if (caCode <> NEW.fcode) then
-				raise exception 'can''t change after creation: code - %, %. property: %', caCode, NEW.fcode, NEW.fid;
+				raise exception 'Can''t change after creation: code - %, %. property: %', caCode, NEW.fcode, NEW.fid;
 			end if;
 			if (caClassId <> NEW.fclass_id) then
-				raise exception 'can''t change after creation: class - %, %. property: %', caClassId, NEW.fclass_id, NEW.fid;
+				raise exception 'Can''t change after creation: class - %, %. property: %', caClassId, NEW.fclass_id, NEW.fid;
 			end if;
 			if (caTypeId <> NEW.ftype_id) then
-				raise exception 'can''t change after creation: type - %, %. property: %', caTypeId, NEW.ftype_id, NEW.fid;
+				raise exception 'Can''t change after creation: type - %, %. property: %', caTypeId, NEW.ftype_id, NEW.fid;
 			end if;
 			if (unlogged <> NEW.funlogged or (unlogged is null and NEW.funlogged is not null) or (unlogged is not null and NEW.funlogged is null)) then
-				raise exception 'can''t change after creation: unlogged. property: %',NEW.fid;
+				raise exception 'Can''t change after creation: unlogged. property: %',NEW.fid;
 			end if;
 			if (caUnique <> NEW.funique or (caUnique is null and NEW.funique is not null) or (caUnique is not null and NEW.funique is null)) then
 			    if (NEW.funique is null or NEW.funique = 0) then
@@ -585,7 +601,7 @@ begin
 	select fcode, fparent_id, funlogged into classCode, parentId, unlogged from _class where fid = classId;
 
 	if (classCode is null) then
-		raise exception 'unknown modelId: %', classId;
+		raise exception 'Unknown model - id: %', classId;
 	end if;
 
     if (position ('new' in opts) = 0) then
