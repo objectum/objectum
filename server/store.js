@@ -150,10 +150,29 @@ class Store {
 		
 		return id;
 	}
-	
+
+	async flushLog (client, revision) {
+		let rows = await client.query ({sql: `select fid, frsc_id, foper_id from _log`});
+
+		for (let i = 0; i < rows.length; i ++) {
+			let row = rows [i];
+
+			if (row.frsc_id == 12) {
+				if (row.foper_id == 1) {
+					this.revisions [revision]["object"].created.push (row.fid);
+				}
+				if (row.foper_id == 2) {
+					this.revisions [revision]["object"].changed.push (row.fid);
+				}
+				if (row.foper_id == 3) {
+					this.revisions [revision]["object"].removed.push (row.fid);
+				}
+			}
+		}
+		await client.query ({sql: `delete from _log`});
+	}
+
 	async commitTransaction ({session}) {
-		let me = this;
-		
 		log.debug ({fn: "store.commitTransaction"});
 		
 		if (this.revision [session.id]) {
@@ -161,24 +180,8 @@ class Store {
 			
 			if (client) {
 				let revision = this.revision [session.id];
-				let rows = await client.query ({sql: `select fid, frsc_id, foper_id from _log`});
 
-				for (let i = 0; i < rows.length; i ++) {
-					let row = rows [i];
-					
-					if (row.frsc_id == 12) {
-						if (row.foper_id == 1) {
-							me.revisions [revision]["object"].created.push (row.fid);
-						}
-						if (row.foper_id == 2) {
-							me.revisions [revision]["object"].changed.push (row.fid);
-						}
-						if (row.foper_id == 3) {
-							me.revisions [revision]["object"].removed.push (row.fid);
-						}
-					};
-				}
-				await client.query ({sql: `delete from _log`});
+				await this.flushLog (client, revision);
 				await client.commitTransaction ();
 				await client.disconnect ();
 				
@@ -208,7 +211,7 @@ class Store {
 		
 		if (this.revision [session.id]) {
 			let revision = this.revision [session.id];
-			
+
 			delete this.revisions [revision];
 			delete this.revision [session.id];
 			

@@ -711,31 +711,25 @@ class Import {
 			}
 			bar.tick ();
 		}
-		// restore
-		let restoreId = [];
-		
-/*
-		_.each (restoreMap, (v, id) => {
-			if (v) {
-				restoreId.push (id);
-			}
-		});
-*/
-		_.each (restoreMap, (o, id) => {
-			if (!_.isEmpty (o)) {
-				restoreId.push (id);
-			}
-		});
-		if (restoreId.length) {
-			log.info ({fn: "restoreRecords", restoreId});
-			
-			let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: restoreId.length, renderThrottle: 200});
-			
-			for (let i = 0; i < restoreId.length; i ++) {
-				await me.restoreObject (restoreId [i], cMap, caMap);
-				bar.tick ();
-			}
-		}
+		/*
+				let restoreId = [];
+
+				_.each (restoreMap, (o, id) => {
+					if (!_.isEmpty (o)) {
+						restoreId.push (id);
+					}
+				});
+				if (restoreId.length) {
+					log.info ({fn: "restoreRecords", restoreId});
+
+					let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: restoreId.length, renderThrottle: 200});
+
+					for (let i = 0; i < restoreId.length; i ++) {
+						await me.restoreObject (restoreId [i], cMap, caMap);
+						bar.tick ();
+					}
+				}
+		*/
 	};
 	
 	async createSchema ({code}) {
@@ -993,6 +987,7 @@ class Import {
 		me.droppedClassConstraints [classId] = true;
 	};
 	
+/*
 	async fixRefs () {
 		log.info ({fn: "fixRefs"});
 		
@@ -1044,7 +1039,8 @@ class Import {
 			bar.tick ();
 		}
 	};
-	
+*/
+
 	async restoreConstraints () {
 		log.info ({fn: "restoreConstraints"});
 		
@@ -1070,7 +1066,7 @@ class Import {
 			where
 				a.fid in (${_.keys (me.droppedClassAttrConstraints).join (",")}) and (a.fnot_null = 1 or a.ftype_id >= 1000)
 		`});
-		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: rows.length, renderThrottle: 200});
+		let prepareBar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: rows.length, renderThrottle: 200});
 		
 		for (let i = 0; i < rows.length; i ++) {
 			let row = rows [i];
@@ -1078,8 +1074,43 @@ class Import {
 			let fieldName = row.ca_code + "_" + row.ca_id;
 			
 			if (row.type_id >= 1000) {
+				let refTable = `${row.ref_code}_${row.type_id}`;
+				let invalidRows = await me.store.query ({session: me.session, sql: `select * from ${tableName} where ${fieldName} not in (select fobject_id from ${refTable})`});
+
+				if (invalidRows.length) {
+					let ids = invalidRows.map (row => row.fobject_id);
+
+					if (row.not_null == 1) {
+						log.info ({table: tableName, field: fieldName, refTable, rows: ids}, `delete rows`);
+						fs.writeFileSync (`importDelete-t-${tableName}-f-${fieldName}-r-${refTable}.json`, JSON.stringify (invalidRows));
+						await me.store.query ({
+							session: me.session,
+							sql: `update tobject set fend_id = ${me.store.revision [me.session.id]} where fclass_id = ${row.c_id} and fend_id = 0 and fid in (${ids})`
+						});
+						await me.store.query ({session: me.session, sql: `delete from ${tableName} where fobject_id in (${ids})`});
+					} else {
+						log.info ({table: tableName, field: fieldName, refTable, rows: ids}, `set null rows`);
+						fs.writeFileSync (`importSetNull-t-${tableName}-f-${fieldName}-r-${refTable}.json`, JSON.stringify (invalidRows));
+						await me.store.query ({
+							session: me.session,
+							sql: `update tobject_attr set fnumber = null, fend_id = ${me.store.revision [me.session.id]} where fclass_attr_id = ${row.ca_id} and fend_id = 0 and fobject_id in (${ids})`
+						});
+						await me.store.query ({session: me.session, sql: `update ${tableName} set ${fieldName} = null where fobject_id in (${ids})`});
+					}
+				}
+			}
+			prepareBar.tick ();
+		}
+		let bar = new ProgressBar (`:current/:total, :elapsed sec.: :bar`, {total: rows.length, renderThrottle: 200});
+
+		for (let i = 0; i < rows.length; i ++) {
+			let row = rows [i];
+			let tableName = row.c_code + "_" + row.c_id;
+			let fieldName = row.ca_code + "_" + row.ca_id;
+
+			if (row.type_id >= 1000) {
 				let removeRule = "set null";
-				
+
 				if (row.remove_rule == "cascade") {
 					removeRule = "cascade";
 				}
@@ -1091,7 +1122,6 @@ class Import {
 					removeRule = "";
 				}
 				let refTable = `${row.ref_code}_${row.type_id}`;
-				
 				await me.store.query ({session: me.session, sql: `alter table ${tableName} add constraint ${tableName}_${fieldName}_fk foreign key (${fieldName}) references ${refTable} (fobject_id) on delete ${removeRule}`});
 			}
 			if (row.not_null == 1) {
@@ -1288,7 +1318,7 @@ class Import {
 			await me.importObjects ();
 			await me.importObjectAttrs ();
 			
-			await me.fixRefs ();
+			//await me.fixRefs ();
 			await me.restoreConstraints ();
 			
 			await me.store.query ({session, sql: "delete from _log"});
