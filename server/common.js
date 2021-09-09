@@ -465,7 +465,7 @@ String.prototype.fulltrim = function () {
 	return this.replace(/(?:(?:^|\n)\s+|\s+(?:$|\n))/g,'').replace(/\s+/g,' ');
 };
 Date.prototype.toJSON = function () {
-	if (!this.getHours () && !this.getMinutes () && !this.getSeconds () && !this.getMilliseconds ()) {
+	if (!this.getMinutes () && !this.getSeconds () && !this.getMilliseconds ()) {
 		return {"type": "date", "value": this.toISOString ().substr (0, 10)};
 	} else {
 		return {"type": "datetime", "value": this.toISOString ()};
