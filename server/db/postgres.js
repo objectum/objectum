@@ -138,8 +138,13 @@ class Postgres {
 			
 			await client.connect ();
 
-			client.on ("error", function (err) {
-				log.error ({fn: "postgres.connect", err, clientError: true});
+			client.on ("error", async (err) => {
+				log.error ({fn: "postgres.connect error", err, clientError: true});
+
+				if (!me.connectError) {
+					await me.connect ();
+					me.connectError = err;
+				}
 			});
 			client.on ("notice", function (notice) {
 				log.debug ({fn: "postgres.connect", notice});
