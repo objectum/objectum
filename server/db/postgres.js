@@ -117,6 +117,8 @@ class Postgres {
 */
 	
 	async connect (opts) {
+		log.debug ({fn: "postgres.connect", opts});
+
 		let me = this;
 		let systemDB = opts ? opts.systemDB : false;
 		let client;
@@ -138,13 +140,9 @@ class Postgres {
 			
 			await client.connect ();
 
-			client.on ("error", async (err) => {
+			client.on ("error", err => {
 				log.error ({fn: "postgres.connect error", err, clientError: true});
-
-				if (!me.connectError) {
-					await me.connect ();
-					me.connectError = err;
-				}
+				me.connected = 0;
 			});
 			client.on ("notice", function (notice) {
 				log.debug ({fn: "postgres.connect", notice});
@@ -183,7 +181,7 @@ class Postgres {
 		log.trace ({fn: "postgres.query", sql, params});
 		
 		let me = this;
-		
+
 		try {
 			if (!me.connected) {
 				await me.connect ();
