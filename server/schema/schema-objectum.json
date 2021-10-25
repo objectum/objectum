@@ -3361,6 +3361,26 @@
 				null,
 				null,
 				1107,
+				1115,
+				2,
+				1013
+			]
+		},
+		{
+			"values": [
+				1013,
+				1000,
+				"Dependencies",
+				"dependence",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    a.fid as id,\n    a.fname as name,\n    a.fcode as code,\n    a.fnot_null as not_null,\n    a.fremove_rule as remove_rule,\n    c.fid as model_id,\n    c.fname as model_name,\n    c.fcode as model_code,\n    b.fcode as store_code,\n    a.frecord_id as store_record\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\nfrom\n    tclass_attr a\n    left join tschema b on (a.fschema_id = b.fid)\n    inner join tclass c on (a.fclass_id = c.fid and c.fend_id = 0)\n    \n{\"where\": \"begin\"}\n    a.fend_id = 0 and a.ftype_id = {\"param\": \"typeId\"}\n{\"where\": \"end\"}\n\n{\"order\": \"begin\"}\n    a.fcode, a.fid\n{\"order\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1115,
 				0,
 				2,
 				1013
@@ -4479,6 +4499,24 @@
 				null,
 				null,
 				1113,
+				1116,
+				2,
+				1048
+			]
+		},
+		{
+			"values": [
+				1048,
+				1013,
+				"store.code",
+				"store_code",
+				null,
+				9,
+				null,
+				1,
+				null,
+				null,
+				1116,
 				0,
 				2,
 				1048
@@ -4515,9 +4553,135 @@
 				null,
 				null,
 				1114,
+				1116,
+				2,
+				1049
+			]
+		},
+		{
+			"values": [
+				1049,
+				1013,
+				"store.record",
+				"store_record",
+				null,
+				10,
+				null,
+				1,
+				null,
+				null,
+				1116,
 				0,
 				2,
 				1049
+			]
+		},
+		{
+			"values": [
+				1050,
+				1013,
+				"model_id",
+				"model_id",
+				null,
+				6,
+				null,
+				1,
+				null,
+				null,
+				1116,
+				1117,
+				2,
+				1050
+			]
+		},
+		{
+			"values": [
+				1050,
+				1013,
+				"Model: id",
+				"model_id",
+				null,
+				6,
+				null,
+				1,
+				null,
+				null,
+				1117,
+				0,
+				2,
+				1050
+			]
+		},
+		{
+			"values": [
+				1051,
+				1013,
+				"model_name",
+				"model_name",
+				null,
+				7,
+				null,
+				1,
+				null,
+				null,
+				1116,
+				1118,
+				2,
+				1051
+			]
+		},
+		{
+			"values": [
+				1051,
+				1013,
+				"Model: Name",
+				"model_name",
+				null,
+				7,
+				null,
+				1,
+				null,
+				null,
+				1118,
+				0,
+				2,
+				1051
+			]
+		},
+		{
+			"values": [
+				1052,
+				1013,
+				"model_code",
+				"model_code",
+				null,
+				8,
+				null,
+				1,
+				null,
+				null,
+				1116,
+				1119,
+				2,
+				1052
+			]
+		},
+		{
+			"values": [
+				1052,
+				1013,
+				"Model: Code",
+				"model_code",
+				null,
+				8,
+				null,
+				1,
+				null,
+				null,
+				1119,
+				0,
+				2,
+				1052
 			]
 		}
 	],
@@ -5834,6 +5998,66 @@
 				"Saving, id: 1049",
 				2,
 				1114
+			]
+		},
+		{
+			"values": [
+				1115,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T19:04:06.991Z"
+				},
+				"Saving, id: 1013",
+				2,
+				1115
+			]
+		},
+		{
+			"values": [
+				1116,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T19:04:09.604Z"
+				},
+				"Synchronize columns",
+				2,
+				1116
+			]
+		},
+		{
+			"values": [
+				1117,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T19:04:22.176Z"
+				},
+				"Saving, id: 1050",
+				2,
+				1117
+			]
+		},
+		{
+			"values": [
+				1118,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T19:04:31.752Z"
+				},
+				"Saving, id: 1051",
+				2,
+				1118
+			]
+		},
+		{
+			"values": [
+				1119,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T19:04:39.118Z"
+				},
+				"Saving, id: 1052",
+				2,
+				1119
 			]
 		}
 	]
