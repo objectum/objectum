@@ -4,9 +4,9 @@
 		"code": "objectum",
 		"file": "../schema/schema-objectum.json",
 		"classes": [
-			1006,
+			1000,
 			1005,
-			1000
+			1006
 		],
 		"views": [
 			1000,
@@ -3345,6 +3345,26 @@
 				2,
 				1012
 			]
+		},
+		{
+			"values": [
+				1013,
+				1000,
+				"Dependencies",
+				"dependence",
+				null,
+				null,
+				"{\"data\": \"begin\"}\nselect\n    a.fid as id,\n    a.fname as name,\n    a.fcode as code,\n    a.fnot_null as not_null,\n    a.fremove_rule as remove_rule,\n    b.fcode as store_code,\n    a.frecord_id as store_record\n{\"data\": \"end\"}\n\n{\"count\": \"begin\"}\nselect\n    count (*) as num\n{\"count\": \"end\"}\n\nfrom\n    tclass_attr a\n    left join tschema b on (a.fschema_id = b.fid)\n    \n{\"where\": \"begin\"}\n    a.fend_id = 0 and a.ftype_id = {\"param\": \"typeId\"}\n{\"where\": \"end\"}\n\n{\"order\": \"begin\"}\n    a.fcode, a.fid\n{\"order\": \"end\"}\n\nlimit {\"param\": \"limit\"}\noffset {\"param\": \"offset\"}\n",
+				null,
+				null,
+				null,
+				null,
+				null,
+				1107,
+				0,
+				2,
+				1013
+			]
 		}
 	],
 	"tview_attr": [
@@ -4264,6 +4284,240 @@
 				0,
 				2,
 				1042
+			]
+		},
+		{
+			"values": [
+				1043,
+				1013,
+				"id",
+				"id",
+				null,
+				1,
+				null,
+				1,
+				null,
+				null,
+				1108,
+				0,
+				2,
+				1043
+			]
+		},
+		{
+			"values": [
+				1044,
+				1013,
+				"name",
+				"name",
+				null,
+				2,
+				null,
+				1,
+				null,
+				null,
+				1108,
+				1109,
+				2,
+				1044
+			]
+		},
+		{
+			"values": [
+				1044,
+				1013,
+				"Name",
+				"name",
+				null,
+				2,
+				null,
+				1,
+				null,
+				null,
+				1109,
+				0,
+				2,
+				1044
+			]
+		},
+		{
+			"values": [
+				1045,
+				1013,
+				"code",
+				"code",
+				null,
+				3,
+				null,
+				1,
+				null,
+				null,
+				1108,
+				1110,
+				2,
+				1045
+			]
+		},
+		{
+			"values": [
+				1045,
+				1013,
+				"Code",
+				"code",
+				null,
+				3,
+				null,
+				1,
+				null,
+				null,
+				1110,
+				0,
+				2,
+				1045
+			]
+		},
+		{
+			"values": [
+				1046,
+				1013,
+				"not_null",
+				"not_null",
+				null,
+				4,
+				null,
+				1,
+				null,
+				null,
+				1108,
+				1111,
+				2,
+				1046
+			]
+		},
+		{
+			"values": [
+				1046,
+				1013,
+				"Not null",
+				"not_null",
+				null,
+				4,
+				null,
+				1,
+				null,
+				null,
+				1111,
+				0,
+				2,
+				1046
+			]
+		},
+		{
+			"values": [
+				1047,
+				1013,
+				"remove_rule",
+				"remove_rule",
+				null,
+				5,
+				null,
+				1,
+				null,
+				null,
+				1108,
+				1112,
+				2,
+				1047
+			]
+		},
+		{
+			"values": [
+				1047,
+				1013,
+				"Remove rule",
+				"remove_rule",
+				null,
+				5,
+				null,
+				1,
+				null,
+				null,
+				1112,
+				0,
+				2,
+				1047
+			]
+		},
+		{
+			"values": [
+				1048,
+				1013,
+				"store_code",
+				"store_code",
+				null,
+				6,
+				null,
+				1,
+				null,
+				null,
+				1108,
+				1113,
+				2,
+				1048
+			]
+		},
+		{
+			"values": [
+				1048,
+				1013,
+				"store.code",
+				"store_code",
+				null,
+				6,
+				null,
+				1,
+				null,
+				null,
+				1113,
+				0,
+				2,
+				1048
+			]
+		},
+		{
+			"values": [
+				1049,
+				1013,
+				"store_record",
+				"store_record",
+				null,
+				7,
+				null,
+				1,
+				null,
+				null,
+				1108,
+				1114,
+				2,
+				1049
+			]
+		},
+		{
+			"values": [
+				1049,
+				1013,
+				"store.record",
+				"store_record",
+				null,
+				7,
+				null,
+				1,
+				null,
+				null,
+				1114,
+				0,
+				2,
+				1049
 			]
 		}
 	],
@@ -5484,6 +5738,102 @@
 				"Saving, id: 1002",
 				2,
 				1106
+			]
+		},
+		{
+			"values": [
+				1107,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T18:36:20.046Z"
+				},
+				"Creating",
+				2,
+				1107
+			]
+		},
+		{
+			"values": [
+				1108,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T18:36:37.484Z"
+				},
+				"Synchronize columns",
+				2,
+				1108
+			]
+		},
+		{
+			"values": [
+				1109,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T18:37:07.315Z"
+				},
+				"Saving, id: 1044",
+				2,
+				1109
+			]
+		},
+		{
+			"values": [
+				1110,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T18:37:15.291Z"
+				},
+				"Saving, id: 1045",
+				2,
+				1110
+			]
+		},
+		{
+			"values": [
+				1111,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T18:37:22.853Z"
+				},
+				"Saving, id: 1046",
+				2,
+				1111
+			]
+		},
+		{
+			"values": [
+				1112,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T18:37:32.235Z"
+				},
+				"Saving, id: 1047",
+				2,
+				1112
+			]
+		},
+		{
+			"values": [
+				1113,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T18:37:40.295Z"
+				},
+				"Saving, id: 1048",
+				2,
+				1113
+			]
+		},
+		{
+			"values": [
+				1114,
+				{
+					"type": "datetime",
+					"value": "2021-10-25T18:37:47.116Z"
+				},
+				"Saving, id: 1049",
+				2,
+				1114
 			]
 		}
 	]
