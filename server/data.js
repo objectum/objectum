@@ -97,6 +97,10 @@ function addToWhere (tokens, f) {
 	return r;
 };
 
+function ToSQLString (s) {
+	return s ? s.split ("'").join ("''") : s;
+}
+
 function addFilters (tokens, filters, caMap, aliasPrefix) {
 	let f = _.map (filters, f => {
 		if (!caMap [f [0]]) {
@@ -108,13 +112,13 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 			f.push ("");
 		}
 		if (f [1] == "like" || f [1] == "not like") {
-			s = `lower (${aliasPrefix [f [0]]}.${caMap [f [0]].getField ()}) ${f [1]} '${f [2].toLowerCase ()}%'`;
+			s = `lower (${aliasPrefix [f [0]]}.${caMap [f [0]].getField ()}) ${f [1]} '${ToSQLString (f [2].toLowerCase ())}%'`;
 		} else
 		if (f [2] !== "") {
 			if (f [1] == "in" || f [1] == "not in") {
 				s += `(${(f [2].length ? f [2] : ['0']).join (",")})`;
 			} else {
-				s += ` '${f [2]}'`;
+				s += ` '${ToSQLString (f [2])}'`;
 			}
 		}
 		return s;
