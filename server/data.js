@@ -98,7 +98,7 @@ function addToWhere (tokens, f) {
 };
 
 function ToSQLString (s) {
-	return s ? s.split ("'").join ("''") : s;
+	return typeof (s) == "string" ? s.split ("'").join ("''") : s;
 }
 
 function addFilters (tokens, filters, caMap, aliasPrefix) {
