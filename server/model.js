@@ -1,7 +1,7 @@
 "use strict"
 
 const _ = require ("lodash");
-const common = require ("./common");
+//const common = require ("./common");
 
 let { getFieldMap, getAttrMap, getMetaTable } = require ("./map");
 
@@ -151,10 +151,15 @@ class Object extends Base {
 				delete me.store.auth.user [me.get ("id")];
 			}
 			if (me.store.revisions [revisionId]["object"]) {
-				me.store.revisions [revisionId]["object"].removed.push (me.get ("id"));
+				let o = {id: me.get ("id"), model: me.get ("_class")};
+				let sharedProperty = classObj.getOpts ().sharedProperty;
+
+				if (sharedProperty) {
+					o [sharedProperty] = me.get (sharedProperty);
+				}
+				me.store.revisions [revisionId]["object"].removed.push (o);
 			}
 			return;
-//			return await me.store.query ({session, sql: `update tobject set fend_id = ${revisionId} where fid = ${me.get ("id")} and fend_id = 0`});
 		}
 		let newObject = false;
 		let id = me.get ("id");
@@ -181,13 +186,9 @@ class Object extends Base {
 			me.set ("id", id);
 			me.set ("start", revisionId);
 			me.set ("end", 0);
-			
-//			await me.store.query ({session, sql: `insert into ${classObj.getTable ()} (fobject_id) values (${id})`});
-//			await me.store.query ({session, sql: `insert into tobject (fid, fclass_id, fstart_id, fend_id) values (${id}, ${me.get ("class")}, ${revisionId}, 0)`});
 		}
 		let data = {};
-		//let login, password;
-		
+
 		for (let i = 0; i < attrs.length; i ++) {
 			let attr = attrs [i];
 			let ca = classObj.attrs [attr];
@@ -197,14 +198,6 @@ class Object extends Base {
 			}
 			let value = me.get (attr);
 			
-/*
-			if (me.store.auth.login [ca.get ("id")]) {
-				login = value;
-			}
-			if (me.store.auth.password [ca.get ("id")]) {
-				password = value;
-			}
-*/
 			if (value === true || value === false) {
 				value = Number (value);
 			}
@@ -280,36 +273,22 @@ class Object extends Base {
 			});
 		}
 		if (me.store.revisions [revisionId]["object"]) {
+			let o = {id: me.get ("id"), model: me.get ("_class")};
+			let sharedProperty = classObj.getOpts ().sharedProperty;
+
+			if (sharedProperty) {
+				o [sharedProperty] = me.get (sharedProperty);
+			}
 			if (newObject) {
-				me.store.revisions [revisionId]["object"].created.push (me.get ("id"));
+				me.store.revisions [revisionId]["object"].created.push (o);
 			} else {
-				me.store.revisions [revisionId]["object"].changed.push (me.get ("id"));
+				me.store.revisions [revisionId]["object"].changed.push (o);
 			}
 		}
 		let updatedObject = await me.store.getObject ({session, id: me.get ("id")});
 		
 		me.data = updatedObject.data;
 		me.originalData = updatedObject.originalData;
-/*
-		if (!config.legacy && me.store.getClass ("objectum.user").get ("id") == me.get ("_class")) {
-			let menuId = null;
-			
-			if (me.get ("role")) {
-				let o = await me.store.getObject ({session, id: me.get ("role")});
-				
-				menuId = o.get ("menu");
-			}
-			let o = {
-				login: me.get ("login"),
-				password: me.get ("password"),
-				id: me.get ("id"),
-				role: me.get ("role"),
-				menu: menuId
-			};
-			me.store.auth.user [me.get ("login")] = o;
-			me.store.auth.user [me.get ("id")] = o;
-		}
-*/
 	}
 	
 	async commit () {
@@ -366,6 +345,8 @@ class Meta extends Base {
 			me.set ("id", id);
 		}
 		if (!me.removed) {
+			delete me.opts;
+
 			let fields = _.values (map);
 			let values = [];
 			
@@ -418,7 +399,10 @@ class Meta extends Base {
 	}
 	
 	getOpts () {
-		return JSON.parse (this.get ("opts") || "{}");
+		if (!this.opts) {
+			this.opts = JSON.parse (this.get ("opts") || "{}");
+		}
+		return this.opts;
 	}
 }
 

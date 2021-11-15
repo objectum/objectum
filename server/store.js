@@ -152,6 +152,8 @@ class Store {
 	}
 
 	async flushLog (client, revision) {
+		// todo: fclass_id, shared property
+/*
 		let rows = await client.query ({sql: `select fid, frsc_id, foper_id from _log`});
 
 		for (let i = 0; i < rows.length; i ++) {
@@ -169,6 +171,7 @@ class Store {
 				}
 			}
 		}
+*/
 		await client.query ({sql: `delete from _log`});
 	}
 
@@ -899,7 +902,7 @@ class Store {
 				if (r.metaChanged) {
 					me.redisClient.hdel (`${me.code}-requests`, "all");
 				}
-				_.each ([...r ["object"].changed, ...r ["object"].removed], id => {
+				_.each ([...r ["object"].changed.map (o => o.id), ...r ["object"].removed.map (o => o.id)], id => {
 					me.redisClient.hdel (`${me.code}-objects`, id);
 				});
 				let auth = [...r ["auth"].created, ...r ["auth"].changed];

@@ -748,24 +748,30 @@ async function getNews (req) {
 
 	if (clientRevision == 0 || clientRevision == store.lastRevision) {
 		// first call
-		data = {revision: store.lastRevision, records: []/*, message*/};
+		data = {revision: store.lastRevision, created: [], updated: [], deleted: []};
 	} else {
 		// send changed objects id from revision to lastRevision
-		let r = [], metaChanged = false;
+		let created = [], updated = [], deleted = [], metaChanged = false;
 		
-		//for (let revision in store.revisions) {
 		for (let i = clientRevision + 1; i <= store.lastRevision; i ++) {
 			let revision = store.revisions [i];
 			
 			if (revision) {
-				r = [...r, ...revision.object.changed, ...revision.object.removed];
-				
+				if (revision.object.created.length) {
+					created = [...created, ...revision.object.created];
+				}
+				if (revision.object.changed.length) {
+					updated = [...updated, ...revision.object.changed];
+				}
+				if (revision.object.removed.length) {
+					deleted = [...deleted, ...revision.object.removed];
+				}
 				if (revision.metaChanged) {
 					metaChanged = true;
 				}
 			}
 		}
-		data = {revision: store.lastRevision, metaChanged, records: r/*, message*/};
+		data = {revision: store.lastRevision, metaChanged, created, updated, deleted};
 	}
 	sessions [req.session.id].news.revision = store.lastRevision;
 	
