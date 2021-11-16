@@ -748,7 +748,7 @@ async function getNews (req) {
 
 	if (clientRevision == 0 || clientRevision == store.lastRevision) {
 		// first call
-		data = {revision: store.lastRevision, created: [], updated: [], deleted: []};
+		data = {revision: store.lastRevision, created: [], updated: [], deleted: [], records: []};
 	} else {
 		// send changed objects id from revision to lastRevision
 		let created = [], updated = [], deleted = [], metaChanged = false;
@@ -771,7 +771,7 @@ async function getNews (req) {
 				}
 			}
 		}
-		data = {revision: store.lastRevision, metaChanged, created, updated, deleted};
+		data = {revision: store.lastRevision, metaChanged, created, updated, deleted, records: []};
 	}
 	sessions [req.session.id].news.revision = store.lastRevision;
 	
