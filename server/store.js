@@ -1,15 +1,12 @@
 "use strict"
 
 const _ = require ("lodash");
-const { createClient } = require ("./db/client").db;
-const { Base, Object, Action, factory } = require ("./model");
-const { Query } = require ("./query");
-const { native, getMetaTable } = require ("./map");
-const legacy = require ("./legacy");
+const redis = require ("redis");
+const {createClient} = require ("./db/client").db;
+const {Base, Object, Action, factory} = require ("./model");
+const {Query} = require ("./query");
+const {native, getMetaTable} = require ("./map");
 const data = require ("./data");
-
-// todo: me.redisClient.hset ("sessions", `${session.id}-clock`, config.clock);
-// todo: redisEmulator Promise
 
 class Store {
 	constructor ({code, connection, systemDB}) {
@@ -137,6 +134,7 @@ class Store {
 		this.revision [session.id] = id;
 		this.revisions [id] = {
 			id,
+			time: new Date ().getTime (),
 			dirty: true // after commitTransaction = true
 		};
 		_.each (["object", "class", "classAttr", "view", "viewAttr", "auth"], rsc => {
@@ -202,10 +200,12 @@ class Store {
 							this.revisions [revision].metaChanged = true;
 						}
 					});
-					this.redisPub.publish (`${config.redis.db}-${this.code}-revisions`, JSON.stringify (this.revisions [revision]));
+					this.redisPub.publish (`o-${this.code}-revisions`, JSON.stringify (this.revisions [revision]));
 				}
 				return revision;
 			}
+		} else {
+			throw new Error ("transaction not active");
 		}
 	}
 	
@@ -221,7 +221,6 @@ class Store {
 			let client = this.clientPool [session.id];
 			
 			if (!client) {
-				// removeTimeoutSessions exception
 				return revision;
 			}
 			await client.rollbackTransaction ();
@@ -229,6 +228,8 @@ class Store {
 			await client.disconnect ();
 			
 			return revision;
+		} else {
+			throw new Error ("transaction not active");
 		}
 	}
 	
@@ -372,7 +373,7 @@ class Store {
 		
 		let me = this;
 		let object;
-		let result = await me.redisClient.hgetAsync (`${me.code}-objects`, id);
+		let result = await me.redisClient.hGet (`o-${me.code}-objects`, String (id));
 		
 		if (result) {
 			object = new Object ({store: me});
@@ -380,67 +381,6 @@ class Store {
 			object.originalData = _.extend ({}, object.data);
 			delete object.data._trace;
 		}
-/*
-		if (!object) {
-			let opts = {
-				session,
-				sql: `
-					select
-						a.fclass_attr_id, a.fstring, a.ftime, a.fnumber,
-						b.fclass_id, b.fstart_id, b.frecord_id, b.fschema_id
-					from
-						tobject b
-						left join tobject_attr a on (a.fobject_id=b.fid and a.fend_id = 0)
-					where
-						b.fid = ${id} and b.fend_id = 0
-				`
-			};
-			if (!session) {
-				opts.client = me.client;
-			}
-			if (_trace) {
-				_trace = [["getObject-start", new Date ().getTime ()]];
-				opts._trace = _trace;
-			}
-			let rows = await me.query (opts);
-			
-			if (!rows.length) {
-				throw new Error (`store.getRecord: Unknown record: ${id}`);
-			}
-			object = new Object ({store: me});
-			object.data.id = id;
-			object.data.fclass_id = object.data.classId = object.data ["_class"] = rows [0].fclass_id;
-			object.data.start = rows [0].fstart_id;
-			object.data.record = rows [0].frecord_id;
-			object.data.schema = rows [0].fschema_id;
-			
-			if (_trace) {
-				_trace.push (["getObject-end", new Date ().getTime ()]);
-				object.data._trace = _trace;
-			}
-			_.each (rows, function (row) {
-				let classAttr = me.map ["classAttr"][row.fclass_attr_id];
-				
-				if (!classAttr) {
-					return;
-				}
-				let value;
-				
-				if (classAttr.get ("type") == 1 || classAttr.get ("type") == 5) {
-					value = row.fstring;
-				} else if (classAttr.get ("type") == 3) {
-					value = row.ftime;
-				} else {
-					value = row.fnumber;
-				}
-				object.data [classAttr.get ("code")] = value;
-				object.originalData [classAttr.get ("code")] = value;
-			});
-			if (!me.revision [session.id]) {
-				me.redisClient.hset (`${me.code}-objects`, id, JSON.stringify (object.toJSON ()));
-			}
-		}
-*/
 		if (!object) {
 			let opts = {
 				session,
@@ -488,7 +428,7 @@ class Store {
 				object.originalData [classAttr.get ("code")] = value;
 			});
 			if (!me.revision [session.id]) {
-				me.redisClient.hset (`${me.code}-objects`, id, JSON.stringify (object.toJSON ()));
+				me.redisClient.hSet (`o-${me.code}-objects`, String (id), JSON.stringify (object.toJSON ()));
 			}
 		}
 		return object;
@@ -526,30 +466,10 @@ class Store {
 		}
 	}
 	
-	addOrderId (sql) {
-		return legacy.addOrderId.call (this, sql);
-	}
-	
-	async execute ({session, client, sql, resultText, asArray}) {
-		return await legacy.execute.call (this, {session, client, sql, resultText, asArray});
-	}
-	
-	async selectRow ({session, viewId, viewFilter, selectFilter}) {
-		return await legacy.selectRow.call (this, {session, viewId, viewFilter, selectFilter});
-	};
-	
-	async getContent ({viewId, row, rowCount, filter, order, total, dateAttrs, timeOffsetMin, session}) {
-		return await legacy.getContent.call (this, {viewId, row, rowCount, filter, order, total, dateAttrs, timeOffsetMin, session});
-	}
-	
 	async readAuthInfo () {
 		log.debug ({fn: "store.readAuthInfo"});
 		
 		let me = this;
-		
-		if (config.legacy) {
-			return await legacy.readAuthInfo.call (this);
-		}
 		let userCls, roleCls;
 		
 		try {
@@ -612,13 +532,11 @@ class Store {
 	
 	async end () {
 		log.debug ({fn: "store.end"});
-		
-		let me = this;
-		
-		await me.client.disconnect ();
-		me.redisClient.quit ();
-		me.redisSub.quit ();
-		me.redisPub.quit ();
+
+		await this.client.disconnect ();
+		await this.redisClient.quit ();
+		await this.redisSub.quit ();
+		await this.redisPub.quit ();
 	}
 	
 	initRsc ({rsc, action, o}) {
@@ -637,8 +555,6 @@ class Store {
 			
 			if (path) {
 				me.map [rsc][path] = o;
-				
-				legacy.updateAliases (me.map [rsc], path, o);
 			}
 			if ((rsc == "class" || rsc == "view") && o.get ("parent")) {
 				let addChild = function (rsc, o, id) {
@@ -754,7 +670,36 @@ class Store {
 			};
 		});
 	}
-	
+
+	gc = async () => {
+		for (let authId in this.clientPool) {
+			let client = this.clientPool [authId];
+			let revision = this.revision [authId];
+			let time = this.revisions [revision]?.time;
+
+			if (!time || time < config.clock - config.user.transactionExpires) {
+				let accessTime = await this.redisClient.hGet ("o-access", String (authId));
+
+				if (accessTime < config.clock - config.user.transactionExpires) {
+					delete this.revisions [revision];
+					delete this.revision [authId];
+					await client.rollbackTransaction ();
+					delete this.clientPool [authId];
+					await client.disconnect ();
+					log.info ({fn: "store.gc"}, `rollback idle transaction: ${authId}, ${revision}`);
+				}
+			}
+		}
+		for (let revisionId in this.revisions) {
+			let revision = this.revisions [revisionId];
+
+			if (config.clock - revision.time > config.user.revisionExpires) {
+				delete this.revisions [revisionId];
+				log.debug ({fn: "store.gc"}, `revision removed: ${revisionId}`);
+			}
+		}
+	}
+
 	async init () {
 		log.debug ({fn: "store.init"});
 		
@@ -842,97 +787,99 @@ class Store {
 			
 			me.lastRevision = rows [0].max_id;
 		}
-		me.redisClient = redis.createClient (config.redis.port, config.redis.host);
-		me.redisPub = redis.createClient (config.redis.port, config.redis.host);
-		me.redisSub = redis.createClient (config.redis.port, config.redis.host);
-		
+		me.redisClient = redis.createClient (config.redis);
+		me.redisPub = redis.createClient (config.redis);
+		me.redisSub = redis.createClient (config.redis);
+
+		await me.redisClient.connect ();
+		await me.redisPub.connect ();
+		await me.redisSub.connect ();
+
 		if (config.redis.db) {
-			await me.redisSub.selectAsync (config.redis.db);
-			await me.redisPub.selectAsync (config.redis.db);
+			await me.redisSub.select (config.redis.db);
+			await me.redisPub.select (config.redis.db);
 			await me.redisClient.select (config.redis.db);
 		}
-		me.redisSub.on ("message", function (channel, message) {
-			log.trace ({fn: "store.sub"}, `redisSub.message on channel: ${channel}`);
-			
-			if (channel == `${config.redis.db}-${me.code}-revisions`) {
-				let r = JSON.parse (message);
-				
-				if (!me.revisions [r.id]) {
-					me.revisions [r.id] = r;
-					log.trace ({fn: "store.sub"}, `new revision: ${r.id}`);
-					
-					if (me.lastRevision < r.id) {
-						me.lastRevision = r.id;
-					}
-					// todo: clear redis cache
+		await me.redisSub.subscribe (`o-${me.code}-revisions`, message => {
+			log.trace ({fn: "store.sub"}, "redisSub.message: revisions");
+
+			let r = JSON.parse (message);
+
+			if (!me.revisions [r.id]) {
+				me.revisions [r.id] = r;
+				log.trace ({fn: "store.sub"}, `new revision: ${r.id}`);
+
+				if (me.lastRevision < r.id) {
+					me.lastRevision = r.id;
 				}
-				_.each (["class", "classAttr", "view", "viewAttr"], rsc => {
-					_.each (r [rsc].created, function ({fields, values}) {
-						let data = Base.buildData ({rsc, fields, values});
-						let o = factory ({rsc, store: me, data});
-						
-						if (rsc == "classAttr" && !me.map ["class"][o.get ("class")]) {
-							return;
-						}
-						if (rsc == "viewAttr" && !me.map ["view"][o.get ("view")]) {
-							return;
-						}
-						me.initRsc ({rsc, action: "create", o});
-					});
-					_.each (r [rsc].changed, function ({fields, values}) {
-						let data = Base.buildData ({rsc, fields, values});
-						let o = me.map [rsc][data.id];
-						
-						if (o) {
-							_.each (data, (v, a) => o.set (a, v));
-							
-							if (rsc == "view") {
-								me.map [rsc][o.getPath ()] = o;
-							}
-						}
-					});
-					_.each (r [rsc].removed, function (id) {
-						let o = me.map [rsc][id];
-						
-						if (o) {
-							me.initRsc ({rsc, action: "remove", o});
-						}
-					});
+				// todo: clear redis cache
+			}
+			_.each (["class", "classAttr", "view", "viewAttr"], rsc => {
+				_.each (r [rsc].created, function ({fields, values}) {
+					let data = Base.buildData ({rsc, fields, values});
+					let o = factory ({rsc, store: me, data});
+
+					if (rsc == "classAttr" && !me.map ["class"][o.get ("class")]) {
+						return;
+					}
+					if (rsc == "viewAttr" && !me.map ["view"][o.get ("view")]) {
+						return;
+					}
+					me.initRsc ({rsc, action: "create", o});
 				});
-				if (r.metaChanged) {
-					me.redisClient.hdel (`${me.code}-requests`, "all");
-				}
-				_.each ([...r ["object"].changed.map (o => o.id), ...r ["object"].removed.map (o => o.id)], id => {
-					me.redisClient.hdel (`${me.code}-objects`, id);
-				});
-				let auth = [...r ["auth"].created, ...r ["auth"].changed];
-				
-				for (let i = 0; i < auth.length; i ++) {
-					let o = auth [i];
-					
-					if (o.user) {
-						me.auth.user [o.user] = me.auth.user [o.user] || {};
-						me.auth.user [o.user].id = o.user;
-						me.auth.user [o.user].login = o.login || me.auth.user [o.user].login;
-						me.auth.user [o.user].password = o.password || me.auth.user [o.user].password;
-						me.auth.user [o.user].role = o.role || me.auth.user [o.user].role;
-						me.auth.user [o.user].menu = o.menu || me.auth.user [o.user].menu;
-						
-						if (o.login) {
-							me.auth.user [o.login] = me.auth.user [o.user];
+				_.each (r [rsc].changed, function ({fields, values}) {
+					let data = Base.buildData ({rsc, fields, values});
+					let o = me.map [rsc][data.id];
+
+					if (o) {
+						_.each (data, (v, a) => o.set (a, v));
+
+						if (rsc == "view") {
+							me.map [rsc][o.getPath ()] = o;
 						}
 					}
-					if (o.role) {
-						_.each (me.auth.user, function (rec) {
-							if (rec.role == o.role) {
-								rec.menu = o.menu;
-							}
-						});
+				});
+				_.each (r [rsc].removed, function (id) {
+					let o = me.map [rsc][id];
+
+					if (o) {
+						me.initRsc ({rsc, action: "remove", o});
+					}
+				});
+			});
+			if (r.metaChanged) {
+				me.redisClient.hDel (`o-${me.code}-requests`, "all");
+			}
+			_.each ([...r ["object"].changed.map (o => o.id), ...r ["object"].removed.map (o => o.id)], id => {
+				me.redisClient.hDel (`o-${me.code}-objects`, String (id));
+			});
+			let auth = [...r ["auth"].created, ...r ["auth"].changed];
+
+			for (let i = 0; i < auth.length; i ++) {
+				let o = auth [i];
+
+				if (o.user) {
+					me.auth.user [o.user] = me.auth.user [o.user] || {};
+					me.auth.user [o.user].id = o.user;
+					me.auth.user [o.user].login = o.login || me.auth.user [o.user].login;
+					me.auth.user [o.user].password = o.password || me.auth.user [o.user].password;
+					me.auth.user [o.user].role = o.role || me.auth.user [o.user].role;
+					me.auth.user [o.user].menu = o.menu || me.auth.user [o.user].menu;
+
+					if (o.login) {
+						me.auth.user [o.login] = me.auth.user [o.user];
 					}
 				}
-			};
+				if (o.role) {
+					_.each (me.auth.user, function (rec) {
+						if (rec.role == o.role) {
+							rec.menu = o.menu;
+						}
+					});
+				}
+			}
 		});
-		me.redisSub.subscribe (`${config.redis.db}-${me.code}-revisions`);
+		setInterval (this.gc, config.user.gcStoreInterval);
 	}
 }
 

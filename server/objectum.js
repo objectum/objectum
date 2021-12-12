@@ -1,30 +1,28 @@
 "use strict"
 
 const _ = require ("lodash");
+const {machineIdSync} = require ("node-machine-id");
 
 class Objectum {
 	constructor (config) {
-		let me = this;
-
 		config.rootDir = config.rootDir || `${__dirname}/..`;
 		global.config = config;
 		
 		_.defaults (config, {
 			stores: {},
-			auth: {multi: true},
 			backlog: 10000,
-			admin: {ip: ["127.0.0.1"]},
-			session: {
-				timeoutInterval: 120 * 1000,
-				gcInterval: 300 * 1000
-			},
-			news: {
-				pollingInterval: 5000,
-				pollingProgressInterval: 500,
-				gcInterval: 300000
+			user: {
+				secretKey: machineIdSync (true), // jwt
+				accessTokenExpires: 15 * 60 * 1000,
+				refreshTokenExpires: 48 * 60 * 60 * 1000,
+				revisionExpires: 60 * 1000, // getNews
+				transactionExpires: 60 * 1000, // idle transactions
+				pollingInterval: 5000, // getNews
+				pollingProgressInterval: 500, // getNews
+				gcRefreshTokenInterval: 60 * 60 * 1000, // removeRefreshTokens
+				gcStoreInterval: 60 * 1000 // store.gc
 			}
 		});
-		
 		config.log = config.log || {};
 		config.log.level = config.log.level || "info";
 		config.wwwRoot = __dirname + "/../www";
@@ -37,28 +35,18 @@ class Objectum {
 			streams: [{
 				stream: process.stdout
 			}, {
-				path: config.rootDir + "/objectum-bunyan.log"
+				path: config.rootDir + "/objectum.log"
 			}]
 		});
-		
-		if (config.redis) {
-			global.redis = require ("redis-promisify");
-		} else {
-			global.redis = {
-				createClient: function () {
-					return require ("./redisEmulator");
-				}
-			};
-		}
-		global.redisClient = redis.createClient (config.redis.port, config.redis.host);
-		global.redisPub = redis.createClient (config.redis.port, config.redis.host);
-		global.redisSub = redis.createClient (config.redis.port, config.redis.host);
+		this.config = config;
+		this.common = require ("./common");
+		this.server = require ("./server");
+		this.project = require ("./project");
+		this.db = require ("./db/client").db;
 
-		me.config = config;
-		me.common = require ("./common");
-		me.server = require ("./server");
-		me.project = require ("./project");
-		me.db = require ("./db/client").db;
+		if (!config.redis) {
+			throw new Error ("config.redis not exist");
+		}
 	}
 };
 

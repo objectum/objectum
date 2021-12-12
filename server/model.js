@@ -141,12 +141,12 @@ class Object extends Base {
 			throw new Error (`unknown model: ${me.get ("_class")}`);
 		}
 		if (me.get ("id")) {
-			await me.store.redisClient.hdelAsync (`${me.store.code}-objects`, me.get ("id"));
+			await me.store.redisClient.hDel (`${me.store.code}-objects`, String (me.get ("id")));
 		}
 		if (me.removed) {
 			await me.store.query ({session, sql: `delete from ${classObj.getTable ()} where fobject_id = ${me.get ("id")}`});
 			
-			if (!config.legacy && me.store.getClass ("objectum.user").get ("id") == me.get ("_class")) {
+			if (me.store.getClass ("objectum.user").get ("id") == me.get ("_class")) {
 				delete me.store.auth.user [me.get ("login")];
 				delete me.store.auth.user [me.get ("id")];
 			}

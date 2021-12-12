@@ -4,87 +4,23 @@ const _ = require ("lodash");
 const fs = require ("fs");
 const util = require ("util");
 const fs_readFile = util.promisify (fs.readFile);
+const jwt = require ("jsonwebtoken");
+jwt.signAsync = util.promisify (jwt.sign);
+jwt.verifyAsync = util.promisify (jwt.verify);
+const uaParser = require ("ua-parser-js");
 const storePool = {};
-const sessions = {};
 const common = require ("./common");
-const { Store } = require ("./store");
-//const { clients } = require ("./db/postgres");
-const { Class, ClassAttr, View, ViewAttr, Action, Object } = require ("./model");
-const legacy = require ("./legacy");
+const {Store} = require ("./store");
+const {Class, ClassAttr, View, ViewAttr, Action, Object} = require ("./model");
 const mimetypes = require ("./mimetypes");
 const data = require ("./data");
 
-if (config.legacy) {
-	require ("objectum-extjs4-legacy");
-	
-	config.wwwRoot = require ("path").dirname (require.resolve ("objectum-extjs4-legacy")) + "/www";
-}
-//const message = {};
-
 async function init () {
-	if (config.redis.db) {
-		await redisClient.selectAsync (config.redis.db);
-		await redisPub.select (config.redis.db);
-		await redisSub.select (config.redis.db);
-	}
-	redisSub.on ("message", function (channel, message) {
-		if (channel == config.redis.db + "-stores") {
-			let r = JSON.parse (message);
-			
-			if (r.free && storePool) {
-				storePool [r.free].end ();
-				delete storePool [r.free];
-			}
+	await redisSub.subscribe ("o-cluster", message => {
+		if (message == "restart") {
+			process.exit (1);
 		}
-		if (channel == config.redis.db + "-cluster") {
-			if (message == "restart") {
-				process.exit (1);
-			}
-		}
-		if (channel == config.redis.db + "-sessions") {
-			let r = JSON.parse (message);
-			let session = sessions [r.removed];
-			
-			if (session && session.store) {
-				session.store.rollbackTransaction ({session});
-			}
-			if (r.removed && sessions [r.removed]) {
-				delete sessions [r.removed];
-			}
-		}
-/*
-		if (channel == config.redis.db + "-connections") {
-			let r = JSON.parse (message);
-			
-			if (r.terminate) {
-				for (let storeCode in storePool) {
-					let store = storePool [storeCode];
-					let has = 0;
-					
-					for (let sid in store.clientPool) {
-						let client = store.clientPool [sid];
-						
-						if (client.pid == r.terminate) {
-							log.info ({cls: "connections"}, "connections disconnect " + r.terminate);
-							
-							has = 1;
-							store.rollbackTransaction ({session: sessions [sid]});
-						}
-					}
-					if (!has && clients && clients [r.terminate]) {
-						log.info ({cls: "connections"}, "connections disconnect db.Postgres " + r.terminate);
-						
-						clients [r.terminate].disconnect ();
-					}
-				}
-			}
-		}
-*/
 	});
-	redisSub.subscribe (config.redis.db + "-stores");
-	redisSub.subscribe (config.redis.db + "-sessions");
-	redisSub.subscribe (config.redis.db + "-connections");
-	redisSub.subscribe (config.redis.db + "-cluster");
 };
 
 async function loadConfig ({code}) {
@@ -158,16 +94,8 @@ async function getStore ({code}) {
 		return store;
 	}
 	if (config.port == config.startPort || process.env.mainWorker) {
-		redisClient.del (`${code}-requests`);
-		redisClient.del (`${code}-objects`);
-		redisClient.del (`${code}-sequences`);
-		redisClient.del (`${code}-vars`);
-		
-		let result = redisClient.keysAsync (`${code}-objects*`);
-		
-		for (let i = 0; i < result.length; i ++) {
-			redisClient.del (result [i]);
-		}
+		await redisClient.del (`o-${code}-requests`);
+		await redisClient.del (`o-${code}-objects`);
 	}
 	await loadConfig ({code});
 	
@@ -180,39 +108,15 @@ async function getStore ({code}) {
 	store.rootDir = config.stores [code].rootDir;
 	store.visualObjectum = config.stores [code].visualObjectum || {};
 	
-	await legacy.startProjectPlugins ({store});
-	
 	return store;
 };
 
-function saveSession (session) {
-	let hdata = {
-		[`${session.id}-id`]: session.id,
-		[`${session.id}-username`]: session.username,
-		[`${session.id}-clock`]: String (session.activity.clock),
-		[`${session.id}-storeCode`]: session.store.code,
-		[`${session.id}-newsRevision`]: String (session.news.revision),
-		[`${session.id}-port`]: String (config.port)
-	};
-	
-	if (session.userId) {
-		hdata [`${session.id}-userId`] = String (session.userId);
-	}
-	if (session.logined) {
-		hdata [`${session.id}-logined`] = String (session.logined);
-	}
-	if (session.ip) {
-		hdata [`${session.id}-ip`] = String (session.ip);
-	}
-	redisClient.hmset ("sessions", hdata);
-};
-
+/*
 function tryLogin ({store, session}) {
 	let sessionId = session.id;
 	
 	sessions [sessionId] = session;
-	saveSession (session);
-	
+
 	let roleId = null;
 	let roleCode = null;
 	let menuId = null;
@@ -231,9 +135,7 @@ function tryLogin ({store, session}) {
 		code: store.code
 	};
 };
-/*
-	Пользователю в поля lastTry, tryNum записывает
-*/
+
 async function logLastTry (store, login, accessGranted) {
 	if (!store.auth.user [login] || !store.auth.user [login].hasTryAttrs) {
 		return;
@@ -259,40 +161,6 @@ async function logLastTry (store, login, accessGranted) {
 	}
 	await o.sync ({session});
 	await store.commitTransaction ({session});
-};
-
-function authAdmin ({store, login, password, req}) {
-	if (login == "admin" && password == config.stores [store.code].adminPassword) {
-		let sessionId = require ("crypto").createHash ("sha1").update (common.getRemoteAddress (req) + new Date ().getTime () + Math.random ()).digest ("hex").toUpperCase ();
-		
-		sessions [sessionId] = {
-			id: sessionId,
-			username: "admin",
-			userId: null,
-			activity: {
-				clock: config.clock
-			},
-			store,
-			news: {
-				revision: 0
-			},
-			transaction: {
-				active: false
-			},
-			logined: common.currentUTCTimestamp (),
-			ip: common.getRemoteAddress (req)
-		};
-		saveSession (sessions [sessionId]);
-		
-		return {
-			sessionId,
-			userId: null,
-			roleId: store.auth.adminRoleId,
-			roleCode: "admin",
-			menuId: store.auth.adminMenuId,
-			code: store.code
-		};
-	}
 };
 
 function authAutologin ({store, login, req}) {
@@ -328,61 +196,94 @@ function authAutologin ({store, login, req}) {
 		};
 	}
 };
+*/
 
-function authUser ({store, login, password, req}) {
-	let userId, sessionId, session;
-	
-	if (store.auth.user [login] && store.auth.user [login].tryNum >= 3 && config.clock - store.auth.user [login].lastTry < 600) {
+function authAdmin ({store, login, password}) {
+	if (login == "admin" && password == config.stores [store.code].adminPassword) {
 		return {
-			wait: (600 - (config.clock - store.auth.user [login].lastTry))
+			userId: null,
+			username: "admin",
+			roleId: store.auth.adminRoleId,
+			roleCode: "admin",
+			menuId: store.auth.adminMenuId,
+			code: store.code
 		};
-	}
-	if (store.auth.user [login] && store.auth.user [login].password == password) {
-		sessionId = require ("crypto").createHash ("sha1").update (common.getRemoteAddress (req) + new Date ().getTime () + Math.random ()).digest ("hex").toUpperCase ()
-		userId = store.auth.user [login].id;
-		session = {
-			id: sessionId,
-			username: login,
-			userId,
-			activity: {
-				clock: config.clock
-			},
-			store,
-			news: {
-				revision: 0
-			},
-			transaction: {
-				active: false
-			},
-			logined: common.currentUTCTimestamp (),
-			ip: common.getRemoteAddress (req)
-		};
-	}
-	if (sessionId) {
-		logLastTry (store, login, true);
-		return tryLogin ({store, session});
-	} else {
-		logLastTry (store, login, false);
 	}
 };
 
-async function auth (req, res, next) {
+function authUser ({store, login, password}) {
+	if (store.auth.user [login] && store.auth.user [login].password == password) {
+		let o = store.auth.user [login];
+
+		return {
+			userId: o.id,
+			username: login,
+			roleId: o.role,
+			roleCode: o.roleCode,
+			menuId: o.menu,
+			code: store.code
+		};
+	}
+};
+
+async function auth (req) {
 	let login = req.args.username;
 	let password = req.args.password;
 	let store = await getStore ({code: req.code});
- 
-	let result =
-		authAdmin ({store, login, password, req}) ||
-		authAutologin ({store, login, password, req}) ||
-		authUser ({store, login, password, req}) ||
-		{error: "401 Unauthenticated"}
-	;
-	// todo: fix store.auth.user.roleCode update
-	if (result.roleId && !result.roleCode && result.userId) {
-		await store.readAuthInfo ();
-		result.roleCode = store.auth.user [result.userId].roleCode;
+	let authId = await redisClient.incr ("o-authId");
+
+	if (req.args.refreshToken) {
+		try {
+			let data = common.parseJwt (req.args.refreshToken);
+
+			if (data.expires < config.clock) {
+				return {error: "401 Unauthenticated"};
+			}
+			let authId = await redisClient.hGet (`o-refresh`, req.args.refreshToken);
+
+			if (authId) {
+				// todo: check hack
+				let accessTokenExpires = (duration => {let d = new Date (); d.setTime (d.getTime () + duration); return d.getTime ()}) (config.user.accessTokenExpires);
+				let accessToken = await jwt.signAsync (_.extend ({}, data, {expires: accessTokenExpires}), config.user.secretKey);
+				let refreshTokenExpires = (duration => {let d = new Date (); d.setTime (d.getTime () + duration); return d.getTime ()}) (config.user.refreshTokenExpires);
+				let refreshToken = await jwt.signAsync (_.extend ({}, data, {expires: refreshTokenExpires}), config.user.secretKey);
+
+				await redisClient.hDel (`o-refresh`, req.args.refreshToken);
+				await redisClient.hSet (`o-refresh`, refreshToken, String (authId));
+
+				return {accessToken, refreshToken};
+			} else {
+				return {error: "401 Unauthenticated"};
+			}
+		} catch (err) {
+			console.error ("auth.verify error", err);
+			return {error: "401 Unauthenticated"};
+		}
+	} else {
+		let data = authAdmin ({store, login, password}) || authUser ({store, login, password}) || {error: "401 Unauthenticated"};
+
+		// todo: fix store.auth.user.roleCode update
+		if (data.roleId && !data.roleCode && data.userId) {
+			await store.readAuthInfo ();
+			data.roleCode = store.auth.user [data.userId].roleCode;
+		}
+		if (data.username) {
+			data.id = authId;
+			data.ip = common.getRemoteAddress (req);
+
+			let accessTokenExpires = (duration => {let d = new Date (); d.setTime (d.getTime () + duration); return d.getTime ()}) (config.user.accessTokenExpires);
+			let accessToken = await jwt.signAsync (_.extend ({}, data, {expires: accessTokenExpires}), config.user.secretKey);
+			let refreshTokenExpires = (duration => {let d = new Date (); d.setTime (d.getTime () + duration); return d.getTime ()}) (config.user.refreshTokenExpires);
+			let refreshToken = await jwt.signAsync (_.extend ({}, data, {expires: refreshTokenExpires}), config.user.secretKey);
+
+			await redisClient.hSet (`o-refresh`, refreshToken, String (authId));
+			await redisClient.hSet (`o-user`, String (authId), JSON.stringify (_.extend ({}, data, {ua: uaParser (req.headers ["user-agent"]).ua})));
+
+			return _.extend (data, {accessToken, refreshToken});
+		} else {
+			return data;
+		}
 	}
-	return result;
 };
 
 async function startTransaction (req) {
@@ -392,32 +293,19 @@ async function startTransaction (req) {
 		throw new Error ("project.startTransaction: forbidden");
 	}
 	let store = await getStore ({code: req.code});
-	
-	// todo: throw new Error ("transaction in progress")
-	if (_.get (sessions [req.session.id], "transaction.active")) {
-		await store.commitTransaction ({session: req.session});
-		sessions [req.session.id].transaction.active = false;
-	}
 	let revision = await store.startTransaction ({
 		session: req.session,
 		remoteAddr: common.getRemoteAddress (req),
 		description: req.args.description
 	});
-	sessions [req.session.id].transaction.active = true;
-	
 	return {revision};
 };
 
 async function commitTransaction (req) {
 	log.debug ({fn: "project.commitTransaction", session: req.session.id});
 	
-	if (!_.get (sessions [req.session.id], "transaction.active")) {
-		throw new Error ("project.commitTransaction: Transaction not active");
-	}
 	let store = await getStore ({code: req.code});
 	let revision = await store.commitTransaction ({session: req.session});
-
-	sessions [req.session.id].transaction.active = false;
 
 	return {revision};
 };
@@ -425,14 +313,9 @@ async function commitTransaction (req) {
 async function rollbackTransaction (req) {
 	log.debug ({fn: "project.rollbackTransaction", session: req.session.id});
 	
-	if (!_.get (sessions [req.session.id], "transaction.active")) {
-		throw new Error ("project.rollbackTransaction: Transaction not active");
-	}
 	let store = await getStore ({code: req.code});
 	let revision = await store.rollbackTransaction ({session: req.session});
 
-	sessions [req.session.id].transaction.active = false;
-	
 	return {revision};
 };
 
@@ -735,9 +618,9 @@ async function objectFn (req) {
 
 async function getNews (req) {
 	if (req.args && req.args.progress) {
-		await common.delay (config.news.pollingProgressInterval);
+		await common.delay (config.user.pollingProgressInterval);
 	} else {
-		await common.delay (config.news.pollingInterval);
+		await common.delay (config.user.pollingInterval);
 	}
 	if (!_.has (req.args, "revision")) {
 		throw new Error ("project.getNews: revision not exist");
@@ -773,71 +656,25 @@ async function getNews (req) {
 		}
 		data = {revision: store.lastRevision, metaChanged, created, updated, deleted, records: []};
 	}
-	sessions [req.session.id].news.revision = store.lastRevision;
-	
 	return data;
 };
 
-function newsGC () {
-	_.each (storePool, function (store, code) {
-		let minRevision;
-		
-		_.each (sessions, function (session, id) {
-			let news = session.news;
-			
-			if (session.store == store && (!minRevision || news.revision < minRevision)) {
-				minRevision = news.revision;
-			}
-		});
-		_.each (store.revisions, function (revision, revisionId) {
-			if (revisionId < minRevision) {
-				delete store.revisions [revisionId];
-				log.debug ({fn: "project.newsGC"}, `revision ${revisionId} removed`);
-			}
-		});
-	});
-	setTimeout (newsGC, config.news.gcInterval);
-}
+async function removeRefreshTokens () {
+	log.debug ({fn: "project.removeRefreshTokens"});
+	
+	let result = await redisClient.hGetAll ("o-refresh");
 
-function removeSession (sessionId) {
-	redisClient.hdel ("sessions",
-		`${sessionId}-id`, `${sessionId}-username`, `${sessionId}-clock`, `${sessionId}-storeCode`,
-		`${sessionId}-newsRevision`, `${sessionId}-port`, `${sessionId}-userId`, `${sessionId}-logined`, `${sessionId}-ip`
-	);
-	redisPub.publish (`${config.redis.db}-sessions`, `{"removed":"${sessionId}"}`);
-	log.debug ({fn: "project.removeSession"}, `session ${sessionId} removed`);
-};
+	for (let refreshToken in result) {
+		let authId = result [refreshToken];
+		let data = common.parseJwt (refreshToken);
 
-async function removeTimeoutSessions () {
-	log.debug ({fn: "project.removeTimeoutSessions"});
-	
-	let timeoutInterval = config.session.timeoutInterval / 1000;
-	
-	let result = await redisClient.hgetallAsync ("sessions");
-	let timeout = [];
-	
-	_.each (result, function (v, a) {
-		if (!_.endsWith (a, "-clock")) {
-			return;
+		if (data.expires < config.clock) {
+			await redisClient.hDel ("o-refresh", refreshToken);
+			await redisClient.hDel ("o-user", authId);
+			await redisClient.hDel ("o-access", authId);
+
+			log.info ({fn: "project.removeRefreshTokens"}, `removed: ${refreshToken}, ${JSON.stringify (data)}`);
 		}
-		let clock = Number (v);
-		
-		if (config.clock > clock && config.clock - clock > timeoutInterval * 2) {
-			let sessionId = a.substr (0, a.length - 6);
-			
-			timeout.push (sessionId);
-			log.info ({fn: "project.removeTimeoutSessions"}, `session removing: ${sessionId} ${config.clock} ${v} ${timeoutInterval * 2}`);
-		}
-	});
-	for (let i = 0; i < timeout.length; i ++) {
-		let sessionId = timeout [i];
-		let session = sessions [sessionId];
-		
-		if (session && session.store) {
-			await session.store.rollbackTransaction ({session});
-		}
-		removeSession (sessionId);
-		log.info ({fn: "project.removeTimeoutSessions"}, `session removed: ${sessionId} ${config.clock} ${result [sessionId + "-clock"]} ${timeoutInterval}`);
 	}
 };
 
@@ -897,7 +734,7 @@ async function getAll (req) {
 
 	let session = req.session;
 	let store = await getStore ({code: req.code});
-	let result = await redisClient.hgetAsync (store.code + "-requests", "all");
+	let result = await redisClient.hGet (`o-${store.code}-requests`, "all");
  
 	if (!result) {
 		const {getFields} = require ("./map");
@@ -927,7 +764,7 @@ async function getAll (req) {
 			rec ["property"] = rec ["classAttr"];
 			delete rec ["classAttr"];
 		});
-		redisClient.hset (`${req.code}-requests`, "all", JSON.stringify (result));
+		redisClient.hSet (`o-${store.code}-requests`, "all", JSON.stringify (result));
 	}
 	return result;
 };
@@ -959,58 +796,32 @@ async function upload (req, res, next) {
 };
 
 async function logout (req) {
-	let sid = req.query.sessionId;
-	
-	redisClient.hdel ("sessions",
-		`${sid}-id`,
-		`${sid}-username`,
-		`${sid}-clock`,
-		`${sid}-storeCode`,
-		`${sid}-newsRevision`,
-		`${sid}-port`,
-		`${sid}-userId`,
-		`${sid}-logined`,
-		`${sid}-ip`
-	);
-	redisPub.publish (`${config.redis.db}-sessions`, `{"removed": "${sid}"}`);
-	
-	let session = sessions [sid];
-	
-	if (session && session.store) {
-		session.store.rollbackTransaction ({session});
-	}
+	redisClient.hDel ("o-access", String (req.session.id));
+	redisClient.hDel ("o-user", String (req.session.id));
 	return {success: true};
 };
 
 async function getDict (req) {
 	log.debug ({fn: "project.getDict"});
-	
 	let store = await getStore ({code: req.code});
-	
 	return await data.getDict (req, store);
 };
 
 async function getLog (req) {
 	log.debug ({fn: "project.getLog"});
-	
 	let store = await getStore ({code: req.code});
-	
 	return await data.getLog (req, store);
 };
 
 async function getData (req) {
 	log.debug ({fn: "project.getData"});
-	
 	let store = await getStore ({code: req.code});
-	
 	return await data.getData (req, store);
 };
 
 async function getRecords (req) {
 	log.debug ({fn: "project.getRecords"});
-	
 	let store = await getStore ({code: req.code});
-	
 	return await data.getRecords (req, store);
 };
 
@@ -1021,18 +832,15 @@ module.exports = {
 	commitTransaction,
 	rollbackTransaction,
 	getNews,
-	newsGC,
 	createStores,
 	getAll,
 	upload,
 	logout,
 	getHandler,
 	auth,
-	removeTimeoutSessions,
+	removeRefreshTokens,
 	www,
 	wwwPublic,
-	sessions,
-	getStore,
 	classFn,
 	classAttrFn,
 	viewFn,

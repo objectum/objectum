@@ -9,6 +9,7 @@ const common = require ("./common");
 const { Store } = require ("./store");
 const { getMetaCode, getFields } = require ("./map");
 const ProgressBar = require ("progress");
+const redis = require ("redis");
 
 class Import {
 	constructor () {
@@ -1334,8 +1335,9 @@ class Import {
 			});
 			log.info ({count});
 			
-			let redisClient = redis.createClient (config.redis.port, config.redis.host);
-			
+			let redisClient = redis.createClient (config.redis);
+
+			await redisClient.connect ();
 			redisClient.del (code + "-objects");
 			redisClient.quit ();
 			await me.store.end ();

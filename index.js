@@ -88,8 +88,8 @@ function startCluster (config) {
 		log.error ({fn: "startCluster"}, "cluster.app.workers must be > 1.");
 		process.exit (1);
 	}
-	const redis = require ("redis-");
-	let redisClient = redis.createClient (config.redis.port, config.redis.host);
+	const redis = require ("redis");
+	let redisClient = redis.createClient (config.redis);
 	
 	redisClient.get ("*", function (err) {
 		if (err) {

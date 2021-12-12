@@ -10,14 +10,13 @@ let fs = require ("fs");
 let util = require ("util");
 const fs_readFile = util.promisify (fs.readFile);
 const fs_stat = util.promisify (fs.stat);
-let redis = require ("redis-promisify");
+let redis = require ("redis");
 let VError = require ("verror");
-let redisClient = redis.createClient (config.redis.port, config.redis.host);
+let redisClient = redis.createClient (config.redis);
 let sessions = {};
 let startedPort = {};
 let portNext;
 let agent = new http.Agent ();
-let memoryUsage = {rss: 0, heapTotal: 0, heapUsed: 0};
 
 agent.maxSockets = config.maxSockets || 5000;
 
@@ -31,7 +30,7 @@ async function www ({req, res, next, filePath}) {
 			filePath = config.wwwRoot + pathname;
 		}
 		let mtime, status = 200, data;
-		let mtimeRedis = await redisClient.hgetAsync ("files-mtime", filePath);
+		let mtimeRedis = await redisClient.hGet ("files-mtime", filePath);
 		let stats = await fs_stat (filePath);
 		
 		mtime = new Date (stats.mtime).getTime ();
@@ -51,11 +50,11 @@ async function www ({req, res, next, filePath}) {
 		}
 		if (!mtimeRedis) {
 			data = await fs_readFile (filePath);
-			await redisClient.hsetAsync ("files", filePath, data.toString ("base64"));
-			await redisClient.hsetAsync ("files-mtime", filePath, mtime);
+			await redisClient.hSet ("files", filePath, data.toString ("base64"));
+			await redisClient.hSet ("files-mtime", filePath, String (mtime));
 		}
 		if (status != 304) {
-			let result = await redisClient.hgetAsync ("files", filePath);
+			let result = await redisClient.hGet ("files", filePath);
 			data = new Buffer (result, "base64");
 		}
 		try {
@@ -214,40 +213,9 @@ function proxy (req, res, next) {
 	});
 };
 
-function updateMemoryUsage () {
-	let pmu = process.memoryUsage ();
-	
-	if (memoryUsage.rss < pmu.rss) {
-		memoryUsage.rss = pmu.rss;
-	}
-	if (memoryUsage.heapTotal < pmu.heapTotal) {
-		memoryUsage.heapTotal = pmu.heapTotal;
-	}
-	if (memoryUsage.heapUsed < pmu.heapUsed) {
-		memoryUsage.heapUsed = pmu.heapUsed;
-	}
-	pmu.rss = (pmu.rss / (1024 * 1024)).toFixed (3);
-	pmu.heapTotal = (pmu.heapTotal / (1024 * 1024)).toFixed (3);
-	pmu.heapUsed = (pmu.heapUsed / (1024 * 1024)).toFixed (3);
-	memoryUsage.rss = (memoryUsage.rss / (1024 * 1024)).toFixed (3);
-	memoryUsage.heapTotal = (memoryUsage.heapTotal / (1024 * 1024)).toFixed (3);
-	memoryUsage.heapUsed = (memoryUsage.heapUsed / (1024 * 1024)).toFixed (3);
-	redisClient.hset ("server-memoryusage", process.pid, JSON.stringify ({
-		//port: config.cluster.www.port,
-		current: {
-			rss: pmu.rss,
-			heapTotal: pmu.heapTotal,
-			heapUsed: pmu.heapUsed
-		},
-		max: {
-			rss: memoryUsage.rss,
-			heapTotal: memoryUsage.heapTotal,
-			heapUsed: memoryUsage.heapUsed
-		}
-	}));
-};
+async function start () {
+	await redisClient.connect ();
 
-function start () {
 	let app = express ();
 	
 	app.use (function (req, res, next) {
@@ -301,10 +269,6 @@ function start () {
 		}
 	};
 	setTimeout (startGC, 5000);
-	setInterval (function () {
-		updateMemoryUsage ();
-	}, 1000);
-	redisClient.hset ("server-started", process.pid, $o.common.currentUTCTimestamp ());
 };
 
 if (process.env.port == config.startPort) {

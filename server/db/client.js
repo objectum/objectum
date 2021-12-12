@@ -1,7 +1,7 @@
 "use strict";
 
 const _ = require ("lodash");
-const { Postgres } = require ("./postgres");
+const {Postgres} = require ("./postgres");
 
 class Database {
 	createClient ({code, connection}) {
@@ -84,78 +84,6 @@ class Database {
 			await store.init ();
 			await require ("./rebuild").rebuild ({store});
 		} else
-		if (cfg.fn == "migration3to4") {
-			log.info ({fn: "db.rebuild"}, "rebuilding store ...");
-			
-			store = new Store ({code: cfg.code, connection});
-			
-			await store.init ();
-			await require ("./rebuild").migration3to4 ({store});
-		} else
-		if (cfg.fn == "uniqueStat") {
-			log.info ("uniqueStat ...");
-			
-			store = new Store ({code: cfg.code, connection});
-			
-			await store.init ();
-			await require ("./rebuild").uniqueStat ({store});
-		} else
-		if (cfg.fn == "uniqueRemoveDuplicates") {
-			log.info ("uniqueRemoveDuplicates ...");
-			
-			store = new Store ({code: cfg.code, connection});
-			
-			await store.init ();
-			await require ("./rebuild").uniqueRemoveDuplicates ({store});
-		} else
-		if (cfg.fn == "nullNotNullStat") {
-			log.info ("nullNotNullStat ...");
-			
-			store = new Store ({code: cfg.code, connection});
-			
-			await store.init ();
-			await require ("./rebuild").nullNotNullStat ({store});
-		} else
-		if (cfg.fn == "updateNullNotNull") {
-			log.info ("updateNullNotNull ...");
-			
-			store = new Store ({code: cfg.code, connection});
-			
-			await store.init ();
-			await require ("./rebuild").updateNullNotNull ({store, values: cfg.values});
-		} else
-		if (cfg.fn == "removeUnusedObjectAttrs") {
-			log.info ("removeUnusedObjectAttrs ...");
-			
-			store = new Store ({code: cfg.code, connection});
-			
-			await store.init ();
-			await require ("./rebuild").removeUnusedObjectAttrs ({store});
-		} else
-		if (cfg.fn == "invalidFkStat") {
-			log.info ("invalidFkStat ...");
-			
-			store = new Store ({code: cfg.code, connection});
-			
-			await store.init ();
-			await require ("./rebuild").invalidFkStat ({store});
-		} else
-		if (cfg.fn == "setNullInvalidFk") {
-			log.info ("setNullInvalidFk ...");
-			
-			store = new Store ({code: cfg.code, connection});
-			
-			await store.init ();
-			await require ("./rebuild").setNullInvalidFk ({store});
-		} else
-		if (cfg.fn == "nullNotNullUniqueStat") {
-			log.info ("nullNotNullUniqueStat ...");
-			
-			store = new Store ({code: cfg.code, connection});
-			
-			await store.init ();
-			await require ("./rebuild").nullNotNullUniqueStat ({store});
-		} else
 		if (cfg.fn == "dropObjectAttrIndexes") {
 			log.info ({fn: "db.rebuild"}, "dropObjectAttrIndexes ...");
 			
@@ -179,11 +107,6 @@ class Database {
 		}
 		log.info (`duration: ${((new Date ().getTime () - time1) / 1000).toFixed (3)} sec.`);
 		
-/*
-		global.redisClient.quit ();
-		global.redisPub.quit ();
-		global.redisSub.quit ();
-*/
 		process.exit (1);
 	}
 };

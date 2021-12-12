@@ -11,7 +11,6 @@
 	backward compatibility:
 	projects.setAttrs.beforeCommit
 	/objectum/obj_news -> /projects/*
-*/
 
 upload file
 
@@ -78,3 +77,5 @@ fid   | fclass_id | fstart_id |  fend_id   | fschema_id | frecord_id | fid | fob
 updateNullNotNull - в проуессе удаляет объекты на которые есть ссылки
 
 2019-05-28 Убрать в легаси readAuthInfo. Сделать просто по objectum.user, objectum.role, objectum.menu
+
+ */

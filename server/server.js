@@ -2,69 +2,56 @@
 
 const fastify = require ("fastify") ();
 const formidable = require ("formidable");
+const redis = require ("redis");
+const util = require ("util");
+const jwt = require ("jsonwebtoken");
+jwt.verifyAsync = util.promisify (jwt.verify);
 const xmlss = require ("./report/xmlss");
 const xlsx = require ("./report/xlsx");
 const pdf = require ("./report/pdf");
 const dbf = require ("./report/dbf");
-const common = require ("./common");
 const project = require ("./project");
-const legacy = require ("./legacy");
 const {statHandler, collectStat} = require ("./stat");
-const {sessions} = project;
 
 process.env.TZ = "UTC";
 process.maxTickDepth = Infinity;
 
-let memoryUsage = {rss: 0, heapTotal: 0, heapUsed: 0};
+global.redisClient = redis.createClient (config.redis);
+global.redisPub = redis.createClient (config.redis);
+global.redisSub = redis.createClient (config.redis);
 
-// Количество секунд прошедших с 1 января 1970 года (UnixTime)
-config.clock = parseInt (new Date ().getTime () / 1000);
+config.clock = new Date ().getTime ();
+setInterval (() => config.clock = new Date ().getTime (), 1000);
 
-function setVars (req) {
-	req.session = req.raw.session = sessions [req.query.sessionId || req.query.sid];
-	
-	let urlTokens = req.raw.url.split ("/");
-	
-	req.code = urlTokens [2];
+async function setVars (req) {
+	if (req.headers.authorization) {
+		try {
+			let data = await jwt.verifyAsync (req.headers.authorization.split (" ")[1], config.user.secretKey);
 
-	if (req.query.sessionId) {
-		redisClient.hset ("sessions", req.query.sessionId + "-clock", config.clock);
-	}
-};
-
-function updateMemoryUsage () {
-	let pmu = process.memoryUsage ();
-	pmu.rss = (pmu.rss / (1024 * 1024)).toFixed (3);
-	pmu.heapTotal = (pmu.heapTotal / (1024 * 1024)).toFixed (3);
-	pmu.heapUsed = (pmu.heapUsed / (1024 * 1024)).toFixed (3);
-
-	if (memoryUsage.rss < pmu.rss) {
-		memoryUsage.rss = pmu.rss;
-	}
-	if (memoryUsage.heapTotal < pmu.heapTotal) {
-		memoryUsage.heapTotal = pmu.heapTotal;
-	}
-	if (memoryUsage.heapUsed < pmu.heapUsed) {
-		memoryUsage.heapUsed = pmu.heapUsed;
-	}
-	redisClient.hset ("server-memoryusage", process.pid, JSON.stringify ({
-		port: config.port,
-		current: {
-			rss: pmu.rss,
-			heapTotal: pmu.heapTotal,
-			heapUsed: pmu.heapUsed
-		},
-		max: {
-			rss: memoryUsage.rss,
-			heapTotal: memoryUsage.heapTotal,
-			heapUsed: memoryUsage.heapUsed
+			if (data.expires > config.clock) {
+				req.session = req.raw.session = data;
+				await redisClient.hSet ("o-access", String (data.id), String (config.clock));
+			}
+		} catch (err) {
+			console.error ("jwt.verify error", err);
 		}
-	}));
+	}
+	let urlTokens = req.raw.url.split ("/");
+	req.code = urlTokens [2];
 };
 
 async function init () {
+	await redisClient.connect ();
+	await redisPub.connect ();
+	await redisSub.connect ();
+
+	if (config.redis.db) {
+		await redisClient.select (config.redis.db);
+		await redisPub.select (config.redis.db);
+		await redisSub.select (config.redis.db);
+	}
 	fastify.addHook ("onRequest", async (req, res) => {
-		setVars (req, res);
+		await setVars (req, res);
 		req.raw.query = req.query;
 	});
 	fastify.addHook ("onError", async (req, res, error) => {
@@ -92,11 +79,9 @@ async function init () {
 		});
 	});
 	fastify.get ("/", async (req, res) => {
-		await statHandler ({req, res, sessions});
+		await statHandler ({req, res/*, sessions*/});
 	});
 	fastify.get ("/projects/:code/report", xmlss.report);
-	fastify.get ("/projects/:code/copy_file", legacy.copyFile);
-	fastify.get ("/projects/:code/plugins/", legacy.processProjectPlugins);
 	fastify.get ("/projects/:code", (req, res) => {
 		res.redirect (`/projects/${req.code}/`);
 	});
@@ -112,9 +97,6 @@ async function init () {
 		});
 	});
 	fastify.post ("/projects/:code/upload", project.upload);
-	fastify.post ("/projects/:code/sendmail", legacy.sendmail);
-	fastify.post ("/projects/:code/save_to_file", legacy.saveToFile);
-	fastify.post ("/projects/:code/plugins/", legacy.processProjectPlugins);
 	fastify.post ("/projects/:code/report", (req, res) => {
 		if (req.query.format == "xlsx" && !req.query.view) {
 			xlsx.report (req.raw, res);
@@ -129,9 +111,6 @@ async function init () {
 	
 	let fnMap = {
 		"getNews": project.getNews,
-		"execute": legacy.projectExecute,
-		"selectRow": legacy.projectSelectRow,
-		"getContent": legacy.projectGetContent,
 		"startTransaction": project.startTransaction,
 		"commitTransaction": project.commitTransaction,
 		"rollbackTransaction": project.rollbackTransaction,
@@ -173,12 +152,8 @@ async function init () {
 			if (fn == "auth") {
 				return await project.auth (req, res);
 			}
-			if (req.session && project.sessions [req.session.id]) {
-				req.session = project.sessions [req.session.id];
-				req.session.activity.clock = config.clock;
-				redisClient.hset ("sessions", req.session.id + "-clock", config.clock);
-			} else {
-				throw new Error ("401 Unauthenticated");
+			if (!req.session) {
+				return {error: "401 Unauthenticated"};
 			}
 			let handler = fnMap [fn] || rscMap [rsc];
 			
@@ -195,8 +170,6 @@ async function init () {
 			return {error: msg, stack: err.stack.split ("\n"), body: req.body};
 		}
 	});
-	await legacy.startPlugins ();
-
 	let startGC = function () {
 		if (global.gc) {
 			global.gc ();
@@ -204,13 +177,6 @@ async function init () {
 		}
 	};
 	setTimeout (startGC, 5000);
-
-	setInterval (function () {
-		config.clock = parseInt (new Date ().getTime () / 1000);
-		updateMemoryUsage ();
-	}, 1000);
-	
-	legacy.init ();
 	await project.init ();
 };
 
@@ -222,31 +188,16 @@ async function start ({port}) {
 
 	if (!config.createStoresOnDemand) {
 		await project.createStores ();
-		project.newsGC ();
 	}
 	if (port == config.startPort || process.env.mainWorker) {
-		setInterval (function () {
-			project.removeTimeoutSessions ();
-		},
-			config.session.gcInterval
-		);
-		redisClient.del ("sessions");
-		redisClient.del ("server-memoryusage");
+		setInterval (() => project.removeRefreshTokens (), config.user.gcRefreshTokenInterval);
 
-		redisClient.keys ("log-*", function (err, result) {
-			for (let i = 0; i < result.length; i ++) {
-				redisClient.del (result [i]);
-			}
-		});
 		redisClient.keys ("*-objects", function (err, result) {
 			for (let i = 0; i < result.length; i ++) {
 				redisClient.del (result [i]);
 			}
 		});
-		await legacy.startWSDL ();
 	}
-	redisClient.hset ("server-started", process.pid, common.currentUTCTimestamp ());
-	
 	try {
 		await fastify.listen (port);
 		log.info (`objectum server has started at port: ${port}`);
