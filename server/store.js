@@ -675,7 +675,7 @@ class Store {
 		for (let authId in this.clientPool) {
 			let client = this.clientPool [authId];
 			let revision = this.revision [authId];
-			let time = this.revisions [revision]?.time;
+			let time = this.revisions [revision] && this.revisions [revision].time;
 
 			if (!time || time < config.clock - config.user.transactionExpires) {
 				let accessTime = await this.redisClient.hGet ("o-access", String (authId));

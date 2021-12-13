@@ -1,9 +1,7 @@
 "use strict"
 
-const fs = require ("fs");
 const cluster = require ("cluster");
-const common = require ("./server/common");
-const { Objectum } = require ("./server/objectum");
+const {Objectum} = require ("./server/objectum");
 
 function start (config) {
 	global.objectum = new Objectum (config);
@@ -28,7 +26,7 @@ function startMaster (config) {
 	});
 };
 
-function startCluster (config) {
+async function startCluster (config) {
 	global.objectum = new Objectum (config);
 	
 	cluster.setupMaster ({
@@ -90,15 +88,18 @@ function startCluster (config) {
 	}
 	const redis = require ("redis");
 	let redisClient = redis.createClient (config.redis);
-	
+	await redisClient.connect ();
+	start ();
+/*
 	redisClient.get ("*", function (err) {
 		if (err) {
 			log.error ({fn: "startCluster"}, `Redis error: ${err}`);
-			process.exit (1);
+			process.exit ();
 		} else {
 			start ();
 		}
 	});
+*/
 };
 
 if (require.main === module) {

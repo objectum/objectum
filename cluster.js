@@ -13,9 +13,7 @@ const fs_stat = util.promisify (fs.stat);
 let redis = require ("redis");
 let VError = require ("verror");
 let redisClient = redis.createClient (config.redis);
-let sessions = {};
 let startedPort = {};
-let portNext;
 let agent = new http.Agent ();
 
 agent.maxSockets = config.maxSockets || 5000;
@@ -117,47 +115,16 @@ async function project (req, res, next) {
 	}
 };
 
-function getNextPort () {
-	let has = false;
-	
-	for (let port in server.startedPort) {
-		if (server.startedPort [port]) {
-			has = true;
-		}
-	};
-	if (!has) {
-		return 0;
-	}
-	portNext = portNext || config.startPort + 2;
-	portNext ++;
-	
-	if (portNext > (config.startPort + config.cluster.app.workers)) {
-		portNext = config.startPort + 2;
-	}
-	let portApp = portNext;
-	
-	if (startedPort [portApp]) {
-		log.info (`port assigned: ${portApp}`);
-		return portApp;
-	} else {
-		return getNextPort ();
-	}
-};
-
 function proxy (req, res, next) {
-	let sessionId = req.query.sessionId, portApp;
-	
-	if (!sessionId) {
-		portApp = getNextPort ();
-		
-		if (!portApp) {
-			return next (new VError ("Server starting"));
-		}
-	} else {
-		if (!sessions [sessionId]) {
-			return next (new VError (`unknown sessionId: ${sessionId}`));
-		}
-		portApp = sessions [sessionId].port;
+	let authId, portApp = config.startPort + 1;
+
+	if (req.headers.authorization) {
+		let data = $o.common.parseJwt (req.headers.authorization.split (" ") [1]);
+		authId = data.id;
+		portApp = data.port || (config.startPort + 2 + authId % (config.cluster.app.workers - 1));
+	}
+	if (!startedPort [portApp]) {
+		return next (new VError ("Server starting"));
 	}
 	req.headers ["x-real-ip"] = $o.common.getRemoteAddress (req);
 	
@@ -183,22 +150,6 @@ function proxy (req, res, next) {
 			}
 		});
 		res2.on ("end", function () {
-			if (req.query.authorize == 1 && data) {
-				let sessionId;
-				
-				try {
-					let opts = JSON.parse (data);
-					
-					sessionId = opts.sessionId;
-				} catch (e) {
-				};
-				if (sessionId) {
-					sessions [sessionId] = {
-						port: portApp
-					};
-					process.send (JSON.stringify ({sessionId, port: portApp}));
-				}
-			}
 			res.end ();
 		});
 	});
@@ -244,19 +195,8 @@ async function start () {
 	process.on ("message", function (m) {
 		let o = eval ("(" + m + ")");
 		
-		if (o.port) {
-			sessions [o.sessionId] = {
-				port: o.port
-			};
-		}
 		if (o.restartPort) {
-			server.startedPort [o.restartPort] = false;
-			
-			_.each (sessions, function (o, sessionId) {
-				if (o.port == o.restartPort) {
-					delete sessions [sessionId];
-				}
-			});
+			startedPort [o.restartPort] = false;
 		}
 		if (o.startedPort) {
 			startedPort [o.startedPort] = true;
@@ -282,7 +222,7 @@ if (process.env.port == config.startPort) {
 			process.send (JSON.stringify ({startedPort: process.env.port}));
 		} catch (err) {
 			log.error ({fn: "cluster.startAppWorker", err});
-			process.exit (1);
+			process.exit ();
 		}
 	}) ();
 };
