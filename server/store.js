@@ -538,8 +538,8 @@ class Store {
 
 		await this.client.disconnect ();
 		await this.redisClient.quit ();
-		await this.redisSub.quit ();
-		await this.redisPub.quit ();
+		//await this.redisSub.quit ();
+		//await this.redisPub.quit ();
 	}
 	
 	initRsc ({rsc, action, o}) {
