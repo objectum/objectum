@@ -64,7 +64,9 @@ class Store {
 		if (!client && !session) {
 			throw new Error ("session not exists");
 		}
-		await me.redisClient.hSet ("o-access", String (session.id), String (config.clock));
+		if (me.redisClient && session) {
+			await me.redisClient.hSet ("o-access", String (session.id), String (config.clock));
+		}
 		client = client || me.getClient ({session});
 		
 		let fArray = fields ? [] : undefined;

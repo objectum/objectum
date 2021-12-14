@@ -1342,6 +1342,7 @@ class Import {
 			redisClient.quit ();
 			await me.store.end ();
 		} catch (err) {
+			console.error (err);
 			await me.store.rollbackTransaction ({session});
 			throw err;
 		}
