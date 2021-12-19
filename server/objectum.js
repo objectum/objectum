@@ -25,7 +25,7 @@ class Objectum {
 		});
 		config.log = config.log || {};
 		config.log.level = config.log.level || "info";
-		config.wwwRoot = __dirname + "/../www";
+		config.wwwRoot = __dirname + "/..";
 		
 		let bunyan = require ("bunyan");
 		

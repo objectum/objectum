@@ -88,8 +88,8 @@ async function init () {
 	fastify.get ("/projects/:code/", project.getHandler);
 	fastify.get ("/projects/:code/files/*", project.getHandler);
 	fastify.get ("/projects/:code/resources/*", project.getHandler);
-	fastify.get ("/client/*", project.www);
-	fastify.get ("/third-party/*", project.www);
+	//fastify.get ("/client/*", project.www);
+	//fastify.get ("/third-party/*", project.www);
 	fastify.get ("/public/*", project.wwwPublic);
 	fastify.get ("/favicon.ico", (req, res) => {
 		require ("fs").readFile (__dirname + "/server/favicon.ico", (err, data) => {
