@@ -825,6 +825,49 @@ async function getRecords (req) {
 	return await data.getRecords (req, store);
 };
 
+async function getStat (req) {
+	log.debug ({fn: "project.getStat"});
+
+	if (req.session.username != "admin") {
+		return {error: "forbidden"};
+	}
+	let store = await getStore ({code: req.code});
+	let refreshTokens = await redisClient.hGetAll ("o-refresh");
+	let access = await redisClient.hGetAll ("o-access");
+
+	log.debug ({
+		fn: "project.getStat",
+		refreshTokens: _.keys (refreshTokens).length,
+		access: _.keys (access).length
+	});
+	let authMap = {};
+	let data = {
+		refreshToken: [],
+		access: [],
+		transaction: []
+	};
+	for (let refreshToken in refreshTokens) {
+		let authId = refreshTokens [refreshToken];
+		let payload = common.parseJwt (refreshToken);
+		authMap [authId] = payload;
+		data.refreshToken.push ({id: authId, expires: payload.expires});
+	}
+	data.map = authMap;
+	let clockLimit = new Date ().getTime () - config.user.accessTokenExpires;
+
+	for (let authId in access) {
+		let clock = access [authId];
+
+		if (clock > clockLimit) {
+			data.access.push ({id: authId, time: Number (clock)});
+		}
+	}
+	for (let authId in store.revision) {
+		data.transaction.push ({id: authId, revision: store.revision [authId]});
+	}
+	return data;
+};
+
 module.exports = {
 	init,
 	loadConfig,
@@ -850,5 +893,6 @@ module.exports = {
 	getData,
 	getDict,
 	getLog,
-	getRecords
+	getRecords,
+	getStat
 };
