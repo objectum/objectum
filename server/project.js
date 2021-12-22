@@ -251,7 +251,9 @@ async function auth (req) {
 				await redisClient.hDel (`o-refresh`, req.args.refreshToken);
 				await redisClient.hSet (`o-refresh`, refreshToken, String (authId));
 
-				return {accessToken, refreshToken};
+				delete data.expires;
+
+				return Object.assign (data, {accessToken, refreshToken});
 			} else {
 				return {error: "401 Unauthenticated"};
 			}
