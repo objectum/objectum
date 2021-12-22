@@ -141,7 +141,7 @@ class Object extends Base {
 			throw new Error (`unknown model: ${me.get ("_class")}`);
 		}
 		if (me.get ("id")) {
-			await me.store.redisClient.hDel (`${me.store.code}-objects`, String (me.get ("id")));
+			await me.store.redisClient.hDel (`o-${me.store.code}-objects`, String (me.get ("id")));
 		}
 		if (me.removed) {
 			await me.store.query ({session, sql: `delete from ${classObj.getTable ()} where fobject_id = ${me.get ("id")}`});
