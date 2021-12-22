@@ -12,16 +12,16 @@ function startMaster (config) {
 	process.env.config = JSON.stringify (config);
 	
 	cluster.setupMaster ({
-	    exec: "./index.js"
+	    exec: __dirname + "/index.js"
 	});
 	let startWorker = function () {
-		log.info ({fn: "startMaster"}, "worker started");
+		console.log ("startMaster: worker started");
 	    cluster.fork (process.env);
 	};
 	startWorker ();
 	
 	cluster.on ("exit", function (worker, code, signal) {
-		log.info ({fn: "startMaster"}, `worker ${worker.process.pid} died (code: ${code}, signal: ${signal})`);
+		console.log (`startMaster: worker ${worker.process.pid} died (code: ${code}, signal: ${signal})`);
 		startWorker ();
 	});
 };
@@ -30,7 +30,7 @@ async function startCluster (config) {
 	global.objectum = new Objectum (config);
 	
 	cluster.setupMaster ({
-	    exec: "./cluster.js"
+	    exec: __dirname + "/cluster.js"
 	});
 	let startWorker = function (port, mainWorker) {
 		process.env.config = JSON.stringify (config);
@@ -50,7 +50,7 @@ async function startCluster (config) {
 				}
 			}
 		});
-		log.info ({fn: "startCluster"}, `worker pid: ${p.process.pid} (port: ${port}) started.`);
+		console.log (`startCluster: worker pid: ${p.process.pid} (port: ${port}) started.`);
 	};
 	let start = function () {
 		for (let i = 0; i < config.cluster.app.workers; i ++) {
@@ -69,7 +69,7 @@ async function startCluster (config) {
 		setTimeout (startGC, 5000);
 	};
 	cluster.on ("exit", function (worker, code, signal) {
-		log.info ({fn: "startCluster"}, `worker pid: ${worker.process.pid} (port: ${worker.port}, code: ${code}, signal: ${signal}) died.`);
+		console.log (`startCluster: worker pid: ${worker.process.pid} (port: ${worker.port}, code: ${code}, signal: ${signal}) died.`);
 		
 		for (let id in cluster.workers) {
 			if (worker.port != cluster.workers [id]) {
@@ -79,12 +79,12 @@ async function startCluster (config) {
 		startWorker (worker.port, worker.port == config.startPort + 1);
 	});
 	if (!config.redis) {
-		log.error ({fn: "startCluster"}, "config.redis not found.");
-		process.exit (1);
+		console.error ("startCluster: config.redis not found.");
+		process.exit ();
 	}
 	if (config.cluster.app.workers < 2) {
-		log.error ({fn: "startCluster"}, "cluster.app.workers must be > 1.");
-		process.exit (1);
+		console.error ("startCluster: cluster.app.workers must be > 1.");
+		process.exit ();
 	}
 	const redis = require ("redis");
 	let redisClient = redis.createClient (config.redis);
@@ -93,7 +93,7 @@ async function startCluster (config) {
 /*
 	redisClient.get ("*", function (err) {
 		if (err) {
-			log.error ({fn: "startCluster"}, `Redis error: ${err}`);
+			console.error (`startCluster: redis error: ${err}`);
 			process.exit ();
 		} else {
 			start ();
