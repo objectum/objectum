@@ -253,7 +253,7 @@ async function auth (req) {
 
 				delete data.expires;
 
-				return Object.assign (data, {accessToken, refreshToken});
+				return _.extend (data, {accessToken, refreshToken});
 			} else {
 				return {error: "401 Unauthenticated"};
 			}
