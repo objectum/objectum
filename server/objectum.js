@@ -7,12 +7,17 @@ class Objectum {
 	constructor (config) {
 		config.rootDir = config.rootDir || `${__dirname}/..`;
 		global.config = config;
-		
+
+		let secretKey = String (new Date ().getTime ());
+		try {
+			secretKey = machineIdSync (true);
+		} catch (err) {
+		}
 		_.defaults (config, {
 			stores: {},
 			backlog: 10000,
 			user: {
-				secretKey: machineIdSync (true), // jwt
+				secretKey, // jwt
 				accessTokenExpires: 15 * 60 * 1000,
 				refreshTokenExpires: 48 * 60 * 60 * 1000,
 				revisionExpires: 60 * 1000, // getNews
