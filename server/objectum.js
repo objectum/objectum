@@ -15,18 +15,19 @@ class Objectum {
 		}
 		_.defaults (config, {
 			stores: {},
-			backlog: 10000,
-			user: {
-				secretKey, // jwt
-				accessTokenExpires: 15 * 60 * 1000,
-				refreshTokenExpires: 48 * 60 * 60 * 1000,
-				revisionExpires: 60 * 1000, // getNews
-				transactionExpires: 60 * 1000, // idle transactions
-				pollingInterval: 5000, // getNews
-				pollingProgressInterval: 500, // getNews
-				gcRefreshTokenInterval: 60 * 60 * 1000, // removeRefreshTokens
-				gcStoreInterval: 60 * 1000 // store.gc
-			}
+			backlog: 10000
+		});
+		config.user = config.user || {};
+		_.defaults (config.user, {
+			secretKey, // jwt
+			accessTokenExpires: 15 * 60 * 1000,
+			refreshTokenExpires: 48 * 60 * 60 * 1000,
+			revisionExpires: 60 * 1000, // getNews
+			transactionExpires: 60 * 1000, // idle transactions
+			pollingInterval: 5000, // getNews
+			pollingProgressInterval: 500, // getNews
+			gcRefreshTokenInterval: 60 * 60 * 1000, // removeRefreshTokens
+			gcStoreInterval: 60 * 1000 // store.gc
 		});
 		config.log = config.log || {};
 		config.log.level = config.log.level || "info";
