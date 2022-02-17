@@ -373,7 +373,10 @@ class Store {
 	
 	async getObject ({session, id, _trace}) {
 		log.debug ({fn: "store.getObject", id});
-		
+
+		if (!id) {
+			throw new Error (`store.getRecord: id not exist`);
+		}
 		let me = this;
 		let object;
 		let result = await me.redisClient.hGet (`o-${me.code}-objects`, String (id));
