@@ -112,7 +112,7 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 			f.push ("");
 		}
 		if (f [1] == "like" || f [1] == "not like") {
-			s = `lower (${aliasPrefix [f [0]]}.${caMap [f [0]].getField ()}) ${f [1]} '${ToSQLString (f [2].toLowerCase ())}%'`;
+			s = `lower (${aliasPrefix [f [0]]}.${caMap [f [0]].getField ()}) ${f [1]} '${ToSQLString (f [2].toLowerCase ())}'`;
 		} else
 		if (f [2] !== "") {
 			if (f [1] == "in" || f [1] == "not in") {
