@@ -8,7 +8,7 @@ async function getDict (req, store) {
 	let session = req.session;
 	let cls = store.getClass (req.args ["model"]);
 	let ca = cls.attrs ["name"];
-	
+
 	if (!ca) {
 		throw new Error (`"name" not exist in ${cls.getPath ()}`);
 	}
@@ -16,7 +16,7 @@ async function getDict (req, store) {
 	let caGroup;
 	let caCode = cls.attrs ["code"];
 	let caOrder = cls.attrs ["order"];
-	
+
 	for (let code in cls.attrs) {
 		if (cls.attrs [code].get ("type") >= 1000) {
 			caGroup = cls.attrs [code];
@@ -66,10 +66,10 @@ async function getLog (req, store) {
 
 function addToWhere (tokens, f) {
 	let r = [], whereSection = false, where = [];
-	
+
 	for (let i = 0; i < tokens.length; i ++) {
 		let o = tokens [i];
-		
+
 		if (o && typeof (o) == "object" && o ["where"]) {
 			if (o ["where"] == "begin") {
 				r.push (o);
@@ -107,12 +107,12 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 			throw new Error (`unknown column: ${f [0]}`);
 		}
 		let s = `${aliasPrefix [f [0]]}.${caMap [f [0]].isId ? "fobject_id" : caMap [f [0]].getField ()} ${f [1]}`;
-		
+
 		if (f.length == 2) {
 			f.push ("");
 		}
 		if (f [1] == "like" || f [1] == "not like") {
-			s = `lower (${aliasPrefix [f [0]]}.${caMap [f [0]].getField ()}) ${f [1]} '${ToSQLString (f [2].toLowerCase ())}'`;
+			s = `lower (${aliasPrefix [f [0]]}.${caMap [f [0]].getField ()}) ${f [1]} '${ToSQLString (f [2].toLowerCase ())}${config.query.filterEnd || ""}'`;
 		} else
 		if (f [2] !== "") {
 			if (f [1] == "in" || f [1] == "not in") {
@@ -124,25 +124,25 @@ function addFilters (tokens, filters, caMap, aliasPrefix) {
 		return s;
 	});
 	f = "\n" + f.join (" and ") + "\n";
-	
+
 	return addToWhere (tokens, f);
 };
 
 function addAccessFilters (tokens, filters) {
 	let f = [];
-	
+
 	for (let i = 0; i < filters.length; i ++) {
 		if (i) {
 			f.push (" and ");
 		}
 		let filterTokens = `(${filters [i]})`.split ("{");
-		
+
 		f.push (filterTokens [0]);
-		
+
 		for (let j = 1; j < filterTokens.length; j ++) {
 			let strTokens = filterTokens [j].split ("}");
 			let json = JSON.parse (`{${strTokens [0]}}`);
-			
+
 			f.push (json);
 			f.push (strTokens [1]);
 		}
@@ -152,10 +152,10 @@ function addAccessFilters (tokens, filters) {
 
 function removeWhere (tokens) {
 	let r = [], whereSection = false;
-	
+
 	for (let i = 0; i < tokens.length; i ++) {
 		let o = tokens [i];
-		
+
 		if (o && typeof (o) == "object" && o ["where"]) {
 			if (o ["where"] == "begin") {
 				whereSection = true;
@@ -175,10 +175,10 @@ function removeWhere (tokens) {
 function addOrder (tokens, order, caMap, aliasPrefix) {
 	let orderStr = `\n${aliasPrefix [order [0]]}.${caMap [order [0]].isId ? "fobject_id" : caMap [order [0]].getField ()} ${order [1]}\n`;
 	let r = [], orderSection = false;
-	
+
 	for (let i = 0; i < tokens.length; i ++) {
 		let o = tokens [i];
-		
+
 		if (o && typeof (o) == "object" && o ["order"]) {
 			if (o ["order"] == "begin") {
 				r.push (o);
@@ -202,10 +202,10 @@ function addOrder (tokens, order, caMap, aliasPrefix) {
 
 function getQuery ({code, tokens, args, parents}) {
 	let sql = "", skip = false;
-	
+
 	for (let i = 0; i < tokens.length; i ++) {
 		let o = tokens [i];
-		
+
 		if (o && typeof (o) == "object") {
 			if (o ["where"] == "begin") {
 				o = "where";
@@ -242,7 +242,7 @@ function getQuery ({code, tokens, args, parents}) {
 				o = "";
 			} else {
 				let section = o ["data"] || o ["count"] || o ["tree"];
-				
+
 				if (section == "begin") {
 					skip = true;
 					continue;
@@ -310,15 +310,15 @@ function getQuery ({code, tokens, args, parents}) {
 
 async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 	let selectAliasesMap = {};
-	
+
 	selectAliases.forEach (a => selectAliasesMap [a.toLowerCase ()] = a);
-	
+
 	let cols = _.map (fields, (field, i) => {
 		let name = field.alias;
 		let va = view.attrs [selectAliasesMap [name] || name];
 		let order = 0;
 		let classId = null, classAttrId = null, typeId = 1, area = 1;
-		
+
 		if (isMetaTable (field.table)) {
 			if (["funlogged", "fnot_null", "fsecure", "funique", "fsystem"].indexOf (field.column) > -1) {
 				typeId = 4;
@@ -341,7 +341,7 @@ async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 			}
 			if (classAttrId) {
 				let ca = store.getClassAttr (classAttrId);
-				
+
 				name = ca.get ("name");
 				order = ca.get ("order");
 				typeId = ca.get ("type");
@@ -368,12 +368,12 @@ async function getViewAttrs (recs, view, caMap, store, fields, selectAliases) {
 function getModelView (model, store, args) {
 	let m = store.getClass (model);
 	let attrs = _.sortBy (_.values (m.attrs), ["order", "name"]);
-	
+
 	if (!attrs.length) {
 		throw new Error ("model has no properties");
 	}
 	let order = [];
-	
+
 	if (attrs ["order"]) {
 		order.push (`{"prop": "a.order"}`);
 	}
@@ -381,9 +381,9 @@ function getModelView (model, store, args) {
 		order.push (`{"prop": "a.name"}`);
 	}
 	order.push (`{"prop": "a.id"}`);
-	
+
 	let where = `{"where": "empty"}`;
-	
+
 	if (args.hasOwnProperty ("parent")) {
 		where = `
 		{"where": "begin"}
@@ -394,7 +394,7 @@ function getModelView (model, store, args) {
 	if (m.getPath ().substr (0, 2) == "t.") {
 		let tokens = m.getPath ().split (".");
 		let parentCode = tokens [tokens.length - 2];
-		
+
 		if (args [parentCode]) {
 			where = `
 		{"where": "begin"}
@@ -459,14 +459,14 @@ function getModelView (model, store, args) {
 		})
 	};
 	let i = 1;
-	
+
 	_.each (attrs, a => {
 		if (a.get ("order")) {
 			i = a.get ("order");
 		}
 		let area = 1;
 		let opts = a.getOpts ();
-		
+
 		if (opts.column && opts.column.hasOwnProperty ("area")) {
 			area = opts.column.area;
 		}
@@ -487,7 +487,7 @@ function getModelView (model, store, args) {
 async function getData (req, store) {
 	let session = req.session;
 	let view;
-	
+
 	if (req.args._trace) {
 		req.args._trace.push (["getData-start", new Date ().getTime ()]);
 	}
@@ -508,11 +508,11 @@ async function getData (req, store) {
 	let query = view.get ("query");
 	let tokens = [], json = "", str = "", classMap = {}, caMap = {}, selectAliases = [], aliasPrefix = {};
 	let hasSelectCount = false, hasTree = false;
-	
+
 /*
 	for (let i = 0; i < query.length; i ++) {
 		let c = query [i];
-		
+
 		if (c == "{") {
 			tokens.push (str);
 			str = "";
@@ -521,13 +521,13 @@ async function getData (req, store) {
 		if (c == "}") {
 			json += c;
 			json = JSON.parse (json);
-			
+
 			if (json ["param"]) {
 				tokens.push (json);
 			} else
 			if (json ["class"] || json ["model"]) {
 				let cls = store.getClass (json ["class"] || json ["model"]);
-				
+
 				tokens.push (cls.getTable () + " " + json ["alias"]);
 				classMap [json ["alias"]] = cls
 			} else {
@@ -552,12 +552,12 @@ async function getData (req, store) {
 	}
 */
 	let queryTokens = query.split ("{");
-	
+
 	tokens.push (queryTokens [0]);
-	
+
 	for (let i = 1; i < queryTokens.length; i ++) {
 		let strTokens = queryTokens [i].split ("}");
-		
+
 		json = JSON.parse (`{${strTokens [0]}}`);
 
 		if (json ["param"]) {
@@ -565,7 +565,7 @@ async function getData (req, store) {
 		} else
 		if (json ["class"] || json ["model"]) {
 			let cls = store.getClass (json ["class"] || json ["model"]);
-			
+
 			tokens.push (cls.getTable () + " " + json ["alias"]);
 			classMap [json ["alias"]] = cls
 		} else {
@@ -584,12 +584,12 @@ async function getData (req, store) {
 	}
 	for (let i = 0; i < tokens.length; i ++) {
 		let o = tokens [i];
-		
+
 		if (o && typeof (o) == "object") {
 			if (o ["attr"] || o ["prop"]) {
 				let t = (o ["attr"] || o ["prop"]).split (".");
 				let f, ca;
-				
+
 				if (t [1] == "id") {
 					f = t [0] + ".fobject_id";
 					ca = {
@@ -605,7 +605,7 @@ async function getData (req, store) {
 						throw new Error (`unknown model: ${JSON.stringify (o)}`);
 					}
 					ca = classMap [t [0] || ""].attrs [t [1]];
-					
+
 					if (!ca) {
 						throw new Error (`unknown property: ${t [1]}, model: ${classMap [t [0] || ""].getPath ()}`);
 					}
@@ -636,12 +636,12 @@ async function getData (req, store) {
 		position: []
 	};
 	data.cols = await getViewAttrs (data.recs, view, caMap, store, fields, selectAliases);
-	
+
 	if (_.has (req.args, "offset") && _.has (req.args, "limit") && !req.args.getColumns) {
 		if (hasSelectCount) {
 			if (req.args.limit != config.query.maxCount) {
 				let recs = await store.query ({session, sql: getQuery ({code: "count", tokens, args: req.args}), _trace: req.args._trace});
-				
+
 				data.length = recs [0].num;
 			} else {
 				data.length = data.recs.length;
@@ -650,7 +650,7 @@ async function getData (req, store) {
 		if (hasTree) {
 			if (data.recs.length) {
 				let parents = [];
-				
+
 				for (let i = 0; i < fields.length; i ++) {
 					if (fields [i].alias == "id") {
 						parents = _.map (data.recs, (rec) => {
@@ -665,7 +665,7 @@ async function getData (req, store) {
 			}
 			// position
 			let pos = {};
-			
+
 			_.each (fields, f => {
 				if (f.alias == "id") {
 					pos.table = f.table;
