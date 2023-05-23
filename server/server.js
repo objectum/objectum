@@ -63,14 +63,14 @@ async function init () {
 	fastify.addContentTypeParser ("multipart/form-data", function (req, done) {
 		let session = req.session;
 		let store = session.store;
-		
+
 		if (config.stores [store.code].hasOwnProperty ("upload") && !config.stores [store.code].upload) {
 			return done (new Error ("upload disabled"));
 		}
 		let form = new formidable.IncomingForm ();
-		
+
 		form.uploadDir = `${store.rootDir}/public/files`;
-		
+
 		form.parse (req, function (err, fields, files) {
 			if (err) {
 				return done (err);
@@ -108,7 +108,7 @@ async function init () {
 		}
 	});
 	fastify.post ("/projects/:code/pdf", pdf.report);
-	
+
 	let fnMap = {
 		"getNews": project.getNews,
 		"startTransaction": project.startTransaction,
@@ -138,18 +138,20 @@ async function init () {
 	fastify.post ("/projects/:code/", async (req, res) => {
 		try {
 			req.args = req.body;
-			
+
 			let fn = req.args._fn;
 			let rsc = req.args._rsc;
-			
+
 			res.startTime = new Date ();
-			
-			res.res.on ("finish", () => {
+
+/*
+			res.on ("finish", () => {
 				collectStat ({
 					rsc, fn, project: req.code,
 					duration: new Date ().getTime () - res.startTime.getTime ()
 				});
 			});
+*/
 			if (fn == "auth") {
 				return await project.auth (req, res);
 			}
@@ -157,17 +159,23 @@ async function init () {
 				return {error: "401 Unauthenticated"};
 			}
 			let handler = fnMap [fn] || rscMap [rsc];
-			
+
 			if (handler) {
-				return await handler (req, res);
+				const result = await handler (req, res);
+
+				collectStat ({
+					rsc, fn, project: req.code,
+					duration: new Date ().getTime () - res.startTime.getTime ()
+				});
+				return result
 			} else {
 				throw new Error ("unknown request");
 			}
 		} catch (err) {
 			let msg = err.message ? err.message : err;
-			
+
 			log.error ({cls: "server", fn: "init", error: msg, body: req.body, stack: err.stack});
-			
+
 			return {error: msg, stack: err.stack.split ("\n"), body: req.body};
 		}
 	});
@@ -200,7 +208,7 @@ async function start ({port}) {
 		});
 	}
 	try {
-		await fastify.listen (port);
+		await fastify.listen ({ port });
 		log.info (`objectum server has started at port: ${port}`);
 	} catch (err) {
 		if (err.code == "EADDRINUSE") {
